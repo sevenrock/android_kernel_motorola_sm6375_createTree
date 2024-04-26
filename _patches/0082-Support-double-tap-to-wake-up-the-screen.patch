@@ -1,0 +1,89 @@
+From 60ddbd417a60ef9d511b2c04a152984858249b2e Mon Sep 17 00:00:00 2001
+From: Wenge Zhu <zhuwg1@motorola.com>
+Date: Sun, 12 Jun 2022 18:36:14 +0800
+Subject: [PATCH] Support double tap to wake up the screen
+
+TP:
+Support double tap to wake up the screen.
+
+Change-Id: Idb137de14ca43e4db7343f79b82939a629738ac4
+Signed-off-by: Wenge Zhu <zhuwg1@motorola.com>
+Reviewed-on: https://gerrit.mot.com/2298079
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Wei Deng <dengwei1@motorola.com>
+Reviewed-by: Jun Weng <wengjun1@motorola.com>
+Reviewed-by: Jichao Zou <zoujc@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../touchscreen_mmi/touchscreen_mmi_gesture.c  |  2 +-
+ .../touchscreen_mmi/touchscreen_mmi_notif.c    | 18 ++++++++++++++++++
+ include/linux/touchscreen_mmi.h                |  8 ++++++--
+ 3 files changed, 25 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+index 4e6277bcc88f..cc079cb54ae8 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+@@ -427,7 +427,7 @@ bool ts_mmi_is_sensor_enable(void)
+ static int ts_mmi_sensor_set_enable(struct sensors_classdev *sensors_cdev,
+ 		unsigned int enable)
+ {
+-#if !defined(CONFIG_BOARD_USES_DOUBLE_TAP_CTRL)
++#ifndef CONFIG_BOARD_USES_DOUBLE_TAP_CTRL
+ 	struct ts_mmi_sensor_platform_data *sensor_pdata = container_of(
+ 			sensors_cdev, struct ts_mmi_sensor_platform_data, ps_cdev);
+ 	struct ts_mmi_dev *touch_cdev = sensor_pdata->touch_cdev;
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+index 7de25f9fb981..216608e2e5db 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+@@ -56,6 +56,24 @@ static int ts_mmi_panel_off(struct ts_mmi_dev *touch_cdev) {
+ 		if(touch_cdev->gesture_mode_type != 0 || touch_cdev->pdata.support_liquid_detection != 0) {
+ 			dev_info(DEV_MMI, "%s: try to enter Gesture mode\n", __func__);
+ 			TRY_TO_CALL(panel_state, touch_cdev->pm_mode, TS_MMI_PM_GESTURE);
++		}
++		if(touch_cdev->gesture_mode_type != 0) {
++			if(touch_cdev->gesture_mode_type & 0x01) {
++				dev_info(DEV_MMI, "%s: try to enter zero Gesture mode\n", __func__);
++				TRY_TO_CALL(panel_state, touch_cdev->pm_mode, TS_MMI_PM_GESTURE_ZERO);
++			}
++			if(touch_cdev->gesture_mode_type & 0x02) {
++				dev_info(DEV_MMI, "%s: try to enter single Gesture mode\n", __func__);
++				TRY_TO_CALL(panel_state, touch_cdev->pm_mode, TS_MMI_PM_GESTURE_SINGLE);
++			}
++			if(touch_cdev->gesture_mode_type & 0x04) {
++				dev_info(DEV_MMI, "%s: try to enter double Gesture mode\n", __func__);
++				TRY_TO_CALL(panel_state, touch_cdev->pm_mode, TS_MMI_PM_GESTURE_DOUBLE);
++			}
++
++			dev_info(DEV_MMI, "%s: notify touch driver to switch gesture mode\n", __func__);
++			TRY_TO_CALL(panel_state, touch_cdev->pm_mode, TS_MMI_PM_GESTURE_SWITCH);
++
+ 			touch_cdev->pm_mode = TS_MMI_PM_GESTURE;
+ 		}
+ #else
+diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
+index c306fa61b5c7..f245ab492141 100644
+--- a/include/linux/touchscreen_mmi.h
++++ b/include/linux/touchscreen_mmi.h
+@@ -289,8 +289,12 @@ struct ts_mmi_class_methods {
+ enum ts_mmi_pm_mode {
+ 	TS_MMI_PM_DEEPSLEEP = 0,
+ 	TS_MMI_PM_GESTURE,
+-	TS_MMI_PM_ACTIVE
+-	};
++	TS_MMI_PM_ACTIVE,
++	TS_MMI_PM_GESTURE_SINGLE,
++	TS_MMI_PM_GESTURE_DOUBLE,
++	TS_MMI_PM_GESTURE_ZERO,
++	TS_MMI_PM_GESTURE_SWITCH,
++};
+ 
+ enum ts_mmi_panel_event {
+ 	TS_MMI_EVENT_PRE_DISPLAY_OFF,
+-- 
+2.39.2
+

@@ -1,0 +1,39 @@
+From 2a419d16364065958638bfa642e691115d37f3dc Mon Sep 17 00:00:00 2001
+From: Pedro Bertoleti <pedrohfb@motorola.com>
+Date: Thu, 4 Nov 2021 17:31:23 -0300
+Subject: [PATCH] defconfig: Disable per-process reclaim
+
+Accordingly to FPS tests
+(http://perf.mot.com/apps/fps/rungraphs/?runids=44588,44602,44598),
+overall device performance has been improved when PPR is disabled (mainly
+considering Major Page Fault and Swap IO improvements).
+
+Change-Id: I89dade542cf47c754787fd17c11cc90e61d34473
+Reviewed-on: https://gerrit.mot.com/2112482
+SLTApproved: Slta Waiver
+SME-Granted: SME Approvals Granted
+Tested-by: Jira Key
+Reviewed-by: Fernanda Schmidt <fschmidt@motorola.com>
+Reviewed-by: Rafael Ortolan <rafones@motorola.com>
+Reviewed-by: Carlos Pinho <cpinho@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 6cd23cfcdd13..d031755ffca0 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -140,6 +140,7 @@ CONFIG_ZSMALLOC=y
+ CONFIG_BALANCE_ANON_FILE_RECLAIM=y
+ CONFIG_HAVE_USERSPACE_LOW_MEMORY_KILLER=y
+ CONFIG_PRIORITIZE_OOM_TASKS=y
++# CONFIG_PROCESS_RECLAIM is not set
+ CONFIG_NET=y
+ CONFIG_PACKET=y
+ CONFIG_UNIX=y
+-- 
+2.39.2
+

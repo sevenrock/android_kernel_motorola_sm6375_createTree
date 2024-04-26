@@ -1,0 +1,37 @@
+From 19b1c0087dff02ae52192719accf82499715ff9c Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Tue, 11 Jul 2023 09:55:37 +0800
+Subject: [PATCH] touchscreen_mmi: Check for pressed status before waking up
+ for gesture
+
+* If anything is pressed then it can be assumed that
+  the display is either already in gesture mode or
+  the display was in gesture before and a gesture was
+  triggered. Don't interrupt in these cases.
+
+test: Turn on UDFPS long press and lockscreen,
+      reboot and before unlocking test long press
+
+Signed-off-by: electimon <electimon@gmail.com>
+Change-Id: I6142eadb7613b65d53642176a82ae757fb94a78b
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+index 03d6a5e6b72c..a6156432822e 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+@@ -370,7 +370,7 @@ static void gesture_set(struct ts_mmi_dev *touch_cdev,
+ 	sync = _gesture_set(touch_cdev, bit, enable);
+ 	mutex_unlock(&touch_cdev->extif_mutex);
+ 
+-	if (sync)
++	if (sync && !touch_cdev->double_tap_pressed)
+ 		gesture_sync(touch_cdev);
+ }
+ 
+-- 
+2.39.2
+

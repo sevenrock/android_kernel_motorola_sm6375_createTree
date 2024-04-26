@@ -1,0 +1,53 @@
+From f8e922e4c8ada4a37724b5a341ec36cbe0d40250 Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Sat, 18 Sep 2021 20:44:25 +0900
+Subject: [PATCH] Revert "lib/decompress_unlz4.c: correctly handle zero-padding
+ around initrds."
+
+This reverts commit 13b51d90f0a687a389adbe3e6db4f4f46b755c61.
+
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/b1ece60bce8de99aeaf32f1a926096ca8e6c897b
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/decompress_unlz4.c | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/lib/decompress_unlz4.c b/lib/decompress_unlz4.c
+index e6327391b6b6..c0cfcfd486be 100644
+--- a/lib/decompress_unlz4.c
++++ b/lib/decompress_unlz4.c
+@@ -112,9 +112,6 @@ STATIC inline int INIT unlz4(u8 *input, long in_len,
+ 				error("data corrupted");
+ 				goto exit_2;
+ 			}
+-		} else if (size < 4) {
+-			/* empty or end-of-file */
+-			goto exit_3;
+ 		}
+ 
+ 		chunksize = get_unaligned_le32(inp);
+@@ -128,10 +125,6 @@ STATIC inline int INIT unlz4(u8 *input, long in_len,
+ 			continue;
+ 		}
+ 
+-		if (!fill && chunksize == 0) {
+-			/* empty or end-of-file */
+-			goto exit_3;
+-		}
+ 
+ 		if (posp)
+ 			*posp += 4;
+@@ -191,7 +184,6 @@ STATIC inline int INIT unlz4(u8 *input, long in_len,
+ 		}
+ 	}
+ 
+-exit_3:
+ 	ret = 0;
+ exit_2:
+ 	if (!input)
+-- 
+2.39.2
+

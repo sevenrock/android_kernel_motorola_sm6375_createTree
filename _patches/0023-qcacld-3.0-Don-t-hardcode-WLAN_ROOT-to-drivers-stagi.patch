@@ -1,0 +1,28 @@
+From f7e639f2da7ed935839323f4239456378231e4de Mon Sep 17 00:00:00 2001
+From: Kristof Petho <kristof.petho@gmail.com>
+Date: Thu, 15 Apr 2021 08:31:23 +0200
+Subject: [PATCH] qcacld-3.0: Don't hardcode WLAN_ROOT to
+ drivers/staging/qcacld-3.0.
+
+Change-Id: I2bb975c4077b2fe61102e99a30db889477c4f7db
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/staging/qcacld-3.0/Kbuild | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/qcacld-3.0/Kbuild b/drivers/staging/qcacld-3.0/Kbuild
+index 9f7bf6b928b0..9dd87be3201e 100644
+--- a/drivers/staging/qcacld-3.0/Kbuild
++++ b/drivers/staging/qcacld-3.0/Kbuild
+@@ -13,7 +13,7 @@ ifeq ($(KERNEL_BUILD), y)
+ 	# These are provided in external module based builds
+ 	# Need to explicitly define for Kernel-based builds
+ 	MODNAME := wlan
+-	WLAN_ROOT := drivers/staging/qcacld-3.0
++	WLAN_ROOT := $(srctree)/$(src)
+ 	WLAN_COMMON_ROOT := ../qca-wifi-host-cmn
+ 	WLAN_COMMON_INC := $(WLAN_ROOT)/$(WLAN_COMMON_ROOT)
+ 	WLAN_FW_API := $(WLAN_ROOT)/../fw-api/
+-- 
+2.39.2
+

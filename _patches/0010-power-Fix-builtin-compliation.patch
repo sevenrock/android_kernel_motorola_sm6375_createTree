@@ -1,0 +1,40 @@
+From 47ab6a8c218321a58d35442af25dd8fe8d6fed23 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sun, 14 Jan 2024 18:53:43 +0000
+Subject: [PATCH] power: Fix builtin compliation
+
+Signed-off-by: electimon <electimon@gmail.com>
+
+Original patch:
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/3afde60639c98556c01b567d16f1a1e9c08303ce
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/mmi_discrete_turbo_charger/mmi_charger_class.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/power/mmi_discrete_turbo_charger/mmi_charger_class.c b/drivers/power/mmi_discrete_turbo_charger/mmi_charger_class.c
+index fc44c0df0935..1bbaf2fda1a3 100644
+--- a/drivers/power/mmi_discrete_turbo_charger/mmi_charger_class.c
++++ b/drivers/power/mmi_discrete_turbo_charger/mmi_charger_class.c
+@@ -141,7 +141,7 @@ static int charger_match_device_by_name(struct device *dev,
+ 	return strcmp(dev_name(dev), name) == 0;
+ }
+ 
+-struct mmi_charger_device *get_charger_by_name(const char *name)
++struct mmi_charger_device *get_charger_by_name_ext(const char *name)
+ {
+ 	struct device *dev;
+ 
+@@ -155,7 +155,7 @@ struct mmi_charger_device *get_charger_by_name(const char *name)
+ 
+ int is_charger_exist(const char *name)
+ {
+-	if (get_charger_by_name(name) == NULL)
++	if (get_charger_by_name_ext(name) == NULL)
+ 		return 0;
+ 	return 1;
+ }
+-- 
+2.39.2
+

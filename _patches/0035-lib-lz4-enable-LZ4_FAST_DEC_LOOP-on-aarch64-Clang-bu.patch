@@ -1,0 +1,50 @@
+From 258d9c8c8f8f20cca77bd8cd9b03666a5d2756f5 Mon Sep 17 00:00:00 2001
+From: Chenyang Zhong <zhongcy95@gmail.com>
+Date: Sat, 18 Jun 2022 22:18:14 -0400
+Subject: [PATCH] lib/lz4: enable LZ4_FAST_DEC_LOOP on aarch64 Clang builds
+
+Upstream lz4 mentioned a performance regression on Qualcomm SoCs
+when built with Clang, but not with GCC [1]. However, according to my
+testing on sm8350 with LLVM Clang 15, this patch does offer a nice
+10% boost in decompression, so enable the fast dec loop for Clang
+as well.
+
+Testing procedure:
+- pre-fill zram with 1GB of real-word zram data dumped under memory
+  pressure, for example
+  $ dd if=/sdcard/zram.test of=/dev/block/zram0 bs=1m count=1000
+- $ fio --readonly --name=randread --direct=1 --rw=randread \
+  --ioengine=psync --randrepeat=0 --numjobs=4 --iodepth=1 \
+  --group_reporting=1 --filename=/dev/block/zram0 --bs=4K --size=1000M
+
+Results:
+- vanilla lz4: read: IOPS=1646k, BW=6431MiB/s (6743MB/s)(4000MiB/622msec)
+- lz4 fast dec: read: IOPS=1775k, BW=6932MiB/s (7269MB/s)(4000MiB/577msec)
+
+[1] https://github.com/lz4/lz4/pull/707
+
+Signed-off-by: Chenyang Zhong <zhongcy95@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/24fd837e0778988a4816fff4e2a266f0b4cc7203
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index 6f959ecf40e6..f1b024311742 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -53,7 +53,7 @@
+ #ifndef LZ4_FAST_DEC_LOOP
+ #if defined(__i386__) || defined(__x86_64__)
+ #define LZ4_FAST_DEC_LOOP 1
+-#elif defined(__aarch64__) && !defined(__clang__)
++#elif defined(__aarch64__)
+      /* On aarch64, we disable this optimization for clang because on certain
+       * mobile chipsets and clang, it reduces performance. For more information
+       * refer to https://github.com/lz4/lz4/pull/707. */
+-- 
+2.39.2
+

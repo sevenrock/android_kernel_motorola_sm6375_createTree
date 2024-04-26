@@ -1,0 +1,62 @@
+From a96fa97a98e78a6dd81f3fd81aea6d4f3e081842 Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Wed, 31 Jul 2019 19:20:31 -0700
+Subject: [PATCH] defconfig: Disable redundant Spectre v2 mitigations
+
+Our big and Prime clusters are currently getting software mitigations
+for Spectre variant 2 (CVE-2017-5715) applied through Trusted Firmware
+despite the presence of Arm v8.5-A hardware mitigations. Disable the
+software mitigations since they're redundant and are only hurting
+performance.
+
+Details and analysis:
+
+The Kryo cores used in the aforementioned clusters are semi-custom
+Cortex-A76 derivatives [1]. According to Arm, newer revisions of their
+reference Cortex-A76 designs (r3p0 and newer) are immune to Spectre v2
+thanks to hardware mitigations implemented as part of Arm v8.5-A [2].
+
+While I was unable to locate a working Spectre v2 PoC for AArch64, Arm's
+overview suggests that the v2 and v3(a) mitigations come together as part
+of the single Arm v8.5-A update [3], so we can test for whether the cores
+are susceptible to v2 by testing for their susceptibility to v3 and/or
+v3a. This is helpful because there *is* a public and working Spectre v3a
+PoC for AArch64 on GitHub [4]. Running the PoC revealed no conclusive
+successes for the v3 exploit, which should mean that our cores are also
+not vulnerable to Spectre v2.
+
+Variants 1 and 4 was not considered because Arm's documentation states
+that v1 and v4 mitigations are completely unrelated to those for v2 [5].
+
+All PoC runs were conducted within a regular Android app's context with
+the app's processes locked to the big and Prime clusters (CPUs 4-7),
+since Arm states that the little cluster's cores (Cortex-A55) are
+not affected by any variants of Spectre [2].
+
+[1] https://en.wikichip.org/wiki/qualcomm/snapdragon_800/855
+[2] https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Security%20update%2010%20September%2018/Kernel_Mitigations_Detail_v1.7.pdf?revision=730b8541-ca91-4fde-a2bb-4093054748ae
+[3] https://developer.arm.com/support/arm-security-updates/speculative-processor-vulnerability
+[4] https://github.com/lgeek/spec_poc_arm
+[5] https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Security%20update%2010%20September%2018/Kernel_Mitigations_Detail_v1.7.pdf?revision=730b8541-ca91-4fde-a2bb-4093054748ae
+
+Change-Id: Ia12ddfbedaae3bac96c188010da3e522b6940d37
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 1d099c56c70b..3e0ed5c412cc 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -59,6 +59,7 @@ CONFIG_NR_CPUS=8
+ CONFIG_SECCOMP=y
+ CONFIG_PARAVIRT=y
+ # CONFIG_UNMAP_KERNEL_AT_EL0 is not set
++# CONFIG_HARDEN_BRANCH_PREDICTOR is not set
+ CONFIG_ARM64_SW_TTBR0_PAN=y
+ CONFIG_COMPAT=y
+ CONFIG_ARMV8_DEPRECATED=y
+-- 
+2.39.2
+

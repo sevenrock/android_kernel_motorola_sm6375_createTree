@@ -1,0 +1,66 @@
+From c019124eed56f7e30d998a42f2abd50638727537 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sun, 11 Jun 2023 23:33:33 -0400
+Subject: [PATCH] drivers: Fix issues reported by clang
+
+Signed-off-by: electimon <electimon@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/bq2589x_chg_mmi/bq2589x_charger.c | 2 +-
+ drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c       | 8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
+index d049b0f1b90c..1e7c8240749c 100644
+--- a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
++++ b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
+@@ -1610,7 +1610,7 @@ int bq2589x_get_usb_present(struct bq2589x *bq)
+ 	return ret;
+ }
+ 
+-static bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
++static int bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
+ {
+ 	int ret = 0;
+ 
+diff --git a/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c b/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c
+index da3997ca67db..1207e39dd613 100644
+--- a/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c
++++ b/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c
+@@ -176,7 +176,7 @@ static int rt1711_read_device(void *client, u32 reg, int len, void *dst)
+ {
+ 	struct i2c_client *i2c = client;
+ 	int ret = 0, count = 5;
+-	u64 t1 = 0, t2 = 0;
++	u64 __maybe_unused t1 = 0, t2 = 0;
+ 
+ 	while (1) {
+ 		t1 = local_clock();
+@@ -197,7 +197,7 @@ static int rt1711_write_device(void *client, u32 reg, int len, const void *src)
+ {
+ 	struct i2c_client *i2c = client;
+ 	int ret = 0, count = 5;
+-	u64 t1 = 0, t2 = 0;
++	u64 __maybe_unused t1 = 0, t2 = 0;
+ 
+ 	while (1) {
+ 		t1 = local_clock();
+@@ -786,13 +786,13 @@ static inline int rt1711_fault_status_vconn_ov(struct tcpc_device *tcpc)
+ 
+ int rt1711_fault_status_clear(struct tcpc_device *tcpc, uint8_t status)
+ {
+-	int ret;
++	int ret = 0;
+ 
+ 	if (status & TCPC_V10_REG_FAULT_STATUS_VCONN_OV)
+ 		ret = rt1711_fault_status_vconn_ov(tcpc);
+ 
+ 	rt1711_i2c_write8(tcpc, TCPC_V10_REG_FAULT_STATUS, status);
+-	return 0;
++	return ret;
+ }
+ 
+ int rt1711_get_chip_id(struct tcpc_device *tcpc, uint32_t *chip_id)
+-- 
+2.39.2
+

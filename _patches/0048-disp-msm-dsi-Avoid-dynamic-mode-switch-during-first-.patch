@@ -1,0 +1,58 @@
+From e19a8d514391597517f81f9f306dcc3598e31532 Mon Sep 17 00:00:00 2001
+From: Raghavendra Ambadas <rambad@codeaurora.org>
+Date: Thu, 11 Nov 2021 11:33:49 +0530
+Subject: [PATCH] disp: msm: dsi: Avoid dynamic mode switch during first commit
+
+Dynamic mode switch (DMS) is not supported for video mode panels before
+cont-splash handoff handled for first frame. so avoid dynamic mode-switch
+during cont-splash handoff for any DRM mode change.
+
+WA is given by QC for GSI issue, as of observation there are no
+side effects
+
+QC SR:05515278
+QC CR:NA
+QC Change ID:Icd5881af99afb3e398d3bba3746b7a35bcda4491
+
+Change-Id: I97f5712ce5bb8448f1c600ccf306d0dac7fa6eae
+Signed-off-by: maheshmk <maheshmk@motorola.com>
+Reviewed-on: https://gerrit.mot.com/2113033
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Ashwin Kumar Pathmudi <jfxr63@motorola.com>
+Reviewed-by: Shuo Yan <shuoyan@motorola.com>
+Reviewed-by: Guobin Zhang <zhanggb@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Forenche <prahul2003@gmail.com>
+
+Original patch:
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/82d2dd7a1672777daf35c1f928171a26fac8a512
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/dsi/dsi_drm.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/techpack/display/msm/dsi/dsi_drm.c b/techpack/display/msm/dsi/dsi_drm.c
+index 8b6db3d58d65..68370f5f4018 100644
+--- a/techpack/display/msm/dsi/dsi_drm.c
++++ b/techpack/display/msm/dsi/dsi_drm.c
+@@ -436,7 +436,13 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
+ 			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_DYN_CLK)) &&
+ 			(!crtc_state->active_changed ||
+ 			 display->is_cont_splash_enabled)) {
+-			dsi_mode.dsi_mode_flags |= DSI_MODE_FLAG_DMS;
++			/* Reject DMS for First commit for Video Mode Panel */
++			if((dsi_mode.panel_mode == DSI_OP_VIDEO_MODE) &&
++							display->is_cont_splash_enabled)
++				DSI_ERR("DMS not supported for display type:%d for first frame\n",
++							dsi_mode.panel_mode);
++			else
++				dsi_mode.dsi_mode_flags |= DSI_MODE_FLAG_DMS;
+ 
+ 			SDE_EVT32(SDE_EVTLOG_FUNC_CASE2,
+ 				dsi_mode.timing.h_active,
+-- 
+2.39.2
+

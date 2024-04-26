@@ -1,0 +1,50 @@
+From 2c03cdff8645f8f0082824665fc2c5f5cf55c6a2 Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Sat, 18 Sep 2021 20:44:29 +0900
+Subject: [PATCH] Revert "lib/lz4: explicitly support in-place decompression"
+
+This reverts commit defcc2b5e54a4724fb5733f802edf5dd596018b6.
+
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/cffcf2bab32d2bfdd597b639d5a3884f2ed8dfe4
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 6 +-----
+ lib/lz4/lz4defs.h        | 2 --
+ 2 files changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index 46f24b7a3221..0bc05b447f33 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -260,11 +260,7 @@ static FORCE_INLINE int LZ4_decompress_generic(
+ 				}
+ 			}
+ 
+-			/*
+-			 * supports overlapping memory regions; only matters
+-			 * for in-place decompression scenarios
+-			 */
+-			LZ4_memmove(op, ip, length);
++			memcpy(op, ip, length);
+ 			ip += length;
+ 			op += length;
+ 
+diff --git a/lib/lz4/lz4defs.h b/lib/lz4/lz4defs.h
+index 369eb181d730..1a7fa9d9170f 100644
+--- a/lib/lz4/lz4defs.h
++++ b/lib/lz4/lz4defs.h
+@@ -137,8 +137,6 @@ static FORCE_INLINE void LZ4_writeLE16(void *memPtr, U16 value)
+ 	return put_unaligned_le16(value, memPtr);
+ }
+ 
+-#define LZ4_memmove(dst, src, size) __builtin_memmove(dst, src, size)
+-
+ static FORCE_INLINE void LZ4_copy8(void *dst, const void *src)
+ {
+ #if LZ4_ARCH64
+-- 
+2.39.2
+

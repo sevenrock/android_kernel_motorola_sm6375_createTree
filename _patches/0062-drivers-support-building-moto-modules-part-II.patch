@@ -1,0 +1,4042 @@
+From 0bddb3b09fadc40cb1a26849b0a17f0ca6d970e6 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Mon, 8 Apr 2024 21:05:33 +0200
+Subject: [PATCH] drivers: support building moto modules, part II
+
+This further integrates Motorola drivers into the kernel build system.
+
+Mostly copied from
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commits/14/
+https://github.com/LineageOS/android_kernel_motorola_sm7325
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/Kconfig                            |    6 +
+ drivers/Kconfig                               |    2 +
+ drivers/Makefile                              |    1 +
+ drivers/backlight/Kconfig                     |    3 +
+ drivers/backlight/Makefile                    |    3 +
+ drivers/backlight/aw99703/Kbuild              |    2 +-
+ drivers/backlight/aw99703/Kconfig             |    9 +
+ drivers/backlight/lm3697/Kbuild               |    2 +-
+ drivers/backlight/lm3697/Kconfig              |    9 +
+ drivers/backlight/sm5350/Kbuild               |    2 +-
+ drivers/backlight/sm5350/Kconfig              |    6 +
+ drivers/fm/Kconfig                            |    4 +
+ drivers/input/misc/Kconfig                    |    5 +
+ drivers/input/misc/Makefile                   |   11 +-
+ drivers/input/misc/focal_fps_mmi/Kbuild       |   50 +-
+ drivers/input/misc/focal_fps_mmi/Kconfig      |    6 +
+ drivers/input/misc/goodix_fod_mmi/Kconfig     |    2 +-
+ drivers/input/misc/qpnp_power_on_mmi/Kbuild   |    2 +-
+ drivers/input/misc/qpnp_power_on_mmi/Kconfig  |    8 +
+ drivers/input/misc/rbs_fps_mmi/Kbuild         |   14 +-
+ drivers/input/misc/rbs_fps_mmi/Kconfig        |   25 +
+ drivers/input/touchscreen/Kconfig             |    2 +
+ drivers/input/touchscreen/Makefile            |    1 +
+ .../touchscreen/goodix_berlin_mmi/Kbuild      |   60 +-
+ .../touchscreen/goodix_berlin_mmi/Kconfig     |   19 +
+ drivers/leds/Kbuild                           |    6 -
+ drivers/leds/trigger/Kbuild                   |    5 -
+ drivers/leds/trigger/Kconfig                  |    7 +
+ drivers/leds/trigger/Makefile                 |   28 +-
+ drivers/misc/Kconfig                          |    1 +
+ drivers/misc/Makefile                         |   80 +-
+ drivers/misc/awinic/Kconfig                   |    2 +-
+ drivers/misc/ldo_vibrator_mmi/Kconfig         |    3 +
+ drivers/mmi_annotate/Kbuild                   |    6 +-
+ drivers/mmi_info/Kbuild                       |    8 +-
+ drivers/mmi_relay/Kbuild                      |    6 +-
+ drivers/moto_f_usbnet/Kbuild                  |    2 +-
+ drivers/nfc/Kconfig                           |    1 +
+ drivers/nfc/Makefile                          |    1 +
+ drivers/nfc/sec_nfc/Kbuild                    |    6 +-
+ drivers/nfc/sec_nfc/Kconfig                   |   67 +
+ drivers/power/Kconfig                         |   10 +
+ drivers/power/Makefile                        |   17 +-
+ drivers/power/bq2589x_chg_mmi/Kbuild          |   21 +-
+ drivers/power/bq2589x_chg_mmi/Kconfig         |   31 +
+ drivers/power/bq2597x_mmi/Kbuild              |    7 +-
+ drivers/power/bq2597x_mmi/Kconfig             |   16 +
+ drivers/power/bq2597x_mmi_iio/Kbuild          |    8 +-
+ drivers/power/bq2597x_mmi_iio/Kconfig         |    9 +
+ drivers/power/cw2217b_fg_mmi/Kbuild           |    7 +-
+ drivers/power/cw2217b_fg_mmi/Kconfig          |   20 +
+ drivers/power/mm8013c_fg_mmi/Kbuild           |    7 -
+ drivers/power/mm8013c_fg_mmi/Makefile         |   11 -
+ .../power/mm8013c_fg_mmi/mm8013c_battery.c    | 2287 -----------------
+ drivers/power/mmi-smbcharger-iio/Kconfig      |    9 +
+ drivers/power/mmi_charger/Kbuild              |    2 +-
+ drivers/power/mmi_charger/Kconfig             |   30 +-
+ drivers/power/mmi_discrete_charger/Kbuild     |   15 +-
+ drivers/power/mmi_discrete_charger/Kconfig    |   24 +
+ .../power/mmi_discrete_turbo_charger/Kbuild   |   16 +-
+ .../power/mmi_discrete_turbo_charger/Kconfig  |   12 +
+ .../power/mmi_parallel_charger_iio/Kconfig    |    9 +
+ drivers/power/mmi_sc8549/Kconfig              |    9 +
+ drivers/power/qpnp_adaptive_charge/Kbuild     |    2 +-
+ drivers/power/rt9426a_fg_mmi/Kconfig          |    9 +
+ drivers/power/sd77426_fg_mmi/Kconfig          |    9 +
+ drivers/power/sgm4154x_chg_mmi/Kbuild         |   29 +-
+ drivers/power/sgm4154x_chg_mmi/Kconfig        |   23 +
+ drivers/power/sm5602_fg_mmi/Kconfig           |    3 +
+ drivers/regulator/Kconfig                     |    4 +
+ drivers/regulator/Makefile                    |    2 +
+ drivers/regulator/wl2866d/Kconfig             |    9 +
+ drivers/regulator/wl2868c/Kconfig             |    9 +
+ drivers/usb/typec/Kconfig                     |    4 +
+ drivers/usb/typec/Makefile                    |    2 +
+ drivers/usb/typec/adapter_class/Kbuild        |    6 +-
+ drivers/usb/typec/adapter_class/Kconfig       |   11 +
+ drivers/usb/typec/mmi_tcpc/Kbuild             |   38 +-
+ drivers/usb/typec/mmi_tcpc/Kconfig            |   41 +
+ 79 files changed, 652 insertions(+), 2609 deletions(-)
+ create mode 100644 drivers/backlight/Kconfig
+ create mode 100644 drivers/backlight/Makefile
+ create mode 100644 drivers/backlight/aw99703/Kconfig
+ create mode 100644 drivers/backlight/lm3697/Kconfig
+ create mode 100644 drivers/backlight/sm5350/Kconfig
+ create mode 100644 drivers/fm/Kconfig
+ create mode 100644 drivers/input/misc/focal_fps_mmi/Kconfig
+ create mode 100644 drivers/input/misc/qpnp_power_on_mmi/Kconfig
+ create mode 100644 drivers/input/misc/rbs_fps_mmi/Kconfig
+ delete mode 100755 drivers/leds/Kbuild
+ delete mode 100644 drivers/leds/trigger/Kbuild
+ create mode 100644 drivers/misc/ldo_vibrator_mmi/Kconfig
+ create mode 100644 drivers/nfc/sec_nfc/Kconfig
+ create mode 100644 drivers/power/bq2589x_chg_mmi/Kconfig
+ create mode 100644 drivers/power/bq2597x_mmi/Kconfig
+ create mode 100644 drivers/power/bq2597x_mmi_iio/Kconfig
+ create mode 100644 drivers/power/cw2217b_fg_mmi/Kconfig
+ delete mode 100644 drivers/power/mm8013c_fg_mmi/Kbuild
+ delete mode 100644 drivers/power/mm8013c_fg_mmi/Makefile
+ delete mode 100644 drivers/power/mm8013c_fg_mmi/mm8013c_battery.c
+ create mode 100644 drivers/power/mmi-smbcharger-iio/Kconfig
+ create mode 100644 drivers/power/mmi_discrete_charger/Kconfig
+ create mode 100644 drivers/power/mmi_discrete_turbo_charger/Kconfig
+ create mode 100644 drivers/power/mmi_parallel_charger_iio/Kconfig
+ create mode 100644 drivers/power/mmi_sc8549/Kconfig
+ create mode 100644 drivers/power/rt9426a_fg_mmi/Kconfig
+ create mode 100644 drivers/power/sd77426_fg_mmi/Kconfig
+ create mode 100644 drivers/power/sgm4154x_chg_mmi/Kconfig
+ create mode 100644 drivers/power/sm5602_fg_mmi/Kconfig
+ create mode 100644 drivers/regulator/wl2866d/Kconfig
+ create mode 100644 drivers/regulator/wl2868c/Kconfig
+ create mode 100644 drivers/usb/typec/adapter_class/Kconfig
+ create mode 100644 drivers/usb/typec/mmi_tcpc/Kconfig
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index c25426a427a6..2bf4df8ef6bf 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -1926,3 +1926,9 @@ config CAMERA_CCI_ADDR_SWITCH
+ 	default n
+ 	help
+ 	Enable it to switch i2c address.
++
++config MMI_QC3P_TURBO_CHARGER
++        bool "QC3P turbo charging"
++        default n
++        help
++        Enable it only for products that support QC3P charging.
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index d494e30841b0..b65088fa014e 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -230,6 +230,8 @@ source "drivers/interconnect/Kconfig"
+ 
+ source "drivers/counter/Kconfig"
+ 
++source "drivers/backlight/Kconfig"
++
+ source "drivers/mmi_annotate/Kconfig"
+ 
+ source "drivers/mmi_info/Kconfig"
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 967f17c64e5c..fcad4c142da3 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -187,6 +187,7 @@ obj-$(CONFIG_GNSS)		+= gnss/
+ obj-$(CONFIG_INTERCONNECT)	+= interconnect/
+ obj-$(CONFIG_COUNTER)		+= counter/
+ 
++obj-y				+= backlight/
+ obj-$(CONFIG_MMI_ANNOTATE)	+= mmi_annotate/
+ obj-$(CONFIG_MMI_INFO)		+= mmi_info/
+ obj-$(CONFIG_MMI_RELAY)	+= mmi_relay/
+diff --git a/drivers/backlight/Kconfig b/drivers/backlight/Kconfig
+new file mode 100644
+index 000000000000..cde255a30790
+--- /dev/null
++++ b/drivers/backlight/Kconfig
+@@ -0,0 +1,3 @@
++source "drivers/backlight/aw99703/Kconfig"
++source "drivers/backlight/lm3697/Kconfig"
++source "drivers/backlight/sm5350/Kconfig"
+diff --git a/drivers/backlight/Makefile b/drivers/backlight/Makefile
+new file mode 100644
+index 000000000000..063a3080426b
+--- /dev/null
++++ b/drivers/backlight/Makefile
+@@ -0,0 +1,3 @@
++obj-y	+= aw99703/
++obj-y	+= lm3697/
++obj-y	+= sm5350/
+diff --git a/drivers/backlight/aw99703/Kbuild b/drivers/backlight/aw99703/Kbuild
+index 0772225e16dc..720ec9726b2f 100644
+--- a/drivers/backlight/aw99703/Kbuild
++++ b/drivers/backlight/aw99703/Kbuild
+@@ -2,4 +2,4 @@
+ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+ 
+-obj-m += leds_aw99703.o
++obj-$(CONFIG_LEDS_AW99703) += leds_aw99703.o
+diff --git a/drivers/backlight/aw99703/Kconfig b/drivers/backlight/aw99703/Kconfig
+new file mode 100644
+index 000000000000..720ed5c9c580
+--- /dev/null
++++ b/drivers/backlight/aw99703/Kconfig
+@@ -0,0 +1,9 @@
++config LEDS_AW99703
++        tristate "AW99703 LED driver"
++        default n
++        help
++         Say Y here if you have a aw99703 compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called leds_aw99703.
+diff --git a/drivers/backlight/lm3697/Kbuild b/drivers/backlight/lm3697/Kbuild
+index 3204c539185a..5904da603dc7 100644
+--- a/drivers/backlight/lm3697/Kbuild
++++ b/drivers/backlight/lm3697/Kbuild
+@@ -2,7 +2,7 @@
+ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+ 
+-obj-m := leds_lm3697.o
++obj-$(CONFIG_LEDS_LM3697_MMI) += leds_lm3697.o
+ leds_lm3697-objs += ti_lm3697.o
+ leds_lm3697-objs += ti_lm3697_backlight.o
+ leds_lm3697-objs += ti_lm3697_backlight_data.o
+diff --git a/drivers/backlight/lm3697/Kconfig b/drivers/backlight/lm3697/Kconfig
+new file mode 100644
+index 000000000000..9cbd1f0dd44c
+--- /dev/null
++++ b/drivers/backlight/lm3697/Kconfig
+@@ -0,0 +1,9 @@
++config LEDS_LM3697_MMI
++        tristate "LM3697 LED driver"
++        default n
++        help
++         Say Y here if you have a lm3697 compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called leds_lm3697.
+diff --git a/drivers/backlight/sm5350/Kbuild b/drivers/backlight/sm5350/Kbuild
+index 41852f505da4..a1d981490792 100644
+--- a/drivers/backlight/sm5350/Kbuild
++++ b/drivers/backlight/sm5350/Kbuild
+@@ -1,5 +1,5 @@
+ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+ 
+-obj-m   += sm5350_bl.o
++obj-$(CONFIG_LEDS_SM5350)   += sm5350_bl.o
+ 
+diff --git a/drivers/backlight/sm5350/Kconfig b/drivers/backlight/sm5350/Kconfig
+new file mode 100644
+index 000000000000..8e141b2284c5
+--- /dev/null
++++ b/drivers/backlight/sm5350/Kconfig
+@@ -0,0 +1,6 @@
++config LEDS_SM5350
++	tristate "LED support for SM5350"
++	depends on LEDS_CLASS
++	depends on I2C
++	help
++	  This option enables support for LEDs connected to SM5350.
+diff --git a/drivers/fm/Kconfig b/drivers/fm/Kconfig
+new file mode 100644
+index 000000000000..0d4966aa36fe
+--- /dev/null
++++ b/drivers/fm/Kconfig
+@@ -0,0 +1,4 @@
++config RADIO_ELNA
++	tristate "ELNA FM Radio"
++	help
++	Choose Y here if you have this FM radio chip.
+diff --git a/drivers/input/misc/Kconfig b/drivers/input/misc/Kconfig
+index 7f39a7dece91..b091d024a787 100644
+--- a/drivers/input/misc/Kconfig
++++ b/drivers/input/misc/Kconfig
+@@ -914,4 +914,9 @@ config INPUT_STPMIC1_ONKEY
+ 	  To compile this driver as a module, choose M here: the
+ 	  module will be called stpmic1_onkey.
+ 
++source "drivers/input/misc/rbs_fps_mmi/Kconfig"
++source "drivers/input/misc/qpnp_power_on_mmi/Kconfig"
++source "drivers/input/misc/goodix_fod_mmi/Kconfig"
++source "drivers/input/misc/focal_fps_mmi/Kconfig"
++
+ endif
+diff --git a/drivers/input/misc/Makefile b/drivers/input/misc/Makefile
+index b4e94422cea7..f5ccbe023814 100644
+--- a/drivers/input/misc/Makefile
++++ b/drivers/input/misc/Makefile
+@@ -88,6 +88,11 @@ obj-$(CONFIG_INPUT_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
+ obj-$(CONFIG_INPUT_YEALINK)		+= yealink.o
+ obj-$(CONFIG_INPUT_IDEAPAD_SLIDEBAR)	+= ideapad_slidebar.o
+ obj-$(CONFIG_FINGERPRINT_GOODIX_FOD_MMI) += goodix_fod_mmi/
+-obj-$(CONFIG_INPUT_AWINIC_HAPTIC) += awinic/
+-obj-$(CONFIG_SARSENSOR_SX937X) += sx937x/
+-obj-$(CONFIG_MOTO_UTAGS) += utag/
++obj-$(CONFIG_INPUT_CHIPONE_FPS_SPI)	+= chipone_fps_mmi/
++obj-$(CONFIG_INPUT_MISC_FPC1020)	+= fpc_fps_mmi/
++obj-$(CONFIG_INPUT_EGIS_FPS_MMI)	+= rbs_fps_mmi/
++obj-$(CONFIG_INPUT_SILEAD_FPS_MMI)	+= silead_fps_mmi/
++obj-$(CONFIG_INPUT_QPNP_POWER_ON_MMI)	+= qpnp_power_on_mmi/
++obj-$(CONFIG_INPUT_GOODIX_FOD_MMI)	+= goodix_fod_mmi/
++obj-$(CONFIG_INPUT_FOCAL_FPS_MMI)	+= focal_fps_mmi/
++obj-$(CONFIG_RBS_FOD_MMI)		+= rbs_fod_mmi/
+diff --git a/drivers/input/misc/focal_fps_mmi/Kbuild b/drivers/input/misc/focal_fps_mmi/Kbuild
+index 4f9cb1ae2a70..fc78fe8df6e3 100644
+--- a/drivers/input/misc/focal_fps_mmi/Kbuild
++++ b/drivers/input/misc/focal_fps_mmi/Kbuild
+@@ -1,49 +1,3 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/input/misc/focal_fps_mmi
+-
+-
+-
+-
+-
+-
+-
+-# Early-logging level for ff_hal, ff_ta and driver as well. Note that this
+-# logging level only takes effect before ff_config module is loaded.
+-#
+-# Options:
+-# 0 - FF_LOG_LEVEL_ALL, All
+-# 1 - FF_LOG_LEVEL_VBS, Verbose
+-# 2 - FF_LOG_LEVEL_DBG, Debug
+-# 3 - FF_LOG_LEVEL_INF, Info
+-# 4 - FF_LOG_LEVEL_WRN, Warning
+-# 5 - FF_LOG_LEVEL_ERR, Error
+-EXTRA_CFLAGS  += -D__FF_BUILD_DATE=\"$(shell date +%Y%m%d)\"
+-EXTRA_CFLAGS += -D__FF_EARLY_LOG_LEVEL=2
+-
+-
+-focal_fps_mmi-y +=  ff_ctl.o plat-msm.o
+-
+-ifneq ($(filter m y,$(CONFIG_INPUT_EGISTEC_FPS_NAVI)),)
+-	EXTRA_CFLAGS += -DCONFIG_INPUT_EGISTEC_FPS_NAVI
+-	ets_fps_mmi-y += ets_navi_input.o
+-endif
+-ifneq ($(filter m y,$(CONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL)),)
+-	EXTRA_CFLAGS += -DCONFIG_INPUT_EGISTEC_FPS_NAVI_VERTICAL
+-endif
+-ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+-	EXTRA_CFLAGS += -DFP_SPI_DEBUG
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_FOCAL_SUPPORT_DRM_SCREEN)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_NOTIFICATIONS
+-endif
+-
+-ifneq ($(filter m y, $(CONFIG_FOCAL_PANEL_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_PANEL_NOTIFICATIONS
+-endif
+-
+-obj-m += focal_fps_mmi.o
+-
++focal_fps_mmi-y += ff_ctl.o plat-msm.o
+ 
++obj-$(CONFIG_INPUT_FOCAL_FPS_MMI) += focal_fps_mmi.o
+diff --git a/drivers/input/misc/focal_fps_mmi/Kconfig b/drivers/input/misc/focal_fps_mmi/Kconfig
+new file mode 100644
+index 000000000000..049231c42957
+--- /dev/null
++++ b/drivers/input/misc/focal_fps_mmi/Kconfig
+@@ -0,0 +1,6 @@
++config INPUT_FOCAL_FPS_MMI
++	tristate "FOCAL fingerprint sensor MMI"
++	default n
++	help
++	 Say Y here if you wish to include support for MMI FOCAL finger print sensor.
++	 If unsure, say N.
+diff --git a/drivers/input/misc/goodix_fod_mmi/Kconfig b/drivers/input/misc/goodix_fod_mmi/Kconfig
+index 7aeeb3b69617..163eb49f866e 100644
+--- a/drivers/input/misc/goodix_fod_mmi/Kconfig
++++ b/drivers/input/misc/goodix_fod_mmi/Kconfig
+@@ -3,4 +3,4 @@ config FINGERPRINT_GOODIX_FOD_MMI
+ 
+ config INPUT_MISC_GOODIX_FOD_SOFTDEP
+ 	bool "Goodix FOD softdependency on GPIO_PCAL6408"
+-	depends on FINGERPRINT_GOODIX_FOD_MMI
+\ No newline at end of file
++	depends on FINGERPRINT_GOODIX_FOD_MMI
+diff --git a/drivers/input/misc/qpnp_power_on_mmi/Kbuild b/drivers/input/misc/qpnp_power_on_mmi/Kbuild
+index dd859e89187d..61560eb32cfa 100644
+--- a/drivers/input/misc/qpnp_power_on_mmi/Kbuild
++++ b/drivers/input/misc/qpnp_power_on_mmi/Kbuild
+@@ -3,5 +3,5 @@ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+ KBUILD_EXTRA_SYMBOLS += $(CURDIR)/../../kernel/msm-$(MODULE_KERNEL_VERSION)/Module.symvers
+ 
+-obj-m += qpnp-power-on-mmi.o
++obj-$(CONFIG_INPUT_QPNP_POWER_ON_MMI) += qpnp-power-on-mmi.o
+ 
+diff --git a/drivers/input/misc/qpnp_power_on_mmi/Kconfig b/drivers/input/misc/qpnp_power_on_mmi/Kconfig
+new file mode 100644
+index 000000000000..0c1768d56cdc
+--- /dev/null
++++ b/drivers/input/misc/qpnp_power_on_mmi/Kconfig
+@@ -0,0 +1,8 @@
++config INPUT_QPNP_POWER_ON_MMI
++        tristate "QPNP PMIC Power-on MMI support"
++        depends on SPMI
++        help
++          This option enables device driver support for the power-on
++          functionality of Qualcomm Technologies, Inc. PNP PMICs.  It supports
++          reporting the change in status of the KPDPWR_N line (connected to the
++          power-key) as well as reset features.
+diff --git a/drivers/input/misc/rbs_fps_mmi/Kbuild b/drivers/input/misc/rbs_fps_mmi/Kbuild
+index b55d1b2190a6..a8e27d8688a9 100644
+--- a/drivers/input/misc/rbs_fps_mmi/Kbuild
++++ b/drivers/input/misc/rbs_fps_mmi/Kbuild
+@@ -1,18 +1,12 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-				-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/input/misc/rbs_fps_mmi
+-
+ ifneq ($(filter m y,$(CONFIG_EGIS_PANEL_NOTIFICATIONS)),)
+-    EXTRA_CFLAGS += -DCONFIG_PANEL_NOTIFICATIONS
++    ccflags-y += -DCONFIG_PANEL_NOTIFICATIONS
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_ET721_FOD)),)
+-    EXTRA_CFLAGS += -DET721_FOD
++    ccflags-y += -DET721_FOD
+ endif
+ 
+-rbs_fps_mmi-y += etxxx_fp.o
+-
++rbs_fps_mmi-objs += etxxx_fp.o
+ 
+-obj-m += rbs_fps_mmi.o
++obj-$(CONFIG_INPUT_EGIS_FPS_MMI) += rbs_fps_mmi.o
+ 
+diff --git a/drivers/input/misc/rbs_fps_mmi/Kconfig b/drivers/input/misc/rbs_fps_mmi/Kconfig
+new file mode 100644
+index 000000000000..5944efc4d758
+--- /dev/null
++++ b/drivers/input/misc/rbs_fps_mmi/Kconfig
+@@ -0,0 +1,25 @@
++config INPUT_EGIS_FPS_MMI
++	tristate "EGIS fingerprint sensor MMI"
++	default n
++	help
++	 Say Y here if you wish to include support for MMI EGIS finger print sensor.
++	 If unsure, say N.
++
++config ET721_FOD
++	bool "FOD Support for egis"
++	default n
++	depends on INPUT_EGIS_FPS_MMI
++	help
++	 Say Y here if you wish to include support for MMI EGIS finger print sensor
++         FOD support.
++	 If unsure, say N.
++
++config EGIS_PANEL_NOTIFICATIONS
++	bool "Panel Notification Support for egis"
++	default n
++	depends on INPUT_EGIS_FPS_MMI
++	help
++	 Say Y here if you wish to include support for MMI EGIS finger print sensor
++         panel notification framework support.
++	 If unsure, say N.
++
+diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
+index f8dbc3e868e7..fd4668871b3e 100644
+--- a/drivers/input/touchscreen/Kconfig
++++ b/drivers/input/touchscreen/Kconfig
+@@ -1337,4 +1337,6 @@ source "drivers/input/touchscreen/stmicro_mmi/Kconfig"
+ 
+ source "drivers/input/touchscreen/touchscreen_mmi/Kconfig"
+ 
++source "drivers/input/touchscreen/goodix_berlin_mmi/Kconfig"
++
+ endif
+diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
+index dfe8da830025..9c90e416d043 100644
+--- a/drivers/input/touchscreen/Makefile
++++ b/drivers/input/touchscreen/Makefile
+@@ -117,3 +117,4 @@ obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx/
+ obj-$(CONFIG_TOUCHSCREEN_NT36XXX)	+= nt36xxx/
+ obj-$(CONFIG_INPUT_TOUCHSCREEN_MMI)	+= touchscreen_mmi/
+ obj-$(CONFIG_TOUCHSCREEN_FTS_TS)	+= stmicro_mmi/
++obj-$(CONFIG_TOUCHSCREEN_GOODIX_BRL)	+= goodix_berlin_mmi/
+diff --git a/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild b/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
+index 773f6e93746c..cc43c65da47c 100644
+--- a/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
++++ b/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
+@@ -3,7 +3,7 @@ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += \
+ 		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+ 
+-obj-m := goodix_brl_mmi.o
++obj-$(CONFIG_TOUCHSCREEN_GOODIX_BRL) := goodix_brl_mmi.o
+ goodix_brl_mmi-objs := \
+ 					goodix_brl_i2c.o \
+ 					goodix_brl_spi.o \
+@@ -17,88 +17,54 @@ goodix_brl_mmi-objs := \
+ 					goodix_ts_config.o
+ 
+ ifneq ($(filter m y, $(CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
++	ccflags-y += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_DRM_PANEL_NOTIFICATIONS)),)
+-    EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_NOTIFICATIONS
++    ccflags-y += -DCONFIG_DRM_PANEL_NOTIFICATIONS
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI)),)
+-    EXTRA_CFLAGS += -DCONFIG_TOUCHSCREEN_GOODIX_BRL_SPI
++    ccflags-y += -DCONFIG_TOUCHSCREEN_GOODIX_BRL_SPI
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GTP_FOD)),)
+-    EXTRA_CFLAGS += -DCONFIG_GTP_FOD
++    ccflags-y += -DCONFIG_GTP_FOD
+     goodix_brl_mmi-objs += goodix_ts_gesture_fod.o
+ else
+     goodix_brl_mmi-objs += goodix_ts_gesture.o
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GTP_LIMIT_USE_SUPPLIER)),)
+-    EXTRA_CFLAGS += -DCONFIG_GTP_LIMIT_USE_SUPPLIER
++    ccflags-y += -DCONFIG_GTP_LIMIT_USE_SUPPLIER
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GTP_ENABLE_PM_QOS)),)
+-    EXTRA_CFLAGS += -DCONFIG_GTP_ENABLE_PM_QOS
++    ccflags-y += -DCONFIG_GTP_ENABLE_PM_QOS
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GOODIX_ESD_ENABLE)),)
+-    EXTRA_CFLAGS += -DCONFIG_GOODIX_ESD_ENABLE
++    ccflags-y += -DCONFIG_GOODIX_ESD_ENABLE
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_TARGET_BUILD_FACROTY)),)
+-    EXTRA_CFLAGS += -DGTP_SAVE_IN_CSV
++    ccflags-y += -DGTP_SAVE_IN_CSV
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GTP_LAST_TIME)),)
+-    EXTRA_CFLAGS += -DCONFIG_GTP_LAST_TIME
++    ccflags-y += -DCONFIG_GTP_LAST_TIME
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_GTP_DDA_STYLUS)),)
+-    EXTRA_CFLAGS += -DCONFIG_GTP_DDA_STYLUS
++    ccflags-y += -DCONFIG_GTP_DDA_STYLUS
+     goodix_brl_mmi-objs += goodix_ts_dda.o
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_INPUT_TOUCHSCREEN_MMI)),)
+-    EXTRA_CFLAGS += -DCONFIG_INPUT_TOUCHSCREEN_MMI
++    ccflags-y += -DCONFIG_INPUT_TOUCHSCREEN_MMI
+     goodix_brl_mmi-objs += goodix_ts_mmi.o
+ endif
+ 
+ ifneq ($(filter m y, $(CONFIG_BOARD_USES_DOUBLE_TAP_CTRL)),)
+-	EXTRA_CFLAGS += -DCONFIG_BOARD_USES_DOUBLE_TAP_CTRL
++	ccflags-y += -DCONFIG_BOARD_USES_DOUBLE_TAP_CTRL
+ endif
+-
+-ifneq ($(findstring _factory,$(TARGET_PRODUCT)),)
+-USE_TARGET_PRODUCT := $(strip $(subst _factory,, $(TARGET_PRODUCT)))
+-else
+-USE_TARGET_PRODUCT := $(TARGET_PRODUCT)
+-endif
+-
+-ifneq ($(filter oneli, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_ONELI
+-else ifneq ($(filter hiphi, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_HIPHI
+-else ifneq ($(filter hiphic, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_HIPHIC
+-else ifneq ($(filter li, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_LI
+-else ifneq ($(filter eqs, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_EQS
+-else ifneq ($(filter tundra%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_TUNDRA
+-else ifneq ($(filter miami%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_MIAMI
+-else ifneq ($(filter rtwo%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_RTWO
+-else ifneq ($(filter bronco, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_BRONCO
+-else ifneq ($(filter felix, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DCONFIG_GTP_DISP_MODE
+-else ifneq ($(filter zeekr%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_ZEEKR
+-endif
+-$(warning "william EXTRA_CFLAGS = $(EXTRA_CFLAGS)")
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../touchscreen_mmi/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../mmi_info/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+diff --git a/drivers/input/touchscreen/goodix_berlin_mmi/Kconfig b/drivers/input/touchscreen/goodix_berlin_mmi/Kconfig
+index 223d5aea824e..6e512e5e3c3f 100644
+--- a/drivers/input/touchscreen/goodix_berlin_mmi/Kconfig
++++ b/drivers/input/touchscreen/goodix_berlin_mmi/Kconfig
+@@ -17,4 +17,23 @@ config TOUCHSCREEN_GOODIX_BRL_SPI
+ 	help
+ 		Say Y here if the touchscreen is connected via SPI bus.
+ 
++config TOUCHSCREEN_GOODIX_BRL_I2C
++	tristate "Goodix berlin touchscreen"
++	help
++	  Say Y here if you have a Goodix berlin series touch controller
++	  to your system.
++
++	  If build module, say M.
++	  If unsure, say N.
++
++config GTP_FOD
++	bool "supports FOD"
++	help
++		Say Y here to support FOD.
++
++config GTP_LIMIT_USE_SUPPLIER
++	bool "supports using supplier"
++	help
++		Say Y here to support using supplier.
++
+ endif
+diff --git a/drivers/leds/Kbuild b/drivers/leds/Kbuild
+deleted file mode 100755
+index eb1a7d0ae20c..000000000000
+--- a/drivers/leds/Kbuild
++++ /dev/null
+@@ -1,6 +0,0 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+-
+-obj-m += leds-indicator-pwm.o
+diff --git a/drivers/leds/trigger/Kbuild b/drivers/leds/trigger/Kbuild
+deleted file mode 100644
+index 1983f4f1e905..000000000000
+--- a/drivers/leds/trigger/Kbuild
++++ /dev/null
+@@ -1,5 +0,0 @@
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+-
+-obj-m += ledtrig-sol.o
+diff --git a/drivers/leds/trigger/Kconfig b/drivers/leds/trigger/Kconfig
+index ce9429ca6dde..0a80142fbae1 100644
+--- a/drivers/leds/trigger/Kconfig
++++ b/drivers/leds/trigger/Kconfig
+@@ -144,4 +144,11 @@ config LEDS_TRIGGER_AUDIO
+ 	  the audio mute and mic-mute changes.
+ 	  If unsure, say N
+ 
++config LEDS_TRIGGER_SOL
++	tristate "Sign of Life LED Trigger"
++	help
++	  Configurable LED trigger that alters the LED blink
++	  pattern based on power supply status.
++	  If unsure, say N
++
+ endif # LEDS_TRIGGERS
+diff --git a/drivers/leds/trigger/Makefile b/drivers/leds/trigger/Makefile
+index a087dacd15ad..efc874937ebb 100644
+--- a/drivers/leds/trigger/Makefile
++++ b/drivers/leds/trigger/Makefile
+@@ -1,10 +1,18 @@
+-KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+-
+-all:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(M) modules $(KBUILD_OPTIONS)
+-
+-modules_install:
+-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(M) modules_install
+-
+-clean:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
++# SPDX-License-Identifier: GPL-2.0
++obj-$(CONFIG_LEDS_TRIGGER_TIMER)	+= ledtrig-timer.o
++obj-$(CONFIG_LEDS_TRIGGER_ONESHOT)	+= ledtrig-oneshot.o
++obj-$(CONFIG_LEDS_TRIGGER_DISK)		+= ledtrig-disk.o
++obj-$(CONFIG_LEDS_TRIGGER_MTD)		+= ledtrig-mtd.o
++obj-$(CONFIG_LEDS_TRIGGER_HEARTBEAT)	+= ledtrig-heartbeat.o
++obj-$(CONFIG_LEDS_TRIGGER_BACKLIGHT)	+= ledtrig-backlight.o
++obj-$(CONFIG_LEDS_TRIGGER_GPIO)		+= ledtrig-gpio.o
++obj-$(CONFIG_LEDS_TRIGGER_CPU)		+= ledtrig-cpu.o
++obj-$(CONFIG_LEDS_TRIGGER_ACTIVITY)	+= ledtrig-activity.o
++obj-$(CONFIG_LEDS_TRIGGER_DEFAULT_ON)	+= ledtrig-default-on.o
++obj-$(CONFIG_LEDS_TRIGGER_TRANSIENT)	+= ledtrig-transient.o
++obj-$(CONFIG_LEDS_TRIGGER_CAMERA)	+= ledtrig-camera.o
++obj-$(CONFIG_LEDS_TRIGGER_PANIC)	+= ledtrig-panic.o
++obj-$(CONFIG_LEDS_TRIGGER_NETDEV)	+= ledtrig-netdev.o
++obj-$(CONFIG_LEDS_TRIGGER_PATTERN)	+= ledtrig-pattern.o
++obj-$(CONFIG_LEDS_TRIGGER_AUDIO)	+= ledtrig-audio.o
++obj-$(CONFIG_LEDS_TRIGGER_SOL)		+= ledtrig-sol.o
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 9ba14d11dbe3..965cef9324f3 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -543,4 +543,5 @@ source "drivers/misc/awinic/Kconfig"
+ source "drivers/misc/mmi_sys_temp/Kconfig"
+ source "drivers/misc/sx937x/Kconfig"
+ source "drivers/misc/utag/Kconfig"
++source "drivers/misc/ldo_vibrator_mmi/Kconfig"
+ endmenu
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index 34b09dd815a7..288d85c1f0c8 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -1,10 +1,72 @@
+-KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
++# SPDX-License-Identifier: GPL-2.0
++#
++# Makefile for misc devices that really don't fit anywhere else.
++#
+ 
+-all:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
+-
+-modules_install:
+-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
+-
+-clean:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
+\ No newline at end of file
++obj-$(CONFIG_IBM_ASM)		+= ibmasm/
++obj-$(CONFIG_IBMVMC)		+= ibmvmc.o
++obj-$(CONFIG_AD525X_DPOT)	+= ad525x_dpot.o
++obj-$(CONFIG_AD525X_DPOT_I2C)	+= ad525x_dpot-i2c.o
++obj-$(CONFIG_AD525X_DPOT_SPI)	+= ad525x_dpot-spi.o
++obj-$(CONFIG_INTEL_MID_PTI)	+= pti.o
++obj-$(CONFIG_ATMEL_SSC)		+= atmel-ssc.o
++obj-$(CONFIG_ATMEL_TCLIB)	+= atmel_tclib.o
++obj-$(CONFIG_DUMMY_IRQ)		+= dummy-irq.o
++obj-$(CONFIG_ICS932S401)	+= ics932s401.o
++obj-$(CONFIG_LKDTM)		+= lkdtm/
++obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
++obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
++obj-$(CONFIG_PHANTOM)		+= phantom.o
++obj-$(CONFIG_QCOM_COINCELL)	+= qcom-coincell.o
++obj-$(CONFIG_QCOM_FASTRPC)	+= fastrpc.o
++obj-$(CONFIG_SENSORS_BH1770)	+= bh1770glc.o
++obj-$(CONFIG_SENSORS_APDS990X)	+= apds990x.o
++obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
++obj-$(CONFIG_KGDB_TESTS)	+= kgdbts.o
++obj-$(CONFIG_SGI_XP)		+= sgi-xp/
++obj-$(CONFIG_SGI_GRU)		+= sgi-gru/
++obj-$(CONFIG_CS5535_MFGPT)	+= cs5535-mfgpt.o
++obj-$(CONFIG_HP_ILO)		+= hpilo.o
++obj-$(CONFIG_APDS9802ALS)	+= apds9802als.o
++obj-$(CONFIG_ISL29003)		+= isl29003.o
++obj-$(CONFIG_ISL29020)		+= isl29020.o
++obj-$(CONFIG_SENSORS_TSL2550)	+= tsl2550.o
++obj-$(CONFIG_DS1682)		+= ds1682.o
++obj-$(CONFIG_C2PORT)		+= c2port/
++obj-$(CONFIG_HMC6352)		+= hmc6352.o
++obj-y				+= eeprom/
++obj-y				+= cb710/
++obj-$(CONFIG_VMWARE_BALLOON)	+= vmw_balloon.o
++obj-$(CONFIG_PCH_PHUB)		+= pch_phub.o
++obj-y				+= ti-st/
++obj-y				+= lis3lv02d/
++obj-$(CONFIG_ALTERA_STAPL)	+=altera-stapl/
++obj-$(CONFIG_INTEL_MEI)		+= mei/
++obj-$(CONFIG_VMWARE_VMCI)	+= vmw_vmci/
++obj-$(CONFIG_LATTICE_ECP3_CONFIG)	+= lattice-ecp3-config.o
++obj-$(CONFIG_SRAM)		+= sram.o
++obj-$(CONFIG_SRAM_EXEC)		+= sram-exec.o
++obj-y				+= mic/
++obj-$(CONFIG_GENWQE)		+= genwqe/
++obj-$(CONFIG_ECHO)		+= echo/
++obj-$(CONFIG_HDCP_QSEECOM)	+= hdcp_qseecom.o
++obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
++obj-$(CONFIG_CXL_BASE)		+= cxl/
++obj-$(CONFIG_PCI_ENDPOINT_TEST)	+= pci_endpoint_test.o
++obj-$(CONFIG_OCXL)		+= ocxl/
++obj-y				+= cardreader/
++obj-$(CONFIG_PVPANIC)   	+= pvpanic.o
++obj-$(CONFIG_HABANA_AI)		+= habanalabs/
++obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
++obj-$(CONFIG_UID_SYS_STATS)	+= uid_sys_stats.o
++obj-$(CONFIG_QSEECOM)		+= qseecom-mod.o
++qseecom-mod-y			:= qseecom.o
++qseecom-mod-$(CONFIG_COMPAT)	+= compat_qseecom.o
++obj-$(CONFIG_PROFILER)			+= profiler.o
++obj-$(CONFIG_WIGIG_SENSING_SPI)	+= wigig_sensing.o
++obj-$(CONFIG_HISI_HIKEY_USB)	+= hisi_hikey_usb.o
++obj-y				+= pen/
++obj-$(CONFIG_MOTO_UTAGS) 	+= utag/
++obj-$(CONFIG_MMI_SYS_TEMP)	+= mmi_sys_temp/
++obj-$(CONFIG_LDO_VIBRATOR_MMI)	+= ldo_vibrator_mmi/
++obj-$(CONFIG_SARSENSOR_SX937X)		+= sx937x/
+diff --git a/drivers/misc/awinic/Kconfig b/drivers/misc/awinic/Kconfig
+index dcb9e22a5ef1..7bc110c62b11 100644
+--- a/drivers/misc/awinic/Kconfig
++++ b/drivers/misc/awinic/Kconfig
+@@ -8,4 +8,4 @@ menuconfig INPUT_AWINIC_HAPTIC
+ 	help
+ 	  Enables Awinic Haptic driver.
+ 
+-source "drivers/misc/awinic/aw8695/Kconfig"
+\ No newline at end of file
++source "drivers/misc/awinic/aw8695/Kconfig"
+diff --git a/drivers/misc/ldo_vibrator_mmi/Kconfig b/drivers/misc/ldo_vibrator_mmi/Kconfig
+new file mode 100644
+index 000000000000..912d94fb2267
+--- /dev/null
++++ b/drivers/misc/ldo_vibrator_mmi/Kconfig
+@@ -0,0 +1,3 @@
++config LDO_VIBRATOR_MMI
++	tristate "ldo vibrator driver"
++	default n
+diff --git a/drivers/mmi_annotate/Kbuild b/drivers/mmi_annotate/Kbuild
+index f554a4e253b2..76a40f6d5ecc 100644
+--- a/drivers/mmi_annotate/Kbuild
++++ b/drivers/mmi_annotate/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += mmi_annotate.o
+\ No newline at end of file
++obj-$(CONFIG_MMI_ANNOTATE) += mmi_annotate.o
+diff --git a/drivers/mmi_info/Kbuild b/drivers/mmi_info/Kbuild
+index 4a3f1a0f3fac..7c2d0eba268d 100644
+--- a/drivers/mmi_info/Kbuild
++++ b/drivers/mmi_info/Kbuild
+@@ -1,12 +1,6 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+ mmi_info-objs += mmi_storage_info.o
+ mmi_info-objs += mmi_ram_info.o
+ mmi_info-objs += mmi_unit_info.o
+ mmi_info-objs += mmi_boot_info.o
+ mmi_info-objs += mmi_info_main.o
+-obj-m += mmi_info.o
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_annotate/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++obj-$(CONFIG_MMI_INFO) += mmi_info.o
+diff --git a/drivers/mmi_relay/Kbuild b/drivers/mmi_relay/Kbuild
+index 12e00ae16d00..aaa4e173f7fb 100644
+--- a/drivers/mmi_relay/Kbuild
++++ b/drivers/mmi_relay/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += mmi_relay.o
++obj-$(CONFIG_MMI_RELAY) += mmi_relay.o
+diff --git a/drivers/moto_f_usbnet/Kbuild b/drivers/moto_f_usbnet/Kbuild
+index 331c29b3cfa2..a016a4a552df 100644
+--- a/drivers/moto_f_usbnet/Kbuild
++++ b/drivers/moto_f_usbnet/Kbuild
+@@ -3,4 +3,4 @@ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+ 
+ moto_f_usbnet-objs += f_usbnet.o
+-obj-m += moto_f_usbnet.o
++obj-$(CONFIG_MOTO_F_USBNET) += moto_f_usbnet.o
+diff --git a/drivers/nfc/Kconfig b/drivers/nfc/Kconfig
+index 2d68b3f179a9..9c3e3eb53896 100644
+--- a/drivers/nfc/Kconfig
++++ b/drivers/nfc/Kconfig
+@@ -60,6 +60,7 @@ source "drivers/nfc/st-nci/Kconfig"
+ source "drivers/nfc/nxp-nci/Kconfig"
+ source "drivers/nfc/s3fwrn5/Kconfig"
+ source "drivers/nfc/st95hf/Kconfig"
++source "drivers/nfc/sec_nfc/Kconfig"
+ endmenu
+ 
+ config NFC_QTI_I2C
+diff --git a/drivers/nfc/Makefile b/drivers/nfc/Makefile
+index 857f995dad8b..e31f15503098 100644
+--- a/drivers/nfc/Makefile
++++ b/drivers/nfc/Makefile
+@@ -19,3 +19,4 @@ obj-$(CONFIG_NFC_NXP_NCI)	+= nxp-nci/
+ obj-$(CONFIG_NFC_S3FWRN5)	+= s3fwrn5/
+ obj-$(CONFIG_NFC_ST95HF)	+= st95hf/
+ obj-y				+= qti/
++obj-$(CONFIG_SEC_NFC)		+= sec_nfc/
+diff --git a/drivers/nfc/sec_nfc/Kbuild b/drivers/nfc/sec_nfc/Kbuild
+index 6493f043054b..2060a71aa326 100644
+--- a/drivers/nfc/sec_nfc/Kbuild
++++ b/drivers/nfc/sec_nfc/Kbuild
+@@ -3,12 +3,12 @@ EXTRA_CFLAGS += -Wall
+ EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+ 
+ ifneq ($(filter m y,$(CONFIG_SEC_NFC_PRODUCT_N5)),)
+-	EXTRA_CFLAGS += -DCONFIG_SEC_NFC_PRODUCT_N5
++	ccflags-y += -DCONFIG_SEC_NFC_PRODUCT_N5
+ endif
+ ifneq ($(filter m y,$(CONFIG_SEC_NFC_IF_I2C)),)
+-	EXTRA_CFLAGS += -DCONFIG_SEC_NFC_IF_I2C
++	ccflags-y += -DCONFIG_SEC_NFC_IF_I2C
+ endif
+ 
+-obj-m        += sec_nfc.o
++obj-$(CONFIG_SEC_NFC) += sec_nfc.o
+ 
+ KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../mmi_info/Module.symvers
+diff --git a/drivers/nfc/sec_nfc/Kconfig b/drivers/nfc/sec_nfc/Kconfig
+new file mode 100644
+index 000000000000..3c66f3b24baf
+--- /dev/null
++++ b/drivers/nfc/sec_nfc/Kconfig
+@@ -0,0 +1,67 @@
++#
++# Near Field Communication (NFC) devices
++#
++
++menu "Near Field Communication (NFC) devices"
++        depends on NFC
++
++config SEC_NFC
++        tristate "Samsung NFC driver"
++        default m
++        help
++          SAMSUNG NFC Driver.
++          This driver provides support for SAMSUNG NFC products.
++          You should select your NFC product and interface.
++
++          Say Y here to compile support for SAMSUNG NFC driver into the
++          kernel.
++
++choice
++        prompt "SEC NFC Products"
++        depends on SEC_NFC
++                default SEC_NFC_PRODUCT_N5
++config SEC_NFC_PRODUCT_N3
++                bool "RN3"
++config SEC_NFC_PRODUCT_N5
++                bool "RN5/RNx"
++endchoice
++choice
++        prompt "SEC NFC Interface"
++        depends on SEC_NFC
++                default SEC_NFC_IF_I2C
++config SEC_NFC_IF_UART
++                bool "UART"
++config SEC_NFC_IF_I2C
++                bool "I2C"
++config SEC_NFC_IF_I2C_GPIO
++                bool "I2C-GPIO (S/W-I2C)"
++                select I2C_CHARDEV
++                select I2C_MUX
++                select I2C_MUX_GPIO
++                select I2C_ARB_GPIO_CHALLENGE
++                select I2C_ALGOBIT
++                select I2C_GPIO
++endchoice
++config SEC_NFC_GPIO_CLK
++                bool "SEC NFC GPIO CLK"
++                default n
++                help
++                  SAMSUNG NFC CLR REQ feature.
++                  This feature provides support for SAMSUNG NFC products.
++                  You should select this feature if your NFC product uses AP CLK.
++
++                  Say Y here to compile support for SAMSUNG NFC CLK REQ feature into the
++                  kernel.
++config SEC_NFC_DEDICATED_CLK
++                tristate "SEC NFC DEDICATED CLK"
++                        default m
++config SEC_NFC_LDO_EN
++                tristate "SEC NFC LDO"
++                        default m
++config SEC_NFC_PMIC_LDO
++                tristate "SEC NFC PMIC LDO"
++                        default m
++config SEC_ESE_COLDRESET
++                tristate "eSE Cold reset"
++                        default m
++endmenu
+diff --git a/drivers/power/Kconfig b/drivers/power/Kconfig
+index af8b08660ce2..111a8e5f4da0 100644
+--- a/drivers/power/Kconfig
++++ b/drivers/power/Kconfig
+@@ -7,3 +7,13 @@ source "drivers/power/bm_adsp_ulog/Kconfig"
+ source "drivers/power/mmi_charger/Kconfig"
+ source "drivers/power/qpnp_adaptive_charge/Kconfig"
+ 
++source "drivers/power/bq2597x_mmi_iio/Kconfig"
++source "drivers/power/bq2589x_chg_mmi/Kconfig"
++source "drivers/power/cw2217b_fg_mmi/Kconfig"
++source "drivers/power/sgm4154x_chg_mmi/Kconfig"
++source "drivers/power/sm5602_fg_mmi/Kconfig"
++source "drivers/power/mmi_discrete_charger/Kconfig"
++source "drivers/power/mmi_discrete_turbo_charger/Kconfig"
++source "drivers/power/mmi_parallel_charger_iio/Kconfig"
++source "drivers/power/mmi_sc8549/Kconfig"
++source "drivers/power/mmi-smbcharger-iio/Kconfig"
+diff --git a/drivers/power/Makefile b/drivers/power/Makefile
+index 75377b6d1d5c..53da74d36b85 100644
+--- a/drivers/power/Makefile
++++ b/drivers/power/Makefile
+@@ -3,6 +3,19 @@ obj-$(CONFIG_POWER_AVS)		+= avs/
+ obj-$(CONFIG_POWER_RESET)	+= reset/
+ obj-$(CONFIG_POWER_SUPPLY)	+= supply/
+ 
+-obj-$(CONFIG_UBM_ADSP_ULOG	+= bm_adsp_ulog/
+-obj-$(CONFIG_USE_MMI_CHARGER)	+= mmi_charger/
++obj-$(CONFIG_UBM_ADSP_ULOG)	+= bm_adsp_ulog/
++obj-$(CONFIG_MMI_CHARGER)	+= mmi_charger/
+ obj-$(CONFIG_QPNP_ADAPTIVE_CHARGE)	+= qpnp_adaptive_charge/
++obj-$(CONFIG_MMI_PARALLEL_CHARGER_IIO) += mmi_parallel_charger_iio/
++obj-$(CONFIG_MMI_SC8549)	+= mmi_sc8549/
++obj-$(CONFIG_MMI_SMBCHARGER_IIO) += mmi-smbcharger-iio/
++obj-$(CONFIG_QPNP_ADAPTIVE_CHARGE) += qpnp_adaptive_charge/
++obj-$(CONFIG_BQ2597X_MMI) += bq2597x_mmi/
++obj-$(CONFIG_BQ2597X_MMI_IIO) += bq2597x_mmi_iio/
++obj-$(CONFIG_BQ2589X_CHARGER)	+= bq2589x_chg_mmi/
++obj-$(CONFIG_CW2217B_FG_MMI)	+= cw2217b_fg_mmi/
++obj-$(CONFIG_SGM4154X_CHARGER)	+= sgm4154x_chg_mmi/
++obj-$(CONFIG_MMI_SM5602_FG)	+= sm5602_fg_mmi/
++obj-$(CONFIG_MMI_DISCRETE_CHARGER) += mmi_discrete_charger/
++obj-$(CONFIG_MMI_DISCRETE_TURBO_CHARGER) += mmi_discrete_turbo_charger/
++obj-$(CONFIG_MMI_MM8013C_FG)	+= mm8013c_fg_mmi/
+\ No newline at end of file
+diff --git a/drivers/power/bq2589x_chg_mmi/Kbuild b/drivers/power/bq2589x_chg_mmi/Kbuild
+index d40823873eee..e0e0802affc1 100644
+--- a/drivers/power/bq2589x_chg_mmi/Kbuild
++++ b/drivers/power/bq2589x_chg_mmi/Kbuild
+@@ -1,20 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/bq2589x_chg_mmi
+-
+-obj-m += bq2589x_charger.o
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_TURBO_CHARGER)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_TURBO_CHARGER
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_WT6670_DETECTED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_WT6670_DETECTED
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_EXT_CHG_LED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_EXT_CHG_LED
+-endif
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_discrete_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++obj-$(CONFIG_BQ2589X_CHARGER) += bq2589x_charger.o
+diff --git a/drivers/power/bq2589x_chg_mmi/Kconfig b/drivers/power/bq2589x_chg_mmi/Kconfig
+new file mode 100644
+index 000000000000..96f25de40d2c
+--- /dev/null
++++ b/drivers/power/bq2589x_chg_mmi/Kconfig
+@@ -0,0 +1,31 @@
++#
++# BQ2589X Charger Driver
++#
++
++config BQ2589X_CHARGER
++    tristate "TI BQ2589x Charger Driver"
++    depends on MMI_DISCRETE_CHARGER_CLASS
++    default n
++    help
++        Say Y here if you have a bq2589x charging device in
++        your system.
++
++        To compile this driver as a module, choose M here: the
++        module will be called bq2589x_charger.
++
++config BQ2589X_MMI_QC3P_TURBO_CHARGER
++    bool "Enable BQ2589X Moto QC3P Turbo Charger"
++    depends on BQ2589X_CHARGER
++    default n
++    help
++        Say Y here if you have a BQ2589X Moto QC3P turbo charger compatible device connected.
++
++        If unsure, say N.
++
++config MMI_EXT_CHG_LED
++    bool "Enable MMI external charger LED"
++    default n
++    help
++        Say Y here if you have a MMI external charger LED.
++
++        If unsure, say N.
+diff --git a/drivers/power/bq2597x_mmi/Kbuild b/drivers/power/bq2597x_mmi/Kbuild
+index 8fbfa78a8359..26c3d62ca5ef 100644
+--- a/drivers/power/bq2597x_mmi/Kbuild
++++ b/drivers/power/bq2597x_mmi/Kbuild
+@@ -1,9 +1,4 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include \
+-		-I$(TOP)/motorola/kernel/modules/drivers/power/bq2597x_mmi
+-
+-obj-m += bq2597x_mmi.o
++obj-$(CONFIG_BQ2597X_MMI) += bq2597x_mmi.o
+ 
+ ifneq ($(filter m y,$(CONFIG_BQ2597X_DUAL)),)
+ 	bq2597x_mmi-objs += bq25980_charger.o
+diff --git a/drivers/power/bq2597x_mmi/Kconfig b/drivers/power/bq2597x_mmi/Kconfig
+new file mode 100644
+index 000000000000..8053a7ab9eb4
+--- /dev/null
++++ b/drivers/power/bq2597x_mmi/Kconfig
+@@ -0,0 +1,16 @@
++config BQ2597X_MMI
++	tristate "BQ2597X MMI"
++	default n
++	help
++	  Say Y here if you have a bq2597x compatible
++	  device connected.
++
++	  This driver can also be built as a module.  If so, the module
++	  will be called bq2597x_mmi.
++
++config BQ2597X_DUAL
++	bool "BQ2597X DUAL"
++	default n
++	help
++	  Say Y here if you have a bq2597x DUAL compatible
++	  device connected.
+diff --git a/drivers/power/bq2597x_mmi_iio/Kbuild b/drivers/power/bq2597x_mmi_iio/Kbuild
+index 4a5406b5538b..eaab1e1ea98c 100644
+--- a/drivers/power/bq2597x_mmi_iio/Kbuild
++++ b/drivers/power/bq2597x_mmi_iio/Kbuild
+@@ -1,7 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/bq2597x_mmi_iio
+-
+-obj-m += bq2597x_mmi_iio.o
+-
++obj-$(CONFIG_BQ2597X_MMI_IIO) += bq2597x_mmi_iio.o
+diff --git a/drivers/power/bq2597x_mmi_iio/Kconfig b/drivers/power/bq2597x_mmi_iio/Kconfig
+new file mode 100644
+index 000000000000..f27a0b63702d
+--- /dev/null
++++ b/drivers/power/bq2597x_mmi_iio/Kconfig
+@@ -0,0 +1,9 @@
++config BQ2597X_MMI_IIO
++	tristate "BQ2597X MMI IIO"
++	default n
++	help
++	  Say Y here if you have a bq2597x iio compatible
++	  device connected.
++
++	  This driver can also be built as a module.  If so, the module
++	  will be called bq2597x_mmi_iio.
+diff --git a/drivers/power/cw2217b_fg_mmi/Kbuild b/drivers/power/cw2217b_fg_mmi/Kbuild
+index 6f917a2d5680..dbbafe2bf15a 100644
+--- a/drivers/power/cw2217b_fg_mmi/Kbuild
++++ b/drivers/power/cw2217b_fg_mmi/Kbuild
+@@ -1,7 +1,4 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/drivers/power/cw2217b_fg_mmi
++ccflags-$(CONFIG_DYNAMIC_UPDATE_UI_FULL) += -DDYNAMIC_UPDATE_UI_FULL
+ 
+ cw2217b_fg_mmi-objs += cw2217B_fuel_gauge_base.o
+-obj-m += cw2217b_fg_mmi.o
++obj-$(CONFIG_CW2217B_FG_MMI) += cw2217b_fg_mmi.o
+diff --git a/drivers/power/cw2217b_fg_mmi/Kconfig b/drivers/power/cw2217b_fg_mmi/Kconfig
+new file mode 100644
+index 000000000000..0a512f41349b
+--- /dev/null
++++ b/drivers/power/cw2217b_fg_mmi/Kconfig
+@@ -0,0 +1,20 @@
++config CW2217B_FG_MMI
++    tristate "CW2217 FGADC Device Driver V1.2"
++    default n
++    help
++        Say Y here if you have CW2217 FGADC Device support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called cw2217b_fg_mmi.
++
++config DYNAMIC_UPDATE_UI_FULL
++    bool "Save the value of CW2217 ui_full to the 0xA2 register"
++    depends on CW2217B_FG_MMI
++    default n
++    help
++        Say Y here to save the value of ui_full to the 0xA2 register.
++
++        If unsure, say N.
+diff --git a/drivers/power/mm8013c_fg_mmi/Kbuild b/drivers/power/mm8013c_fg_mmi/Kbuild
+deleted file mode 100644
+index 66ea64620b81..000000000000
+--- a/drivers/power/mm8013c_fg_mmi/Kbuild
++++ /dev/null
+@@ -1,7 +0,0 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/drivers/power/mm8013c_fg_mmi
+-
+-mm8013c_fg_mmi-objs += mm8013c_battery.o
+-obj-m += mm8013c_fg_mmi.o
+diff --git a/drivers/power/mm8013c_fg_mmi/Makefile b/drivers/power/mm8013c_fg_mmi/Makefile
+deleted file mode 100644
+index 62a13fd28500..000000000000
+--- a/drivers/power/mm8013c_fg_mmi/Makefile
++++ /dev/null
+@@ -1,11 +0,0 @@
+-KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+-
+-all:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
+-
+-modules_install:
+-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
+-
+-clean:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
+-
+diff --git a/drivers/power/mm8013c_fg_mmi/mm8013c_battery.c b/drivers/power/mm8013c_fg_mmi/mm8013c_battery.c
+deleted file mode 100644
+index 247ebc6a0cf5..000000000000
+--- a/drivers/power/mm8013c_fg_mmi/mm8013c_battery.c
++++ /dev/null
+@@ -1,2287 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0
+-/*
+- * MM8xxx battery driver
+- */
+-#include <linux/i2c.h>
+-#include <linux/interrupt.h>
+-#include <linux/device.h>
+-#include <linux/module.h>
+-#include <linux/mutex.h>
+-#include <linux/param.h>
+-#include <linux/jiffies.h>
+-#include <linux/delay.h>
+-#include <linux/platform_device.h>
+-#include <linux/power_supply.h>
+-#include <linux/slab.h>
+-#include <linux/of.h>
+-#include <linux/delay.h>
+-#include <asm/unaligned.h>
+-#include <linux/iio/consumer.h>
+-#include <linux/firmware.h>
+-#include <linux/time.h>
+-#include <linux/types.h>
+-#include <linux/file.h>
+-#include <linux/fs.h>
+-#include <linux/types.h>
+-
+-#define MM8XXX_MANUFACTURER	"MITSUMI ELECTRIC"
+-#define MM8XXX_BATT_PHY "bms"
+-#define mm_info(fmt, arg...)  \
+-	printk("FG_MM8xxx : %s-%d : " fmt, __FUNCTION__ ,__LINE__,##arg)
+-
+-static DEFINE_IDR(battery_id);
+-static DEFINE_MUTEX(battery_mutex);
+-
+-enum mm8xxx_chip {
+-	MM8118G01 = 1,
+-	MM8118W02,
+-	MM8013C10,
+-};
+-
+-struct mm8xxx_device_info;
+-
+-struct mm8xxx_access_methods {
+-	int (*read)(struct mm8xxx_device_info *di, u8 cmd);
+-	int (*write)(struct mm8xxx_device_info *di, u8 cmd, int value);
+-};
+-
+-struct mm8xxx_state_cache {
+-	int temperature;
+-	int avg_time_to_empty;
+-	int full_charge_capacity;
+-	int cycle_count;
+-	int soc;
+-	int flags;
+-	int health;
+-	int elapsed_months;
+-	int elapsed_days;
+-	int elapsed_hours;
+-};
+-
+-struct mm8xxx_device_info {
+-	struct device *dev;
+-	int id;
+-	enum mm8xxx_chip chip;
+-	const char *name;
+-	struct mm8xxx_access_methods bus;
+-	struct mm8xxx_state_cache cache;
+-	int charge_design_full;
+-	unsigned long last_update;
+-	struct delayed_work work;
+-	struct power_supply *psy;
+-	struct power_supply *batt_psy;
+-	struct power_supply *usb_psy;
+-	struct power_supply *dc_psy;
+-	struct list_head list;
+-	struct mutex lock;
+-	u8 *cmds;
+-	struct iio_channel *Batt_NTC_channel;
+-	bool fake_battery;
+-	u32 latest_fw_version;
+-	u32 first_battery_param_ver;
+-	u32 second_battery_param_ver;
+-	u32 first_battery_id;
+-	u32 second_battery_id;
+-};
+-
+-struct mm8xxx_device_info *di = NULL;
+-
+-static int mm8xxx_battery_read_Nbyte(struct mm8xxx_device_info *di, u8 cmd, unsigned char *data, unsigned char length);
+-static int mm8xxx_battery_read(struct mm8xxx_device_info *di, u8 cmd);
+-static int mm8xxx_battery_write(struct mm8xxx_device_info *di, u8 cmd,int value);
+-static int mm8xxx_battery_write_Nbyte(struct mm8xxx_device_info *di, u8 cmd,unsigned int value, int byte_num);
+-static int mm8xxx_battery_write_4byteCmd(struct mm8xxx_device_info *di, unsigned int cmd,unsigned int value);
+-static u32 mmi_get_battery_info(struct mm8xxx_device_info *di, u32 cmd);
+-/****************************FW / Parameter update****************************************/
+-#define ENABLE_VERIFICATION
+-
+-#define MM8013_HW_VERSION 0x0021
+-#define MM8013_LATEST_FW_VERSION 0x0812
+-#define MM8013_PARAMETER_VERSION 0x0201
+-
+-#define MM8013_DEFAULT_BATTERY_ID 0x0103
+-#define MM8013_1TH_BATTERY_ID 0x0103
+-#define MM8013_2TH_BATTERY_ID 0x0102
+-
+-#define ADDRESS_PROGRAM		(0x00008000)
+-#define ADDRESS_PARAMETER	(0x00014000)
+-#define SIZE_PROGRAM		(0x4000)
+-#define SIZE_PARAMETER		(0x3C0)
+-#ifdef ENABLE_VERIFICATION
+-#define SIZE_READBUFFER		(16)
+-#endif
+-
+-#define COMMAND_CONTROL		(0x00)
+-#define COMMAND_FGCONDITION	(0x6E)
+-#define COMMAND_MODECONTROL	(0x88)
+-#ifdef ENABLE_VERIFICATION
+-#define COMMAND_READNVMDATA	(0x8B)
+-#endif
+-#define COMMAND_ERASENVM	(0x8C)
+-#define COMMAND_WRITENVMDATA	(0x8D)
+-#define REQCODE_CONTROL_STATUS	(0x0000)
+-#define FG_CMD_READ_FAILED	(0x10000)
+-#define BIT_SS			(0x2000)
+-
+-#define FW_VER_CMD		(0x0002)
+-#define HW_VER_CMD		(0x0003)
+-#define PARAM_VER_CMD		(0x000C)
+-#define BATTERY_ID_CMD		(0x0008)
+-
+-enum PARTITION_INDEX {
+-	PARTITION_PROGRAM = 0,
+-	PARTITION_PARAMETER,
+-	PARTITION_MAX
+-};
+-
+-enum UPDATE_INDEX {
+-	UPDATE_PROGRAM = 0,
+-	UPDATE_PARAMETER,
+-	UPDATE_ALL,
+-	UPDATE_NONE
+-};
+-
+-static unsigned char chartoBcd(char iChar)
+-{
+-	unsigned char mBCD = 0;
+-
+-	if (iChar >= '0' && iChar <= '9')
+-		mBCD = iChar - '0';
+-	else if (iChar >= 'A' && iChar <= 'F')
+-		mBCD = iChar - 'A' + 0x0A;
+-	else if (iChar >= 'a' && iChar <= 'f')
+-		mBCD = iChar - 'a' + 0x0a;
+-
+-	return mBCD;
+-}
+-
+-static int tohex(char *pbuf, unsigned char length)
+-{
+-	int i = 0;
+-	int  value = 0;
+-
+-	if  (length >4)
+-		return -EINVAL;
+-
+-	for(i = 0; i < length; i++)
+-	{
+-		value += (chartoBcd(pbuf[i]) << (4*(length -1-i)));
+-	}
+-
+-	return value;
+-}
+-/**
+- * parse a FG firmware / parameter file
+- *  arguments:
+- *    hexfile_path - file path of FGFW/parameter
+- *
+- *  return value:
+- *    pointer of jagged arrays
+- *    or NULL if it fails
+- *    jagged arrays details are below.
+- *      [0] - pointer of PROGRAM data array
+- *            or NULL if the specfied file does not contain any PROGRAM data.
+- *      [1] - pointer of PARAMETER data array
+- *            or NULL if the specfied file does not contain any PARAMETER data.
+- */
+-static unsigned char *parse_hexfile(char *hexfile_name, struct mm8xxx_device_info *di)
+-{
+-	unsigned char *result = NULL;
+-	char *fbuf = NULL;
+-	char *pbuf = NULL;
+-	char *ebuf = NULL;
+-	int i,j;
+-	unsigned int bcnt;
+-	unsigned int addr;
+-	unsigned int rtype;
+-	unsigned int csum;
+-	unsigned int eladdr;
+-	int offset;
+-	int cont;
+-	int tmp;
+-	int ptsize;
+-	int size = 0;
+-	int ret;
+-	const struct firmware *fw;
+-
+-	ret = request_firmware(&fw, hexfile_name, di->dev);
+-	if (ret || fw->size <=0 ) {
+-		mm_info("Couldn't get firmware  rc=%d\n", ret);
+-		goto FAILED;
+-	}
+-	size =  fw->size;
+-	fbuf = kzalloc(size+1, GFP_KERNEL);
+-	memset(fbuf, 0, size+1);
+-	memcpy(fbuf, fw->data, size);
+-	fbuf[size] = '\0';
+-	j = 0;
+-	for (i = 0; i < size; i++) {
+-		if (iscntrl(fbuf[i]) || (fbuf[i] == ' ')) {
+-			continue;
+-		}
+-		fbuf[j++] = fbuf[i];
+-	}
+-
+-	ebuf = fbuf + j;
+-	*ebuf = '\0';
+-	cont = 1;
+-	pbuf = fbuf;
+-	eladdr = 0;
+-	do {
+-		if ((ebuf - pbuf) < 11)
+-			goto FAILED;
+-		if ((*pbuf) != ':')
+-			goto FAILED;
+-		pbuf++;
+-		/* Byte count */
+-		if ((tmp = tohex(pbuf, 2)) < 0)
+-			goto FAILED;
+-		bcnt = tmp;
+-		pbuf += 2;
+-
+-		if ((ebuf - pbuf) < (8 + bcnt * 2))
+-			goto FAILED;
+-		csum = bcnt;
+-		/* Address */
+-		if ((tmp = tohex(pbuf, 4)) < 0)
+-			goto FAILED;
+-		addr = tmp;
+-		pbuf += 4;
+-
+-		csum = (csum + ((addr & 0xFF00) >> 8) + (addr & 0x00FF)) & 0xFF;
+-		/* Record type */
+-		if ((tmp = tohex(pbuf, 2)) < 0)
+-			goto FAILED;
+-		rtype = tmp;
+-		pbuf += 2;
+-
+-		csum = (csum + rtype) & 0xFF;
+-		/* Data */
+-		switch (rtype)
+-		{
+-		case 0:
+-			/* Data */
+-			offset = addr + eladdr;
+-			if ((offset >= ADDRESS_PROGRAM) &&
+-			    ((offset + bcnt) <= (ADDRESS_PROGRAM + SIZE_PROGRAM))) {
+-				offset = offset - ADDRESS_PROGRAM;
+-				ptsize = SIZE_PROGRAM;
+-			} else if ((offset >= ADDRESS_PARAMETER) &&
+-				   ((offset + bcnt) <= (ADDRESS_PARAMETER + SIZE_PARAMETER))) {
+-				offset = offset - ADDRESS_PARAMETER;
+-				ptsize = SIZE_PARAMETER;
+-			} else {
+-				offset = -1;
+-				ptsize = 0;
+-			}
+-
+-			if (offset >= 0) {
+-				if (!result) {
+-					result = (unsigned char *)kzalloc(4 * ptsize, GFP_KERNEL);
+-					for (i = 0; i < ptsize; i++) {
+-						result[i] = (unsigned char)0xFF;
+-					}
+-				}
+-			}
+-
+-			for (i = 0; i < bcnt; i++) {
+-				if ((tmp = tohex(pbuf, 2)) < 0)
+-					goto FAILED;
+-				j = tmp;
+-				pbuf += 2;
+-				csum = (csum + j) & 0xFF;
+-
+-				if ((0 <= offset) && (offset < ptsize))
+-					result[offset++] = (unsigned char)j;
+-			}
+-			break;
+-		case 1:
+-			/* EOF */
+-			cont = 0;
+-			break;
+-		case 2:
+-			/* Extended Segment Address */
+-			if (bcnt != 2)
+-				goto FAILED;
+-			if ((tmp = tohex(pbuf, 4)) < 0)
+-				goto FAILED;
+-			eladdr = tmp;
+-			pbuf += 4;
+-			csum = (csum + ((eladdr & 0xFF00) >> 8) + (eladdr & 0x00FF)) & 0xFF;
+-			eladdr <<= 4;
+-			break;
+-		case 4:
+-			/* Extended Linear Address */
+-			if (bcnt != 2)
+-				goto FAILED;
+-			if ((tmp = tohex(pbuf, 4)) < 0)
+-				goto FAILED;
+-			eladdr = tmp;
+-			pbuf += 4;
+-			csum = (csum + ((eladdr & 0xFF00) >> 8) + (eladdr & 0x00FF)) & 0xFF;
+-			eladdr <<= 16;
+-			break;
+-		case 3:
+-		case 5:
+-			/* skip: Start Segment Address */
+-			/* skip: Start Linear Address */
+-			for (i = 0; i < bcnt; i++) {
+-				if ((tmp = tohex(pbuf, 2)) < 0)
+-					goto FAILED;
+-				j = tmp;
+-				pbuf += 2;
+-				csum = (csum + j) & 0xFF;
+-			}
+-			break;
+-		default:
+-			goto FAILED;
+-		}
+-
+-		/* Checksum */
+-		if ((tmp = tohex(pbuf, 2)) < 0)
+-			goto FAILED;
+-		j = tmp;
+-		pbuf += 2;
+-		if ((csum + j) & 0xFF)
+-			goto FAILED;
+-	} while (cont);
+-
+-	kfree(fbuf);
+-
+-	return result;
+-FAILED:
+-	if (fbuf) {
+-		kfree(fbuf);
+-		fbuf = NULL;
+-	}
+-	if (result) {
+-		kfree(result);
+-		result = NULL;
+-	}
+-	return NULL;
+-}
+-
+-static int fg_read_control_status(struct mm8xxx_device_info *di)
+-{
+-	if (mm8xxx_battery_write(di, COMMAND_CONTROL,REQCODE_CONTROL_STATUS) < 0)
+-		return -EINVAL;
+-
+-	return mm8xxx_battery_read(di, COMMAND_CONTROL);
+-}
+-
+-/* Additional library functions */
+-/**
+- * set FG to UNSEAL mode
+- *
+- *  arguments:
+- *    fd         - file descriptor of an i2c device
+- *    s2us_code  - Seal to Unseal code
+- *
+- *  return value:
+- *    0 if it successes
+- *    or 1 if it fails.
+- *
+- */
+-static int unseal_request(struct mm8xxx_device_info *di, unsigned int s2us_code)
+-{
+-	int ret;
+-	/* Check CONTROL_STATUS */
+-	ret=fg_read_control_status(di);
+-	if (  ret < 0 ) {
+-		return -EINVAL;
+-	}
+-
+-	if (ret & BIT_SS) {
+-		if ((mm8xxx_battery_write(di, COMMAND_CONTROL,  s2us_code & 0xFFFF) < 0) ||
+-		     (mm8xxx_battery_write(di, COMMAND_CONTROL,  (s2us_code >> 16) & 0xFFFF) <0)) {
+-			return -EINVAL;
+-		}
+-
+-		if ((ret = fg_read_control_status(di)) < 0) {
+-			return -EINVAL;
+-		}
+-		if (ret & BIT_SS) {
+-			/* failed to set to UNSEALED mode. */
+-			return -EINVAL;
+-		}
+-	}
+-
+-	return 0;
+-}
+-
+-static int Lock_release_request(struct mm8xxx_device_info *di)
+-{
+-	return mm8xxx_battery_write(di, COMMAND_FGCONDITION, 0x0340);
+-}
+-
+-static int NVM_write_mode(struct mm8xxx_device_info *di)
+-{
+-	if (mm8xxx_battery_write(di, COMMAND_FGCONDITION, 0x00A0) < 0)
+-		return -EINVAL;
+-
+-	mdelay(100);
+-
+-	if (mm8xxx_battery_write_Nbyte(di, COMMAND_MODECONTROL, 0x88, 1) < 0)
+-		return -EINVAL;
+-
+-	return 0;
+-}
+-
+-static int erase_param_nvm(struct mm8xxx_device_info *di)
+-{
+-
+-	if ( (mm8xxx_battery_write(di, 0x00, 0x2E03) < 0) ||
+-		(mm8xxx_battery_write(di, 0x02, 0x0000) < 0) ||
+-		(mm8xxx_battery_write(di, 0x04, 0xDE83) < 0) ||
+-		(mm8xxx_battery_write(di, 0x64, 0x0192) < 0)) {
+-		return -EINVAL;
+-	}
+-	mdelay(100);
+-
+-	if ( (mm8xxx_battery_write(di, 0x00, 0x2F03) < 0) ||
+-		(mm8xxx_battery_write(di, 0x02, 0x0000) < 0) ||
+-		(mm8xxx_battery_write(di, 0x04, 0xDE83) < 0) ||
+-		(mm8xxx_battery_write(di, 0x64, 0x0193) < 0)) {
+-		return -EINVAL;
+-	}
+-	mdelay(100);
+-
+-	return 0;
+-}
+-
+-static int erase_program_nvm(struct mm8xxx_device_info *di)
+-{
+-	if (mm8xxx_battery_write_Nbyte(di, COMMAND_ERASENVM, 0x80, 1) < 0)
+-		return -EINVAL;
+-	mdelay(2000);
+-
+-	return 0;
+-}
+-
+-static int write_nvm(struct mm8xxx_device_info *di, enum PARTITION_INDEX ptindex, unsigned char *data)
+-{
+-	unsigned int offset;
+-	unsigned int size;
+-	int i;
+-#ifdef ENABLE_VERIFICATION
+-	int j;
+-	int addr;
+-	unsigned char rbuf[SIZE_READBUFFER];
+-#endif
+-
+-	if (!data) {
+-		/* specified pointer is NULL */
+-		return  -EINVAL;
+-	}
+-
+-	switch (ptindex) {
+-		case PARTITION_PROGRAM:
+-			offset = ADDRESS_PROGRAM;
+-			size = SIZE_PROGRAM;
+-			break;
+-
+-		case PARTITION_PARAMETER:
+-			offset = ADDRESS_PARAMETER;
+-			size = SIZE_PARAMETER;
+-			break;
+-
+-		default:
+-			/* unexpected partition index */
+-			return  -EINVAL;
+-	}
+-
+-	for (i = 0; i < size; i += 4) {
+-		if (mm8xxx_battery_write_4byteCmd(di, offset + i,
+-			data[i] | (data[i + 1] << 8) | (data[i + 2] << 16) | (data[i + 3] << 24)) < 0) {
+-			mm_info("%s, mm8xxx_battery_write_4byteCmd fail\n", __func__);
+-			return  -EINVAL;
+-		}
+-	}
+-
+-#ifdef ENABLE_VERIFICATION
+-	for (i = 0; i < size; i += SIZE_READBUFFER) {
+-		addr = offset + i;
+-
+-		if ((mm8xxx_battery_write_Nbyte(di, COMMAND_READNVMDATA, addr, 4) < 0) ||
+-		    (mm8xxx_battery_read_Nbyte(di, COMMAND_READNVMDATA, rbuf, SIZE_READBUFFER) < 0)) {
+-			mm_info("%s, verification fail\n", __func__);
+-			return  -EINVAL;
+-		}
+-
+-		for (j = 0; j < SIZE_READBUFFER; j++) {
+-			if (data[i + j] != rbuf[j]) {
+-				mm_info("%s, verification fail\n", __func__);
+-				return  -EINVAL;
+-			}
+-		}
+-	}
+-#endif
+-
+-	return 0;
+-}
+-
+-static int Write_program_data(struct mm8xxx_device_info *di, unsigned char *array)
+-{
+-	return write_nvm(di, PARTITION_PROGRAM, array);
+-}
+-static int Write_parameter_data(struct mm8xxx_device_info *di, unsigned char *array)
+-{
+-	return write_nvm(di, PARTITION_PARAMETER, array);
+-}
+-
+-static int write_program_and_parameter(struct mm8xxx_device_info *di,
+-					 unsigned char *program_array,
+-					 unsigned char *parameter_array)
+-{
+-	int ret = -EINVAL;
+-
+-	/* Unseal Request */
+-	mm_info("Requesting set to Unseal mode ... ");
+-	if (unseal_request(di, 0x56781234) < 0) {
+-		mm_info("unseal_request failed\n");
+-		goto EXIT;
+-	}
+-
+-	/* Lock Release Request */
+-	mm_info("Requesting lock releasing ... ");
+-	if (Lock_release_request(di) < 0) {
+-		mm_info("Lock_release_request failed\n");
+-		goto EXIT;
+-	}
+-
+-	/* NVM Write mode Request */
+-	mm_info("Requesting set to NVM Write mode ... ");
+-	if (NVM_write_mode(di) < 0) {
+-		mm_info("Requesting set to NVM Write mode failed\n");
+-		goto EXIT;
+-	}
+-
+-	/* Program Erase And wait 2 second */
+-	if (program_array) {
+-		mm_info("Erasing 'PROGRAM' partition ... ");
+-		if(erase_program_nvm(di) < 0) {
+-			mm_info("Erasing 'PROGRAM' failed\n");
+-			goto EXIT;
+-		}
+-	}
+-
+-	/* Parameter Erase And wait 2 second */
+-	if (parameter_array) {
+-		mm_info("Erasing 'PARAMETER' partition ... ");
+-		if(erase_param_nvm(di) < 0) {
+-			mm_info("Erasing 'PARAMETER' failed\n");
+-			goto EXIT;
+-		}
+-	}
+-
+-	/*
+-	 * Initialization of variables
+-	 * Copy the data of the target from the hex file
+-	 * Write Command 0x8D and Data
+-	 * Increment the write size
+-	 * 16384byte / 4 = 4096Loop
+-	 */
+-	if (program_array) {
+-		mm_info("Writing 'PROGRAM' partition ... ");
+-		if(Write_program_data(di, program_array) < 0) {
+-			mm_info("Writing 'PROGRAM' failed\n");
+-			goto EXIT;
+-		}
+-	}
+-
+-	/*
+-	 * Initialization of variables
+-	 * Copy the data of the target from the hex file
+-	 * Write Command 0x8D and Data
+-	 * Increment the write size
+-	 * 960byte / 4 = 250Loop
+-	 */
+-	if (parameter_array) {
+-		mm_info("Writing 'PARAMETER' partition ... ");
+-		if(Write_parameter_data(di, parameter_array) < 0) {
+-			mm_info("Writing 'PARAMETER' failed\n");
+-			goto EXIT;
+-		}
+-	}
+-
+-	/* System Reset Request */
+-	mm_info("Requesting system resetting ... ");
+-	if (mm8xxx_battery_write_Nbyte(di, COMMAND_MODECONTROL, 0x80, 1) < 0) {
+-		mm_info("Reset fg system failed\n");
+-		goto EXIT;
+-	}
+-	mdelay(100);
+-	ret = 0;
+-
+-EXIT:
+-	return ret;
+-}
+-
+-static const char *get_battery_serialnumber(void)
+-{
+-	struct device_node *np = of_find_node_by_path("/chosen");
+-	const char *battsn_buf;
+-	int retval;
+-
+-	battsn_buf = NULL;
+-
+-	if (np)
+-		retval = of_property_read_string(np, "mmi,battid",
+-						 &battsn_buf);
+-	else
+-		return NULL;
+-
+-	if ((retval == -EINVAL) || !battsn_buf) {
+-		mm_info(" Battsn unused\n");
+-		of_node_put(np);
+-		return NULL;
+-
+-	} else
+-		mm_info("Battsn = %s\n", battsn_buf);
+-
+-	of_node_put(np);
+-
+-	return battsn_buf;
+-}
+-
+-static u32 seach_batt_id(void)
+-{
+-	struct device_node *np = di->dev->of_node;
+-	const char *dev_sn = NULL;
+-	const char *first_batt_sn = NULL;
+-	const char *second_batt_sn = NULL;
+-	u32 battery_id = di->first_battery_id;;
+-
+-	dev_sn = get_battery_serialnumber();
+-	if (dev_sn != NULL) {
+-		of_property_read_string(np, "first_batt_sn",
+-					     &first_batt_sn);
+-		of_property_read_string(np, "second_batt_sn",
+-					     &second_batt_sn);
+-		if (first_batt_sn != NULL && second_batt_sn != NULL)
+-		{
+-			if (strnstr(dev_sn, first_batt_sn, 10))
+-				battery_id = di->first_battery_id;
+-			else if (strnstr(dev_sn, second_batt_sn, 10))
+-				battery_id = di->second_battery_id;
+-		}
+-	}
+-
+-	return battery_id;
+-}
+-
+-static int mm8xxx_battery_update_program_and_parameter(struct mm8xxx_device_info *di, enum UPDATE_INDEX update_index)
+-{
+-	unsigned char *fw_hexfile_data = NULL;
+-	unsigned char *param_hexfile_data = NULL;
+-	u32 battery_id;
+-	int i;
+-	char param_name[30] = {0};
+-
+-	if (update_index != UPDATE_PROGRAM){
+-		battery_id = mmi_get_battery_info(di, BATTERY_ID_CMD);
+-		if (battery_id !=0)
+-		{
+-			if (battery_id != di->first_battery_id && battery_id != di->second_battery_id){
+-				 mm_info("Error: the battery is not suitable for this poject.\n");
+-				goto EXIT;
+-			}
+-		}
+-		else {
+-			battery_id = seach_batt_id();
+-                      mm_info("Error getting battery_id , try to get batt sn via utag info and get the correct batt_id=%04x\n", battery_id);
+-		}
+-
+-		sprintf(param_name,"%s%04x%s", "mm8013c_parameter_", battery_id, ".hex");
+-		mm_info("battery parameter name=%s\n", param_name);
+-	}
+-
+-	switch (update_index )
+-	{
+-		case UPDATE_PROGRAM:
+-			mm_info("Parsing the FW_HEX file ... ");
+-			if (!(fw_hexfile_data = parse_hexfile("mm8013c_fw.hex", di))) {
+-				mm_info("Parse fw hex data failed\n");
+-				goto EXIT;
+-			}
+-			break;
+-		case UPDATE_PARAMETER:
+-			mm_info("Parsing the parameter_HEX file ... ");
+-			if (!(param_hexfile_data = parse_hexfile(param_name, di))) {
+-				mm_info("Parse parameter hex date failed\n");
+-				goto EXIT;
+-			}
+-			break;
+-		case UPDATE_ALL:
+-			mm_info("Parsing the FW_HEX file ... ");
+-			if (!(fw_hexfile_data = parse_hexfile("mm8013c_fw.hex", di))) {
+-				mm_info("failed\n");
+-				goto EXIT;
+-			}
+-			mm_info("Parsing the parameter_HEX file ... ");
+-			if (!(param_hexfile_data = parse_hexfile(param_name, di))) {
+-				mm_info("failed\n");
+-				goto EXIT;
+-			}
+-			break;
+-		default:
+-		return -EINVAL;
+-	}
+-
+-	for (i=1; i<= 3; i++)
+-	{
+-		/* start TRM sequence */
+-		if (write_program_and_parameter(di,
+-						fw_hexfile_data, param_hexfile_data) < 0) {
+-			mm_info("FAILED TO UPDATE program_and_parameter,fail count=%d\n", i);
+-		}
+-		else {
+-			mm_info("successfully update program_and_parameter !!\n");
+-			break;
+-		}
+-	}
+-
+-EXIT:
+-	if (fw_hexfile_data) {
+-		kfree(fw_hexfile_data);
+-		fw_hexfile_data = NULL;
+-	}
+-	if (param_hexfile_data) {
+-		kfree(param_hexfile_data);
+-		param_hexfile_data = NULL;
+-	}
+-
+-	return 0;
+-}
+-
+-/********************************************************************/
+-
+-static ssize_t  mm8xxx_battery_fw_ver_show(struct device *dev, struct device_attribute *attr, char *buf)
+-{
+-	return sprintf(buf, "%04x\n", mmi_get_battery_info(di, FW_VER_CMD));
+-}
+-static DEVICE_ATTR(fw_ver, S_IRUGO| (S_IWUSR|S_IWGRP), mm8xxx_battery_fw_ver_show, NULL);
+-
+-static ssize_t  mm8xxx_battery_param_ver_show(struct device *dev, struct device_attribute *attr, char *buf)
+-{
+-	return sprintf(buf, "%04x\n", mmi_get_battery_info(di, PARAM_VER_CMD));
+-}
+-static DEVICE_ATTR(param_ver, S_IRUGO| (S_IWUSR|S_IWGRP), mm8xxx_battery_param_ver_show, NULL);
+-
+-static ssize_t  mm8xxx_battery_batt_id_show(struct device *dev, struct device_attribute *attr, char *buf)
+-{
+-	return sprintf(buf, "%04x\n", mmi_get_battery_info(di, BATTERY_ID_CMD));
+-}
+-static DEVICE_ATTR(batt_id, S_IRUGO| (S_IWUSR|S_IWGRP), mm8xxx_battery_batt_id_show, NULL);
+-
+-static struct attribute *mm8xxx_attributes[] = {
+-	&dev_attr_fw_ver.attr,
+-	&dev_attr_param_ver.attr,
+-	&dev_attr_batt_id.attr,
+-	NULL,
+-};
+-
+-static struct attribute_group mm8xxx_attribute_group = {
+-	.attrs = mm8xxx_attributes,
+-};
+-
+-static void mm8xxx_battery_update(struct mm8xxx_device_info *di);
+-static irqreturn_t mm8xxx_battery_irq_handler_thread(int irq, void *data)
+-{
+-	struct mm8xxx_device_info *di = data;
+-	mm8xxx_battery_update(di);
+-	return IRQ_HANDLED;
+-}
+-
+-static int mm8xxx_battery_read(struct mm8xxx_device_info *di, u8 cmd)
+-{
+-	struct i2c_client *client = to_i2c_client(di->dev);
+-	struct i2c_msg msg[2];
+-	u8 data[2];
+-	int ret;
+-
+-	if (!client->adapter)
+-		return -ENODEV;
+-
+-	msg[0].addr = client->addr;
+-	msg[0].flags = 0;
+-	msg[0].buf = &cmd;
+-	msg[0].len = sizeof(cmd);
+-	msg[1].addr = client->addr;
+-	msg[1].flags = I2C_M_RD;
+-	msg[1].buf = data;
+-	msg[1].len = 2;
+-
+-	ret = i2c_transfer(client->adapter, msg, ARRAY_SIZE(msg));
+-	if (ret < 0)
+-		return ret;
+-
+-	ret = get_unaligned_le16(data);
+-
+-	return ret;
+-}
+-#ifdef ENABLE_VERIFICATION
+-static int mm8xxx_battery_read_Nbyte(struct mm8xxx_device_info *di, u8 cmd, unsigned char *data, unsigned char length)
+-{
+-	struct i2c_client *client = to_i2c_client(di->dev);
+-	struct i2c_msg msg[2];
+-	int ret;
+-//mm_info("%s, begin\n", __func__);
+-	if (!client->adapter)
+-		return -ENODEV;
+-
+-	msg[0].addr = client->addr;
+-	msg[0].flags = 0;
+-	msg[0].buf = &cmd;
+-	msg[0].len = sizeof(cmd);
+-	msg[1].addr = client->addr;
+-	msg[1].flags = I2C_M_RD;
+-	msg[1].buf = data;
+-	msg[1].len = length;
+-
+-	ret = i2c_transfer(client->adapter, msg, ARRAY_SIZE(msg));
+-	if (ret < 0)
+-		return ret;
+-//mm_info("%s, end\n", __func__);
+-	return ret;
+-}
+-#endif
+-
+-static int mm8xxx_battery_write(struct mm8xxx_device_info *di, u8 cmd,
+-				int value)
+-{
+-	struct i2c_client *client = to_i2c_client(di->dev);
+-	struct i2c_msg msg;
+-	u8 data[4];
+-	int ret;
+-
+-	if (!client->adapter)
+-		return -ENODEV;
+-
+-	data[0] = cmd;
+-	put_unaligned_le16(value, &data[1]);
+-	msg.len = 3;
+-
+-	msg.buf = data;
+-	msg.addr = client->addr;
+-	msg.flags = 0;
+-
+-	ret = i2c_transfer(client->adapter, &msg, 1);
+-	if (ret < 0)
+-		return ret;
+-	else if (ret != 1)
+-		return -EINVAL;
+-
+-	return 0;
+-}
+-
+-static int mm8xxx_battery_write_Nbyte(struct mm8xxx_device_info *di, u8 cmd,
+-				unsigned int value, int byte_num)
+-{
+-	struct i2c_client *client = to_i2c_client(di->dev);
+-	struct i2c_msg msg;
+-	u8 data[16];
+-	int ret,i=0;
+-
+-	if (byte_num > 15)
+-		return -ENODEV;
+-	if (!client->adapter)
+-		return -ENODEV;
+-
+-	data[0] = cmd;
+-	for (i=0; i < byte_num; i++)
+-	{
+-		data[i+1] = (value >> (8 * i)) & 0xFF;
+-	}
+-
+-	msg.len = byte_num+1;
+-
+-	msg.buf = data;
+-	msg.addr = client->addr;
+-	msg.flags = 0;
+-
+-	ret = i2c_transfer(client->adapter, &msg, 1);
+-	if (ret < 0)
+-		return ret;
+-	else if (ret != 1)
+-		return -EINVAL;
+-
+-	return 0;
+-}
+-
+-static int mm8xxx_battery_write_4byteCmd(struct mm8xxx_device_info *di, unsigned int cmd, unsigned int value)
+-{
+-	struct i2c_client *client = to_i2c_client(di->dev);
+-	struct i2c_msg msg;
+-	u8 data[9];
+-	int ret;
+-
+-	if (!client->adapter)
+-		return -ENODEV;
+-
+-	data[0] = COMMAND_WRITENVMDATA;
+-	data[1] = cmd & 0xFF;
+-	data[2] = (cmd >> 8) & 0xFF;
+-	data[3] = (cmd >> 16) & 0xFF;
+-	data[4] = (cmd >> 24) & 0xFF;
+-
+-	data[5] = value & 0xFF;
+-	data[6] = (value >> 8) & 0xFF;
+-	data[7] = (value >> 16) & 0xFF;
+-	data[8] = (value >> 24) & 0xFF;
+-
+-	msg.len = 9;
+-	msg.buf = data;
+-	msg.addr = client->addr;
+-	msg.flags = 0;
+-
+-	ret = i2c_transfer(client->adapter, &msg, 1);
+-	if (ret < 0)
+-		return ret;
+-	else if (ret != 1)
+-		return -EINVAL;
+-
+-	return 0;
+-}
+-
+-/* MM8XXX Flags */
+-#define MM8XXX_FLAG_DSG		BIT(0)
+-#define MM8XXX_FLAG_SOCF	BIT(1)
+-#define MM8XXX_FLAG_SOC1	BIT(2)
+-#define MM8XXX_FLAG_UT		BIT(3)
+-#define MM8XXX_FLAG_OT		BIT(4)
+-#define MM8XXX_FLAG_ODC		BIT(5)
+-#define MM8XXX_FLAG_OCC		BIT(6)
+-#define MM8XXX_FLAG_OCVTAKEN	BIT(7)
+-#define MM8XXX_FLAG_CHG		BIT(8)
+-#define MM8XXX_FLAG_FC		BIT(9)
+-#define MM8XXX_FLAG_CHGINH	BIT(11)
+-#define MM8XXX_FLAG_BATLOW	BIT(12)
+-#define MM8XXX_FLAG_BATHI	BIT(13)
+-#define MM8XXX_FLAG_OTD		BIT(14)
+-#define MM8XXX_FLAG_OTC		BIT(15)
+-
+-#define INVALID_COMMAND		0xff
+-
+-enum mm8xxx_cmd_index {
+-	MM8XXX_CMD_CONTROL = 0,
+-	MM8XXX_CMD_TEMPERATURE,
+-	MM8XXX_CMD_VOLTAGE,
+-	MM8XXX_CMD_FLAGS,
+-	MM8XXX_CMD_REMAININGCAPACITY,
+-	MM8XXX_CMD_FULLCHARGECAPACITY,
+-	MM8XXX_CMD_AVERAGECURRENT,
+-	MM8XXX_CMD_AVERAGETIMETOEMPTY,
+-	MM8XXX_CMD_CHARGETYPE,
+-	MM8XXX_CMD_CYCLECOUNT,
+-	MM8XXX_CMD_STATEOFCHARGE,
+-	MM8XXX_CMD_CHARGEVOLTAGE,
+-	MM8XXX_CMD_DESIGNCAPACITY,
+-	MM8XXX_CMD_ELAPSEDTIMEM,
+-	MM8XXX_CMD_ELAPSEDTIMED,
+-	MM8XXX_CMD_ELAPSEDTIMEH,
+-
+-	MM8XXX_CMD_EOI,
+-};
+-
+-static u8
+-	mm8118g01_cmds[MM8XXX_CMD_EOI] = {
+-		[MM8XXX_CMD_CONTROL] 		= 0x00,
+-		[MM8XXX_CMD_TEMPERATURE] 	= 0x06,
+-		[MM8XXX_CMD_VOLTAGE] 		= 0x08,
+-		[MM8XXX_CMD_FLAGS] 		= 0x0A,
+-		[MM8XXX_CMD_REMAININGCAPACITY]	= 0x10,
+-		[MM8XXX_CMD_FULLCHARGECAPACITY]	= 0x12,
+-		[MM8XXX_CMD_AVERAGECURRENT]	= 0x14,
+-		[MM8XXX_CMD_AVERAGETIMETOEMPTY]	= 0x16,
+-		[MM8XXX_CMD_CYCLECOUNT]		= 0x2A,
+-		[MM8XXX_CMD_STATEOFCHARGE]	= 0x2C,
+-		[MM8XXX_CMD_CHARGEVOLTAGE]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_DESIGNCAPACITY]	= 0x3C,
+-		[MM8XXX_CMD_ELAPSEDTIMEM]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_ELAPSEDTIMED]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_ELAPSEDTIMEH]	= INVALID_COMMAND,
+-	},
+-	mm8118w02_cmds[MM8XXX_CMD_EOI] = {
+-		[MM8XXX_CMD_CONTROL] 		= 0x00,
+-		[MM8XXX_CMD_TEMPERATURE] 	= 0x06,
+-		[MM8XXX_CMD_VOLTAGE] 		= 0x08,
+-		[MM8XXX_CMD_FLAGS] 		= 0x0A,
+-		[MM8XXX_CMD_REMAININGCAPACITY]	= 0x10,
+-		[MM8XXX_CMD_FULLCHARGECAPACITY]	= 0x12,
+-		[MM8XXX_CMD_AVERAGECURRENT]	= 0x14,
+-		[MM8XXX_CMD_AVERAGETIMETOEMPTY]	= 0x16,
+-		[MM8XXX_CMD_CYCLECOUNT]		= 0x2A,
+-		[MM8XXX_CMD_STATEOFCHARGE]	= 0x2C,
+-		[MM8XXX_CMD_CHARGEVOLTAGE]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_DESIGNCAPACITY]	= 0x3C,
+-		[MM8XXX_CMD_ELAPSEDTIMEM]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_ELAPSEDTIMED]	= INVALID_COMMAND,
+-		[MM8XXX_CMD_ELAPSEDTIMEH]	= INVALID_COMMAND,
+-	},
+-	mm8013c10_cmds[MM8XXX_CMD_EOI] = {
+-		[MM8XXX_CMD_CONTROL] 		= 0x00,
+-		[MM8XXX_CMD_TEMPERATURE] 	= 0x06,
+-		[MM8XXX_CMD_VOLTAGE] 		= 0x08,
+-		[MM8XXX_CMD_FLAGS] 		= 0x0A,
+-		[MM8XXX_CMD_REMAININGCAPACITY]	= 0x10,
+-		[MM8XXX_CMD_FULLCHARGECAPACITY]	= 0x12,
+-		[MM8XXX_CMD_AVERAGECURRENT]	= 0x14,
+-		[MM8XXX_CMD_AVERAGETIMETOEMPTY]	= 0x16,
+-		[MM8XXX_CMD_CHARGETYPE]		= 0x20,
+-		[MM8XXX_CMD_CYCLECOUNT]		= 0x2A,
+-		[MM8XXX_CMD_STATEOFCHARGE]	= 0x2C,
+-		[MM8XXX_CMD_CHARGEVOLTAGE]	= 0x30,
+-		[MM8XXX_CMD_DESIGNCAPACITY]	= 0x3C,
+-		[MM8XXX_CMD_ELAPSEDTIMEM]	= 0x74,
+-		[MM8XXX_CMD_ELAPSEDTIMED]	= 0x76,
+-		[MM8XXX_CMD_ELAPSEDTIMEH]	= 0x78,
+-	};
+-
+-static enum power_supply_property mm8118g01_props[] = {
+-	POWER_SUPPLY_PROP_STATUS,
+-	POWER_SUPPLY_PROP_PRESENT,
+-	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+-	POWER_SUPPLY_PROP_CURRENT_NOW,
+-	POWER_SUPPLY_PROP_CAPACITY,
+-	POWER_SUPPLY_PROP_CAPACITY_LEVEL,
+-	POWER_SUPPLY_PROP_TEMP,
+-	POWER_SUPPLY_PROP_TIME_TO_EMPTY_NOW,
+-	POWER_SUPPLY_PROP_TECHNOLOGY,
+-	POWER_SUPPLY_PROP_CHARGE_FULL,
+-	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+-	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
+-	POWER_SUPPLY_PROP_CYCLE_COUNT,
+-	POWER_SUPPLY_PROP_POWER_AVG,
+-	POWER_SUPPLY_PROP_HEALTH,
+-	POWER_SUPPLY_PROP_MANUFACTURER,
+-};
+-#define mm8118w02_props mm8118g01_props
+-
+-static enum power_supply_property mm8013c10_props[] = {
+-	POWER_SUPPLY_PROP_STATUS,
+-	POWER_SUPPLY_PROP_PRESENT,
+-	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+-	POWER_SUPPLY_PROP_CURRENT_NOW,
+-	POWER_SUPPLY_PROP_CAPACITY,
+-	POWER_SUPPLY_PROP_CAPACITY_LEVEL,
+-	POWER_SUPPLY_PROP_TEMP,
+-	POWER_SUPPLY_PROP_TIME_TO_EMPTY_NOW,
+-	POWER_SUPPLY_PROP_TECHNOLOGY,
+-	POWER_SUPPLY_PROP_CHARGE_FULL,
+-	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+-	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
+-	POWER_SUPPLY_PROP_CYCLE_COUNT,
+-	POWER_SUPPLY_PROP_HEALTH,
+-	POWER_SUPPLY_PROP_TYPE,
+-	POWER_SUPPLY_PROP_MANUFACTURER,
+-};
+-
+-#define MM8XXX_DATA(ref) { 			\
+-	.cmds = ref##_cmds,			\
+-	.props = ref##_props,			\
+-	.props_size = ARRAY_SIZE(ref##_props) }
+-
+-static struct {
+-	u8 *cmds;
+-	enum power_supply_property *props;
+-	size_t props_size;
+-} mm8xxx_chip_data[] = {
+-	[MM8118G01]	= MM8XXX_DATA(mm8118g01),
+-	[MM8118W02]	= MM8XXX_DATA(mm8118w02),
+-	[MM8013C10]	= MM8XXX_DATA(mm8013c10),
+-};
+-
+-static DEFINE_MUTEX(mm8xxx_list_lock);
+-static LIST_HEAD(mm8xxx_battery_devices);
+-
+-#define MM8XXX_MSLEEP(i) usleep_range((i)*1000, (i)*1000+500)
+-
+-static int poll_interval_param_set(const char *val,
+-				   const struct kernel_param *kp)
+-{
+-	struct mm8xxx_device_info *di;
+-	unsigned int prev_val = *(unsigned int *) kp->arg;
+-	int ret;
+-
+-	ret = param_set_uint(val, kp);
+-	if ((ret < 0) || (prev_val == *(unsigned int *) kp->arg))
+-		return ret;
+-
+-	mutex_lock(&mm8xxx_list_lock);
+-	list_for_each_entry(di, &mm8xxx_battery_devices, list) {
+-		cancel_delayed_work_sync(&di->work);
+-		schedule_delayed_work(&di->work, 0);
+-	}
+-	mutex_unlock(&mm8xxx_list_lock);
+-
+-	return ret;
+-}
+-
+-static const struct kernel_param_ops param_ops_poll_interval = {
+-	.get = param_get_uint,
+-	.set = poll_interval_param_set,
+-};
+-
+-static unsigned int poll_interval = 360;
+-module_param_cb(poll_interval, &param_ops_poll_interval, &poll_interval, 0644);
+-MODULE_PARM_DESC(poll_interval,
+-		"battery poll interval in seconds - 0 disables polling");
+-
+-static inline int mm8xxx_read(struct mm8xxx_device_info *di, int cmd_index)
+-{
+-	int ret;
+-
+-	if ((!di) || (di->cmds[cmd_index] == INVALID_COMMAND))
+-		return -EINVAL;
+-
+-	if (!di->bus.read)
+-		return -EPERM;
+-
+-	ret = di->bus.read(di, di->cmds[cmd_index]);
+-	if (ret < 0)
+-		dev_dbg(di->dev, "failed to read command 0x%02x (index %d)\n",
+-			di->cmds[cmd_index], cmd_index);
+-
+-	return ret;
+-}
+-
+-static inline int mm8xxx_write(struct mm8xxx_device_info *di, int cmd_index,
+-			       u16 value)
+-{
+-	int ret;
+-
+-	if ((!di) || (di->cmds[cmd_index] == INVALID_COMMAND))
+-		return -EINVAL;
+-
+-	if (!di->bus.write)
+-		return -EPERM;
+-
+-	ret = di->bus.write(di, di->cmds[cmd_index], value);
+-	if (ret < 0)
+-		dev_dbg(di->dev, "failed to write command 0x%02x (index %d)\n",
+-			di->cmds[cmd_index], cmd_index);
+-
+-	return ret;
+-}
+-
+- static int mm8xxx_battery_temp(struct mm8xxx_device_info *di, int *temp)
+-{
+-	return iio_read_channel_processed(di->Batt_NTC_channel, temp);
+-}
+-
+-static int mm8xxx_battery_temp_to_FG(struct mm8xxx_device_info *di)
+-{
+-	static int pre_temp=250;
+-	int temp = 0;
+-	int ret = 0;
+-
+-	ret = mm8xxx_battery_temp(di, &temp);
+-	if (ret < 0) {
+-		dev_err(di->dev, "error mm8xxx_battery_temp \n");
+-		return ret;
+-	}
+-	temp = temp / 100;
+-
+-	if(temp < 0) {
+-		temp = 65536 - temp;
+-	}
+-
+-	if ( pre_temp != temp)
+-	{
+-		pre_temp = temp;
+-		ret =mm8xxx_write(di, MM8XXX_CMD_TEMPERATURE, (u16)temp);
+-		if (ret < 0) {
+-			dev_err(di->dev, "error writing temperature to fg \n");
+-		}
+-	}
+-
+-	return ret;
+-}
+-
+-static int mm8xxx_battery_chargeType_to_FG(struct mm8xxx_device_info *di, int type)
+-{
+-	int ret = 0;
+-
+-	ret =mm8xxx_write(di, MM8XXX_CMD_CHARGETYPE, (u16)type);
+-	if (ret < 0) {
+-		dev_err(di->dev, "error writing chargeType to fg\n");
+-	}
+-
+-	return ret;
+-}
+-
+-/*
+- * Return the battery State-of-Charge
+- * Or < 0 if somthing fails.
+- */
+-static int mm8xxx_battery_read_stateofcharge(struct mm8xxx_device_info *di)
+-{
+-	int soc;
+-
+-	soc = mm8xxx_read(di, MM8XXX_CMD_STATEOFCHARGE);
+-
+-	if (soc < 0)
+-		dev_dbg(di->dev, "error reading State-of-Charge\n");
+-
+-	return soc;
+-}
+-
+-/*
+- * Return the battery Remaining Capacity in μAh
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_remainingcapacity(struct mm8xxx_device_info *di)
+-{
+-	int rc;
+-
+-	rc = mm8xxx_read(di, MM8XXX_CMD_REMAININGCAPACITY);
+-	if (rc < 0)
+-		dev_dbg(di->dev, "error reading Remaining Capacity\n");
+-
+-	rc *= 1000;
+-
+-	return rc;
+-}
+-
+-/*
+- * Return the battery Full Charge Capacity in μAh
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_fullchargecapacity(struct mm8xxx_device_info *di)
+-{
+-	int fcc;
+-
+-	fcc = mm8xxx_read(di, MM8XXX_CMD_FULLCHARGECAPACITY);
+-	if (fcc < 0)
+-		dev_dbg(di->dev, "error reading Full Charge Capacity\n");
+-
+-	fcc *= 1000;
+-
+-	return fcc;
+-}
+-
+-/*
+- * Return the battery Design Capacity in μAh
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_designcapacity(struct mm8xxx_device_info *di)
+-{
+-	int dc;
+-
+-	dc = mm8xxx_read(di, MM8XXX_CMD_DESIGNCAPACITY);
+-	if (dc < 0)
+-		dev_dbg(di->dev, "error reading Design Capacity\n");
+-
+-	dc *= 1000;
+-
+-	return dc;
+-}
+-
+-/*
+- * Return the battery temperature in tenths of degree Kelvin
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_temperature(struct mm8xxx_device_info *di)
+-{
+-	int temp;
+-
+-	temp = mm8xxx_read(di, MM8XXX_CMD_TEMPERATURE);
+-	if (temp < 0)
+-		dev_err(di->dev, "error reading temperature\n");
+-
+-	return temp;
+-}
+-
+-/*
+- * Return the battery Cycle Count
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_cyclecount(struct mm8xxx_device_info *di)
+-{
+-	int cc;
+-
+-	cc = mm8xxx_read(di, MM8XXX_CMD_CYCLECOUNT);
+-	if (cc < 0)
+-		dev_err(di->dev, "error reading cycle count\n");
+-
+-	return cc;
+-}
+-
+-/*
+- * Return the battery usable time
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_averagetimetoempty(struct mm8xxx_device_info *di)
+-{
+-	int atte;
+-
+-	atte = mm8xxx_read(di, MM8XXX_CMD_AVERAGETIMETOEMPTY);
+-	if (atte < 0) {
+-		dev_dbg(di->dev, "error reading average time to empty\n");
+-		return atte;
+-	}
+-
+-	if (atte == 65535)
+-		return -ENODATA;
+-
+-	return atte * 60;
+-}
+-
+-/*
+- * Returns true if a battery over temperature condition is detected.
+- */
+-static inline bool mm8xxx_battery_overtemperature(u16 flags)
+-{
+-	return flags & MM8XXX_FLAG_OT;
+-}
+-
+-/*
+- * Returns true if a battery under temperature condition is detected.
+- */
+-static inline bool mm8xxx_battery_undertemperature(u16 flags)
+-{
+-	return flags & MM8XXX_FLAG_UT;
+-}
+-
+-/*
+- * Returns true if a low state of charge condition is detected.
+- */
+-static inline bool mm8xxx_battery_dead(u16 flags)
+-{
+-	return flags & MM8XXX_FLAG_SOCF;
+-}
+-
+-/*
+- * Returns POWER_SUPPLY_HEALTH_(OVERHEAT/COLD/DEAD) if a battery is in abnormal
+- * condition, POWER_SUPPLY_HEALTH_GOOD otherwise.
+- */
+-static int mm8xxx_battery_read_health(struct mm8xxx_device_info *di)
+-{
+-	if (unlikely(mm8xxx_battery_overtemperature(di->cache.flags)))
+-		return POWER_SUPPLY_HEALTH_OVERHEAT;
+-	if (unlikely(mm8xxx_battery_undertemperature(di->cache.flags)))
+-		return POWER_SUPPLY_HEALTH_COLD;
+-	if (unlikely(mm8xxx_battery_dead(di->cache.flags)))
+-		return POWER_SUPPLY_HEALTH_DEAD;
+-
+-	return POWER_SUPPLY_HEALTH_GOOD;
+-}
+-
+-#ifdef CONFIG_BATTERY_MM8XXX_DYNAMIC_CHARGE_VOLTAGE
+-/*
+- * Return the battery Charge Voltage
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_chargevoltage(struct mm8xxx_device_info *di)
+-{
+-	int cv;
+-
+-	cv = mm8xxx_read(di, MM8XXX_CMD_CHARGEVOLTAGE);
+-	if (cv < 0)
+-		dev_err(di->dev, "error reading charge voltage\n");
+-
+-	return cv;
+-}
+-
+-/*
+- * Write the battery Charge Voltage.
+- */
+-static int mm8xxx_battery_write_chargevoltage(struct mm8xxx_device_info *di,
+-					      u16 cv)
+-{
+-	int ret;
+-
+-	ret = mm8xxx_write(di, MM8XXX_CMD_CHARGEVOLTAGE, cv);
+-	if (ret < 0) {
+-		dev_err(di->dev, "error writing charge voltage\n");
+-		return ret;
+-	}
+-
+-	return 0;
+-}
+-#endif
+-
+-/*
+- * Return the battery usage time in month
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_elapsedmonths(struct mm8xxx_device_info *di)
+-{
+-	int elapsed;
+-
+-	elapsed = mm8xxx_read(di, MM8XXX_CMD_ELAPSEDTIMEM);
+-	if (elapsed < 0)
+-		dev_err(di->dev, "error reading elapsed months\n");
+-
+-	return elapsed;
+-}
+-
+-/*
+- * Return the battery usage time in day
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_elapseddays(struct mm8xxx_device_info *di)
+-{
+-	int elapsed;
+-
+-	elapsed = mm8xxx_read(di, MM8XXX_CMD_ELAPSEDTIMED);
+-	if (elapsed < 0)
+-		dev_err(di->dev, "error reading elapsed days\n");
+-
+-	return elapsed;
+-}
+-
+-/*
+- * Return the battery usage time in hour
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_read_elapsedhours(struct mm8xxx_device_info *di)
+-{
+-	int elapsed;
+-
+-	elapsed = mm8xxx_read(di, MM8XXX_CMD_ELAPSEDTIMEH);
+-	if (elapsed < 0)
+-		dev_err(di->dev, "error reading elapsed hours\n");
+-
+-	return elapsed;
+-}
+-
+-static bool is_input_present(struct mm8xxx_device_info *di)
+-{
+-	int rc = 0, input_present = 0;
+-	union power_supply_propval pval = {0, };
+-
+-	if (!di->usb_psy)
+-		di->usb_psy = power_supply_get_by_name("usb");
+-	if (di->usb_psy) {
+-		rc = power_supply_get_property(di->usb_psy,
+-				POWER_SUPPLY_PROP_PRESENT, &pval);
+-		if (rc < 0)
+-			pr_err("Couldn't read USB Present status, rc=%d\n", rc);
+-		else
+-			input_present |= pval.intval;
+-	}
+-
+-	if (!di->dc_psy)
+-		di->dc_psy = power_supply_get_by_name("dc");
+-	if (di->dc_psy) {
+-		rc = power_supply_get_property(di->dc_psy,
+-				POWER_SUPPLY_PROP_PRESENT, &pval);
+-		if (rc < 0)
+-			pr_err("Couldn't read DC Present status, rc=%d\n", rc);
+-		else
+-			input_present |= pval.intval;
+-	}
+-	pr_info("input present = %d\n", input_present);
+-	if (input_present)
+-		return true;
+-
+-	return false;
+-}
+-
+-#define CAP(min, max, value)			\
+-		((min > value) ? min : ((value > max) ? max : value))
+-
+-static void mm8xxx_battery_update(struct mm8xxx_device_info *di)
+-{
+-	struct mm8xxx_state_cache cache = {0, };
+-	bool input_present = is_input_present(di);
+-#ifdef CONFIG_BATTERY_MM8XXX_DYNAMIC_CHARGE_VOLTAGE
+-	int cv;
+-	int req = 0;
+-#endif
+-
+-	/* get battery power supply */
+-	if (!di->batt_psy) {
+-		di->batt_psy = power_supply_get_by_name("battery");
+-		if (!di->batt_psy)
+-			mm_info("get batt_psy fail\n");
+-	}
+-
+-	cache.flags = mm8xxx_read(di, MM8XXX_CMD_FLAGS);
+-	if ((cache.flags & 0xFFFF) == 0xFFFF)
+-		cache.flags = -1;
+-	if (cache.flags < 0)
+-		goto out;
+-
+-	cache.temperature = mm8xxx_battery_read_temperature(di);
+-	cache.avg_time_to_empty = mm8xxx_battery_read_averagetimetoempty(di);
+-	cache.soc = mm8xxx_battery_read_stateofcharge(di);
+-	cache.full_charge_capacity = mm8xxx_battery_read_fullchargecapacity(di);
+-	di->cache.flags = cache.flags;
+-	cache.health = mm8xxx_battery_read_health(di);
+-	cache.cycle_count = mm8xxx_battery_read_cyclecount(di);
+-	mm8xxx_battery_temp_to_FG(di);
+-
+-	mm_info("soc = %d, ui_soc = %d\n", cache.soc, di->cache.soc);
+-	if (di->cache.soc == 0)
+-		di->cache.soc = cache.soc;
+-
+-	if (cache.soc > di->cache.soc) {
+-		/* SOC increased */
+-		if (input_present) {/* Increment if input is present */
+-			cache.soc = di->cache.soc + 1;
+-		} else
+-			cache.soc = di->cache.soc;
+-
+-	} else if (cache.soc < di->cache.soc) {
+-		/* SOC dropped */
+-		cache.soc = di->cache.soc - 1;
+-	}
+-	cache.soc = CAP(0, 100, cache.soc);
+-
+-	if (di->charge_design_full <= 0)
+-		di->charge_design_full = mm8xxx_battery_read_designcapacity(di);
+-
+-	if (di->cmds[MM8XXX_CMD_ELAPSEDTIMEM] != INVALID_COMMAND)
+-		cache.elapsed_months = mm8xxx_battery_read_elapsedmonths(di);
+-	if (di->cmds[MM8XXX_CMD_ELAPSEDTIMED] != INVALID_COMMAND)
+-		cache.elapsed_days = mm8xxx_battery_read_elapseddays(di);
+-	if (di->cmds[MM8XXX_CMD_ELAPSEDTIMEH] != INVALID_COMMAND)
+-		cache.elapsed_hours = mm8xxx_battery_read_elapsedhours(di);
+-
+-#ifdef CONFIG_BATTERY_MM8XXX_DYNAMIC_CHARGE_VOLTAGE
+-	if (di->chip != MM8013C10)
+-		goto out;
+-
+-	cv = mm8xxx_battery_read_chargevoltage(di);
+-	if (cv < 0)
+-		goto out;
+-
+-	/*
+-	 * TODO: Change cycle-counts and voltages according to each devices.
+-	 */
+-	if ((cache.cycle_count < 250) && (cv != 4400))
+-		req = 4400;
+-	else if ((cache.cycle_count < 500) && (cv != 4350))
+-		req = 4350;
+-	else if ((cache.cycle_count < 800) && (cv != 4300))
+-		req = 4300;
+-	else if (cv != 4250)
+-		req = 4250;
+-
+-	if (req == 0)
+-		goto out;
+-
+-	mm8xxx_battery_write_chargevoltage(di, cv);
+-#endif
+-
+-out:
+-	if ((di->cache.soc != cache.soc) ||
+-	    (di->cache.flags != cache.flags)) {
+-		if (di->batt_psy)
+-			power_supply_changed(di->batt_psy);
+-	}
+-
+-	if (memcmp(&di->cache, &cache, sizeof(cache)) != 0)
+-		di->cache = cache;
+-
+-	di->last_update = jiffies;
+-}
+-
+-static void mm8xxx_battery_poll(struct work_struct *work)
+-{
+-	struct mm8xxx_device_info *di =
+-		container_of(work, struct mm8xxx_device_info, work.work);
+-
+-	mm8xxx_battery_update(di);
+-
+-	if (poll_interval > 0)
+-		schedule_delayed_work(&di->work, poll_interval * HZ);
+-}
+-
+-/*
+- * Gets the battery average current in μA and returns 0
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_current(struct mm8xxx_device_info *di,
+-				  union power_supply_propval *val)
+-{
+-	int curr;
+-	curr = mm8xxx_read(di, MM8XXX_CMD_AVERAGECURRENT);
+-	if (curr < 0) {
+-		dev_err(di->dev, "error reading current\n");
+-		return curr;
+-	}
+-
+-	curr = (int)((s16)curr) * 1000;
+-	val->intval = curr;
+-
+-	return 0;
+-}
+-
+-static int mm8xxx_battery_status(struct mm8xxx_device_info *di,
+-				 union power_supply_propval *val)
+-{
+-	int status;
+-
+-	if (di->cache.flags & MM8XXX_FLAG_CHG)
+-		status = POWER_SUPPLY_STATUS_CHARGING;
+-	else if (di->cache.flags & MM8XXX_FLAG_DSG)
+-		status = POWER_SUPPLY_STATUS_DISCHARGING;
+-	else if (di->cache.flags & MM8XXX_FLAG_FC)
+-		status = POWER_SUPPLY_STATUS_FULL;
+-	else
+-		status = POWER_SUPPLY_STATUS_NOT_CHARGING;
+-
+-	val->intval = status;
+-
+-	return 0;
+-}
+-
+-static int mm8xxx_battery_capacity_level(struct mm8xxx_device_info *di,
+-					 union power_supply_propval *val)
+-{
+-	int level;
+-
+-	if (di->cache.flags & MM8XXX_FLAG_FC)
+-		level = POWER_SUPPLY_CAPACITY_LEVEL_FULL;
+-	else if (di->cache.flags & MM8XXX_FLAG_SOCF)
+-		level = POWER_SUPPLY_CAPACITY_LEVEL_CRITICAL;
+-	else
+-		level = POWER_SUPPLY_CAPACITY_LEVEL_NORMAL;
+-
+-	val->intval = level;
+-
+-	return 0;
+-}
+-
+-/*
+- * Gets the battery Voltage in μV and returns 0
+- * Or < 0 if something fails.
+- */
+-static int mm8xxx_battery_voltage(struct mm8xxx_device_info *di,
+-				  union power_supply_propval *val)
+-{
+-	int voltage;
+-	u32 fg_fw_ver;
+-	u32 fg_param_ver;
+-	static bool reset_fg_flag = false;
+-
+-	voltage = mm8xxx_read(di, MM8XXX_CMD_VOLTAGE);
+-	if (voltage < 0) {
+-		dev_err(di->dev, "error reading voltage\n");
+-		return voltage;
+-	}
+-
+-	val->intval = voltage * 1000;
+-
+-	if (voltage == 0) {
+-		fg_fw_ver = mmi_get_battery_info(di, FW_VER_CMD);
+-		fg_param_ver = mmi_get_battery_info(di, PARAM_VER_CMD);
+-		mm_info("voltage 0mv, fg_fw_ver=0x%04x, fg_param_ver=0x%04x, reset_fg_flag %d\n",
+-				fg_fw_ver, fg_param_ver, reset_fg_flag);
+-		if ((fg_fw_ver == 0x0024) && (fg_param_ver == 0x0006) && (reset_fg_flag == false)) {
+-			/* System Reset Request */
+-			mm_info("The FG is in boot mode, Requesting system resetting ... \n");
+-			if (mm8xxx_battery_write_Nbyte(di, COMMAND_MODECONTROL, 0x80, 1) < 0) {
+-				mm_info("Reset fg system failed\n");
+-			}
+-			reset_fg_flag = true;
+-		}
+-	} else {
+-		reset_fg_flag = false;
+-	}
+-
+-	return 0;
+-}
+-
+-static int mm8xxx_simple_value(int value, union power_supply_propval *val)
+-{
+-	if (value < 0)
+-		return value;
+-
+-	val->intval = value;
+-
+-	return 0;
+-}
+-
+-
+-static int mm8xxx_battery_set_property(struct power_supply *psy,
+-				       enum power_supply_property psp,
+-				       const union power_supply_propval *val)
+-{
+-	int ret = 0;
+-	struct mm8xxx_device_info *di = power_supply_get_drvdata(psy);
+-
+-	if ((psp != POWER_SUPPLY_PROP_PRESENT) && (di->cache.flags < 0))
+-		return -ENODEV;
+-
+-	switch (psp) {
+-	case POWER_SUPPLY_PROP_TEMP:
+-		mm8xxx_battery_temp_to_FG(di);
+-		break;
+-	case POWER_SUPPLY_PROP_TYPE:
+-		mm8xxx_battery_chargeType_to_FG(di, val->intval);
+-		break;
+-	default:
+-		return -EINVAL;
+-	}
+-
+-	return ret;
+-}
+-static int mm8xxx_battery_get_property(struct power_supply *psy,
+-				       enum power_supply_property psp,
+-				       union power_supply_propval *val)
+-{
+-	int ret = 0;
+-	struct mm8xxx_device_info *di = power_supply_get_drvdata(psy);
+-
+-	mutex_lock(&di->lock);
+-	if (time_is_before_jiffies(di->last_update + 5 * HZ)) {
+-		cancel_delayed_work_sync(&di->work);
+-		mm8xxx_battery_poll(&di->work.work);
+-	}
+-	mutex_unlock(&di->lock);
+-
+-	if ((psp != POWER_SUPPLY_PROP_PRESENT) && (di->cache.flags < 0))
+-		return -ENODEV;
+-
+-	switch (psp) {
+-	case POWER_SUPPLY_PROP_STATUS:
+-		ret = mm8xxx_battery_status(di, val);
+-		break;
+-	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
+-		ret = mm8xxx_battery_voltage(di, val);
+-		break;
+-	case POWER_SUPPLY_PROP_PRESENT:
+-		val->intval = di->cache.flags < 0 ? 0 : 1;
+-		break;
+-	case POWER_SUPPLY_PROP_CURRENT_NOW:
+-		ret = mm8xxx_battery_current(di, val);
+-		val->intval = val->intval * (-1);
+-		break;
+-	case POWER_SUPPLY_PROP_CAPACITY:
+-		ret = mm8xxx_simple_value(di->cache.soc, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CAPACITY_LEVEL:
+-		ret = mm8xxx_battery_capacity_level(di, val);
+-		break;
+-	case POWER_SUPPLY_PROP_TEMP:
+-		mm8xxx_battery_temp(di, &val->intval);
+-		val->intval = val->intval / 100;
+-		break;
+-	case POWER_SUPPLY_PROP_TIME_TO_EMPTY_NOW:
+-		ret = mm8xxx_simple_value(di->cache.avg_time_to_empty, val);
+-		break;
+-	case POWER_SUPPLY_PROP_TECHNOLOGY:
+-		val->intval = POWER_SUPPLY_TECHNOLOGY_LION;
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+-		ret = mm8xxx_simple_value(
+-			mm8xxx_battery_read_remainingcapacity(di), val);
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_FULL:
+-		ret = mm8xxx_simple_value(di->cache.full_charge_capacity, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
+-		ret = mm8xxx_simple_value(di->charge_design_full, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CYCLE_COUNT:
+-		ret = mm8xxx_simple_value(di->cache.cycle_count, val);
+-		break;
+-	case POWER_SUPPLY_PROP_HEALTH:
+-		ret = mm8xxx_simple_value(di->cache.health, val);
+-		break;
+-	case POWER_SUPPLY_PROP_MANUFACTURER:
+-		val->strval = MM8XXX_MANUFACTURER;
+-		break;
+-
+-	/*
+-	 * TODO: Implement appropriate POWER_SUPPLY_PROP property and read
+-	 * elapsed time.
+-	 *
+-	 *   di->cache.elapsed_months
+-	 *   di->cache.elapsed_days
+-	 *   di->cache.elapsed_hours
+-	 */
+-
+-	default:
+-		return -EINVAL;
+-	}
+-
+-	return ret;
+-}
+-
+-static void mm8xxx_external_power_changed(struct power_supply *psy)
+-{
+-	struct mm8xxx_device_info *di = power_supply_get_drvdata(psy);
+-
+-	cancel_delayed_work_sync(&di->work);
+-	schedule_delayed_work(&di->work, 0);
+-}
+-
+-static int mm8xxx_battery_setup(struct mm8xxx_device_info *di)
+-{
+-	struct power_supply_desc *ps_desc;
+-	struct power_supply_config ps_cfg = {
+-		.of_node = di->dev->of_node,
+-		.drv_data = di,
+-	};
+-
+-	INIT_DELAYED_WORK(&di->work, mm8xxx_battery_poll);
+-	mutex_init(&di->lock);
+-
+-	ps_desc = devm_kzalloc(di->dev, sizeof(*ps_desc), GFP_KERNEL);
+-	if (!ps_desc)
+-		return -ENOMEM;
+-
+-	ps_desc->name = MM8XXX_BATT_PHY;
+-	ps_desc->type = POWER_SUPPLY_TYPE_MAINS;
+-	ps_desc->properties = mm8xxx_chip_data[di->chip].props;
+-	ps_desc->num_properties = mm8xxx_chip_data[di->chip].props_size;
+-	ps_desc->get_property = mm8xxx_battery_get_property;
+-	ps_desc->set_property = mm8xxx_battery_set_property;
+-	ps_desc->external_power_changed = mm8xxx_external_power_changed;
+-
+-	di->psy = power_supply_register(di->dev, ps_desc, &ps_cfg);
+-	if (IS_ERR(di->psy)) {
+-		dev_err(di->dev, "failed to register battery\n");
+-		return PTR_ERR(di->psy);
+-	}
+-
+-	if (sysfs_create_group(&di->psy->dev.kobj, &mm8xxx_attribute_group)) {
+-		mm_info(" Error failed to creat attributes\n");
+-	}
+-
+-	mm8xxx_battery_update(di);
+-
+-	mutex_lock(&mm8xxx_list_lock);
+-	list_add(&di->list, &mm8xxx_battery_devices);
+-	mutex_unlock(&mm8xxx_list_lock);
+-
+-	return 0;
+-}
+-
+-static void mm8xxx_battery_teardown(struct mm8xxx_device_info *di)
+-{
+-	poll_interval = 0;
+-
+-	cancel_delayed_work_sync(&di->work);
+-	power_supply_unregister(di->psy);
+-
+-	mutex_lock(&mm8xxx_list_lock);
+-	list_del(&di->list);
+-	mutex_unlock(&mm8xxx_list_lock);
+-
+-	mutex_destroy(&di->lock);
+-}
+-
+-static void mm8xxx_fake_battery_update(struct mm8xxx_device_info *di)
+-{
+-	di->cache.temperature = 250;
+-	di->cache.avg_time_to_empty = 3600;
+-	di->cache.soc = 10;
+-	di->cache.full_charge_capacity = 4020000;
+-	di->cache.flags = 0;
+-	di->cache.health = POWER_SUPPLY_HEALTH_GOOD;
+-	di->cache.cycle_count = 0;
+-
+-	di->charge_design_full = 4020000;
+-
+-	di->last_update = jiffies;
+-}
+-
+-static void mm8xxx_fake_battery_poll(struct work_struct *work)
+-{
+-	struct mm8xxx_device_info *di =
+-		container_of(work, struct mm8xxx_device_info, work.work);
+-
+-	mm8xxx_fake_battery_update(di);
+-
+-	if (poll_interval > 0)
+-		schedule_delayed_work(&di->work, poll_interval * HZ);
+-}
+-
+-static int mm8xxx_fake_battery_get_property(struct power_supply *psy,
+-				       enum power_supply_property psp,
+-				       union power_supply_propval *val)
+-{
+-	int ret = 0;
+-	struct mm8xxx_device_info *di = power_supply_get_drvdata(psy);
+-
+-	mutex_lock(&di->lock);
+-	if (time_is_before_jiffies(di->last_update + 5 * HZ)) {
+-		cancel_delayed_work_sync(&di->work);
+-		mm8xxx_fake_battery_poll(&di->work.work);
+-	}
+-	mutex_unlock(&di->lock);
+-
+-	if ((psp != POWER_SUPPLY_PROP_PRESENT) && (di->cache.flags < 0))
+-		return -ENODEV;
+-
+-	switch (psp) {
+-	case POWER_SUPPLY_PROP_STATUS:
+-		val->intval = POWER_SUPPLY_STATUS_DISCHARGING;
+-		break;
+-	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
+-		val->intval = 4200 * 1000;
+-		break;
+-	case POWER_SUPPLY_PROP_PRESENT:
+-		val->intval = 1;
+-		break;
+-	case POWER_SUPPLY_PROP_CURRENT_NOW:
+-		val->intval = 0;
+-		break;
+-	case POWER_SUPPLY_PROP_CAPACITY:
+-		ret = mm8xxx_simple_value(di->cache.soc, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CAPACITY_LEVEL:
+-		val->intval = POWER_SUPPLY_CAPACITY_LEVEL_NORMAL;
+-		break;
+-	case POWER_SUPPLY_PROP_TEMP:
+-		val->intval = di->cache.temperature;
+-		break;
+-	case POWER_SUPPLY_PROP_TIME_TO_EMPTY_NOW:
+-		ret = mm8xxx_simple_value(di->cache.avg_time_to_empty, val);
+-		break;
+-	case POWER_SUPPLY_PROP_TECHNOLOGY:
+-		val->intval = POWER_SUPPLY_TECHNOLOGY_LION;
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+-		val->intval = di->cache.full_charge_capacity * di->cache.soc / 100;
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_FULL:
+-		ret = mm8xxx_simple_value(di->cache.full_charge_capacity, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
+-		ret = mm8xxx_simple_value(di->charge_design_full, val);
+-		break;
+-	case POWER_SUPPLY_PROP_CYCLE_COUNT:
+-		ret = mm8xxx_simple_value(di->cache.cycle_count, val);
+-		break;
+-	case POWER_SUPPLY_PROP_HEALTH:
+-		ret = mm8xxx_simple_value(di->cache.health, val);
+-		break;
+-	case POWER_SUPPLY_PROP_MANUFACTURER:
+-		val->strval = MM8XXX_MANUFACTURER;
+-		break;
+-
+-	/*
+-	 * TODO: Implement appropriate POWER_SUPPLY_PROP property and read
+-	 * elapsed time.
+-	 *
+-	 *   di->cache.elapsed_months
+-	 *   di->cache.elapsed_days
+-	 *   di->cache.elapsed_hours
+-	 */
+-
+-	default:
+-		return -EINVAL;
+-	}
+-
+-	return ret;
+-}
+-
+-static void mm8xxx_fake_external_power_changed(struct power_supply *psy)
+-{
+-	struct mm8xxx_device_info *di = power_supply_get_drvdata(psy);
+-
+-	cancel_delayed_work_sync(&di->work);
+-	schedule_delayed_work(&di->work, 0);
+-}
+-
+-static int mm8xxx_fake_battery_setup(struct mm8xxx_device_info *di)
+-{
+-	struct power_supply_desc *ps_desc;
+-	struct power_supply_config ps_cfg = {
+-		.of_node = di->dev->of_node,
+-		.drv_data = di,
+-	};
+-
+-	INIT_DELAYED_WORK(&di->work, mm8xxx_fake_battery_poll);
+-	mutex_init(&di->lock);
+-
+-	ps_desc = devm_kzalloc(di->dev, sizeof(*ps_desc), GFP_KERNEL);
+-	if (!ps_desc)
+-		return -ENOMEM;
+-
+-	ps_desc->name = "bms";
+-	ps_desc->type = POWER_SUPPLY_TYPE_MAINS;
+-	ps_desc->properties = mm8xxx_chip_data[di->chip].props;
+-	ps_desc->num_properties = mm8xxx_chip_data[di->chip].props_size;
+-	ps_desc->get_property = mm8xxx_fake_battery_get_property;
+-	ps_desc->external_power_changed = mm8xxx_fake_external_power_changed;
+-
+-	di->psy = power_supply_register(di->dev, ps_desc, &ps_cfg);
+-	if (IS_ERR(di->psy)) {
+-		dev_err(di->dev, "failed to register battery\n");
+-		return PTR_ERR(di->psy);
+-	}
+-
+-	mm8xxx_fake_battery_update(di);
+-
+-	mutex_lock(&mm8xxx_list_lock);
+-	list_add(&di->list, &mm8xxx_battery_devices);
+-	mutex_unlock(&mm8xxx_list_lock);
+-
+-	return 0;
+-}
+-
+-static u32 mmi_get_battery_info(struct mm8xxx_device_info *di, u32 cmd)
+-{
+-	int ret = 0;
+-
+-	ret = mm8xxx_write(di, MM8XXX_CMD_CONTROL, cmd);
+-	if (ret < 0) {
+-		dev_err(di->dev, "error writing cmd control\n");
+-		return ret;
+-	}
+-
+-	ret = mm8xxx_read(di, MM8XXX_CMD_CONTROL);
+-	if (ret < 0) {
+-		dev_err(di->dev, "error read cmd control\n");
+-		return ret;
+-	}
+-
+-	return (u32)ret;
+-}
+-
+-static int mm8xxx_battery_parse_dts(struct mm8xxx_device_info *di)
+-{
+-	struct device_node *np = di->dev->of_node;
+-	int rc;
+-
+-	rc = of_property_read_u32(np, "latest_fw_version", &di->latest_fw_version);
+-	if(rc < 0){
+-		di->latest_fw_version = MM8013_LATEST_FW_VERSION;
+-		mm_info("dts no config fw version, use default fw version=0x%04x\n", di->latest_fw_version);
+-	}
+-
+-	rc = of_property_read_u32(np, "first_battery_param_ver", &di->first_battery_param_ver);
+-	if (rc < 0) {
+-		di->first_battery_param_ver = MM8013_PARAMETER_VERSION;
+-		mm_info("dts no config parameter version, first_battery_param_ver=0x%04x\n", di->first_battery_param_ver);
+-	}
+-
+-	rc = of_property_read_u32(np, "second_battery_param_ver", &di->second_battery_param_ver);
+-	if (rc < 0) {
+-		di->second_battery_param_ver = MM8013_PARAMETER_VERSION;
+-		mm_info("dts no config parameter version, second_battery_param_ver=0x%04x\n", di->second_battery_param_ver);
+-	}
+-
+-	rc = of_property_read_u32(np, "first_battery_id", &di->first_battery_id);
+-	if (rc < 0) {
+-		di->first_battery_id = MM8013_1TH_BATTERY_ID;
+-	}
+-
+-	rc = of_property_read_u32(np, "second_battery_id", &di->second_battery_id);
+-	if (rc < 0) {
+-		di->second_battery_id = MM8013_2TH_BATTERY_ID;
+-	}
+-
+-	return rc;
+-}
+-
+-bool is_factory_mode(void)
+-{
+-	struct device_node *np = of_find_node_by_path("/chosen");
+-	bool factory_mode = false;
+-	const char *bootargs = NULL;
+-	char *bootmode = NULL;
+-	char *end = NULL;
+-
+-	if (!np)
+-		return factory_mode;
+-
+-	if (!of_property_read_string(np, "bootargs", &bootargs)) {
+-		bootmode = strstr(bootargs, "androidboot.mode=");
+-		if (bootmode) {
+-			end = strpbrk(bootmode, " ");
+-			bootmode = strpbrk(bootmode, "=");
+-		}
+-		if (bootmode &&
+-		    end > bootmode &&
+-		    strnstr(bootmode, "mot-factory", end - bootmode)) {
+-				factory_mode = true;
+-		}
+-	}
+-	of_node_put(np);
+-
+-	return factory_mode;
+-}
+-
+-static int mm8xxx_battery_probe(struct i2c_client *client,
+-				const struct i2c_device_id *id)
+-{
+-	int ret;
+-	char *name;
+-	int num;
+-	u32 fg_fw_ver;
+-	u32 fg_param_ver;
+-	u32 fg_battery_id;
+-	u32 parameter_version = 0xFFFF;
+-	enum UPDATE_INDEX update_index =UPDATE_NONE;
+-
+-	mm_info("MM8013 prob begin\n");
+-
+-	mutex_lock(&battery_mutex);
+-	num = idr_alloc(&battery_id, client, 0, 0, GFP_KERNEL);
+-	mutex_unlock(&battery_mutex);
+-	if (num < 0)
+-		return num;
+-
+-	name = devm_kasprintf(&client->dev, GFP_KERNEL, "%s-%d", id->name, num);
+-	if (!name)
+-		goto mem_err;
+-
+-	di = devm_kzalloc(&client->dev, sizeof(*di), GFP_KERNEL);
+-	if (!di)
+-		goto mem_err;
+-
+-	i2c_set_clientdata(client, di);
+-
+-	di->id = num;
+-	di->dev = &client->dev;
+-	di->chip = id->driver_data;
+-	di->name = name;
+-
+-	di->bus.read = mm8xxx_battery_read;
+-	di->bus.write = mm8xxx_battery_write;
+-	di->cmds = mm8xxx_chip_data[di->chip].cmds;
+-
+-	mm8xxx_battery_parse_dts(di);
+-
+-	ret = mmi_get_battery_info(di, HW_VER_CMD);
+-	if (ret != MM8013_HW_VERSION) {
+-		di->fake_battery = true;
+-		mm_info("don't have real battery,use fake battery\n");
+-	}
+-
+-	if (!di->fake_battery)
+-	{
+-		fg_fw_ver = mmi_get_battery_info(di, FW_VER_CMD);
+-		fg_param_ver = mmi_get_battery_info(di, PARAM_VER_CMD);
+-		fg_battery_id = mmi_get_battery_info(di, BATTERY_ID_CMD);
+-		mm_info("From fg ic,fg_fw_ver=0x%04x, battery_id=0x%04x,fg_param_ver=0x%04x\n", \
+-					fg_fw_ver, fg_battery_id, fg_param_ver);
+-
+-		if ((fg_fw_ver == 0x0024) && (fg_param_ver == 0x0006)) {
+-			/* System Reset Request */
+-			mm_info("The FG is in boot mode, Requesting system resetting ... ");
+-			if (mm8xxx_battery_write_Nbyte(di, COMMAND_MODECONTROL, 0x80, 1) < 0) {
+-				mm_info("Reset fg system failed\n");
+-			}
+-		}
+-
+-		if (is_factory_mode())
+-		{
+-			if (fg_fw_ver < 0 || fg_param_ver < 0 || fg_battery_id < 0) {
+-				update_index = UPDATE_NONE;
+-				goto update_begin;
+-			}
+-			else if (fg_battery_id == di->first_battery_id) {
+-				parameter_version = di->first_battery_param_ver;
+-			}
+-			else if (fg_battery_id == di->second_battery_id) {
+-				parameter_version = di->second_battery_param_ver;
+-			}
+-			if (fg_fw_ver < di->latest_fw_version) {
+-				if (fg_param_ver < parameter_version)
+-					update_index = UPDATE_ALL;
+-				else if (fg_param_ver == parameter_version)
+-					update_index = UPDATE_PROGRAM;
+-				else if (fg_param_ver == 0xa200)
+-					update_index = UPDATE_ALL;
+-			}
+-			else if (fg_param_ver < parameter_version || fg_param_ver == 0xa200)
+-					update_index = UPDATE_PARAMETER;
+-
+-			update_begin:
+-			if (update_index != UPDATE_NONE)
+-				mm8xxx_battery_update_program_and_parameter(di, update_index);
+-		}
+-	}
+-
+-	di->Batt_NTC_channel = devm_iio_channel_get(&client->dev, "batt_therm");
+-	if (IS_ERR(di->Batt_NTC_channel)) {
+-		dev_err(&client->dev, "failed to get batt_therm IIO channel\n");
+-		ret = PTR_ERR(di->Batt_NTC_channel);
+-		goto failed;
+-	}
+-
+-	if (di->fake_battery)
+-		ret = mm8xxx_fake_battery_setup(di);
+-	else
+-		ret = mm8xxx_battery_setup(di);
+-
+-	if (ret)
+-		goto failed;
+-
+-	schedule_delayed_work(&di->work, 60 * HZ);
+-
+-	if (client->irq) {
+-		ret = devm_request_threaded_irq(&client->dev, client->irq,
+-				NULL, mm8xxx_battery_irq_handler_thread,
+-				IRQF_ONESHOT,
+-				di->name, di);
+-		if (ret) {
+-			dev_err(&client->dev,
+-				"Unable to register IRQ %d error %d\n",
+-				client->irq, ret);
+-
+-			return ret;
+-		}
+-	}
+-
+-	mm_info("MM8013 driver probe success\n");
+-	return 0;
+-
+-mem_err:
+-	ret = -ENOMEM;
+-
+-failed:
+-	mutex_lock(&battery_mutex);
+-	idr_remove(&battery_id, num);
+-	mutex_unlock(&battery_mutex);
+-
+-	return ret;
+-}
+-
+-static int mm8xxx_battery_remove(struct i2c_client *client)
+-{
+-	struct mm8xxx_device_info *di = i2c_get_clientdata(client);
+-
+-	mm8xxx_battery_teardown(di);
+-
+-	mutex_lock(&battery_mutex);
+-	idr_remove(&battery_id, di->id);
+-	mutex_unlock(&battery_mutex);
+-
+-	return 0;
+-}
+-
+-static const struct i2c_device_id mm8xxx_battery_id_table[] = {
+-	{ "mm8118g01", MM8118G01 },
+-	{ "mm8118w02", MM8118W02 },
+-	{ "mm8013c10", MM8013C10 },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(i2c, mm8xxx_battery_id_table);
+-
+-#ifdef CONFIG_OF
+-static const struct of_device_id mm8xxx_battery_of_match_table[] = {
+-	{ .compatible = "mitsumi,mm8118g01" },
+-	{ .compatible = "mitsumi,mm8118w02" },
+-	{ .compatible = "mitsumi,mm8013c10" },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, mm8xxx_battery_of_match_table);
+-#endif
+-
+-static struct i2c_driver mm8xxx_battery_driver = {
+-	.driver = {
+-		.name = "mm8xxx-battery",
+-		.of_match_table = of_match_ptr(mm8xxx_battery_of_match_table),
+-	},
+-	.probe = mm8xxx_battery_probe,
+-	.remove = mm8xxx_battery_remove,
+-	.id_table = mm8xxx_battery_id_table,
+-};
+-module_i2c_driver(mm8xxx_battery_driver);
+-
+-MODULE_AUTHOR("Takayuki Sugaya");
+-MODULE_AUTHOR("Yasuhiro Kinoshita");
+-MODULE_DESCRIPTION("MM8xxx battery monitor");
+-MODULE_LICENSE("GPL");
+diff --git a/drivers/power/mmi-smbcharger-iio/Kconfig b/drivers/power/mmi-smbcharger-iio/Kconfig
+new file mode 100644
+index 000000000000..60056fcf9782
+--- /dev/null
++++ b/drivers/power/mmi-smbcharger-iio/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_SMBCHARGER_IIO
++        tristate "MMI SMBCHARGER IIO"
++        default n
++        help
++         Say Y here if you have a mmi smbcharger iio compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi-smbcharger-iio.
+diff --git a/drivers/power/mmi_charger/Kbuild b/drivers/power/mmi_charger/Kbuild
+index c1ab14765ca1..c372e5471463 100755
+--- a/drivers/power/mmi_charger/Kbuild
++++ b/drivers/power/mmi_charger/Kbuild
+@@ -1 +1 @@
+-obj-$(CONFIG_USE_MMI_CHARGER) += mmi_charger.o
++obj-$(CONFIG_MMI_CHARGER) += mmi_charger.o
+diff --git a/drivers/power/mmi_charger/Kconfig b/drivers/power/mmi_charger/Kconfig
+index ad8495df665b..63aa01067e6f 100644
+--- a/drivers/power/mmi_charger/Kconfig
++++ b/drivers/power/mmi_charger/Kconfig
+@@ -1,9 +1,21 @@
+-config USE_MMI_CHARGER
+-        tristate "MMI CHARGER"
+-        default n
+-        help
+-         Say Y here if you have a mmi charger compatible
+-         device connected.
+-
+-         This driver can also be built as a module.  If so, the module
+-         will be called mmi_charger.
++config MMI_CHARGER
++    tristate "MMI Charger Driver"
++    depends on MMI_INFO
++    default n
++    help
++        Say Y here if you have mmi charger support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called mmi_charger.
++
++config MMI_RECHARGER_HAWAO_MODE
++    bool "Enable MMI Recharger Hawao Mode"
++    depends on MMI_CHARGER
++    default n
++    help
++        Say Y here if you have a mmi recharger hawao mode compatible device connected.
++
++        If unsure, say N.
+diff --git a/drivers/power/mmi_discrete_charger/Kbuild b/drivers/power/mmi_discrete_charger/Kbuild
+index 5801739c0586..03d0b8d9cc7d 100644
+--- a/drivers/power/mmi_discrete_charger/Kbuild
++++ b/drivers/power/mmi_discrete_charger/Kbuild
+@@ -1,17 +1,10 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/mmi_charger \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/mmi_discrete_charger
++ccflags-y += -I$(srctree)/drivers/power/mmi_charger
++ccflags-y += -I$(srctree)/drivers/power/mmi_discrete_charger
+ 
+-obj-m += mmi_discrete_charger.o
++obj-$(CONFIG_MMI_DISCRETE_CHARGER) += mmi_discrete_charger.o
+ mmi_discrete_charger-objs += mmi_discrete_charger_core.o
+ mmi_discrete_charger-objs += mmi_discrete_charger_iio.o
+ mmi_discrete_charger-objs += mmi_discrete_voter.o
+ mmi_discrete_charger-objs += mmi_discrete_factory_tcmd.o
+ 
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../usb/typec/adapter_class/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-
+-
+-obj-m += mmi_discrete_charger_class.o
++obj-$(CONFIG_MMI_DISCRETE_CHARGER_CLASS) += mmi_discrete_charger_class.o
+diff --git a/drivers/power/mmi_discrete_charger/Kconfig b/drivers/power/mmi_discrete_charger/Kconfig
+new file mode 100644
+index 000000000000..7127dfae83fe
+--- /dev/null
++++ b/drivers/power/mmi_discrete_charger/Kconfig
+@@ -0,0 +1,24 @@
++config MMI_DISCRETE_CHARGER
++    tristate "MMI Discrete Charger Driver"
++    depends on TYPEC_ADAPTER_CLASS && MMI_CHARGER
++    default n
++    help
++        Say Y here if you have mmi discrete charger support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called mmi_discrete_charger.
++
++config MMI_DISCRETE_CHARGER_CLASS
++    tristate "MMI Discrete Charger Class Device"
++    default n
++    help
++        Say Y here if you have mmi discrete charger class support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called mmi_discrete_charger_class.
+diff --git a/drivers/power/mmi_discrete_turbo_charger/Kbuild b/drivers/power/mmi_discrete_turbo_charger/Kbuild
+index b6d3765de57c..415f13d845d3 100644
+--- a/drivers/power/mmi_discrete_turbo_charger/Kbuild
++++ b/drivers/power/mmi_discrete_turbo_charger/Kbuild
+@@ -1,13 +1,4 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/mmi_discrete_turbo_charger
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_WT6670_DETECTED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_WT6670_DETECTED
+-endif
+-
+-obj-m += mmi_discrete_turbo_charger.o
++obj-$(CONFIG_MMI_DISCRETE_TURBO_CHARGER) += mmi_discrete_turbo_charger.o
+ mmi_discrete_turbo_charger-objs += mmi_charger_class.o
+ mmi_discrete_turbo_charger-objs += mmi_charger_core.o
+ mmi_discrete_turbo_charger-objs += mmi_charger_pump_policy.o
+@@ -15,8 +6,3 @@ mmi_discrete_turbo_charger-objs += mmi_cp_charger.o
+ mmi_discrete_turbo_charger-objs += qpnp_pmic_charger.o
+ mmi_discrete_turbo_charger-objs += mmi_qc3p.o
+ mmi_discrete_turbo_charger-objs += mmi_qc3p_cp_policy.o
+-
+-#ifeq ($(CONFIG_MMI_PL_CP_POLICY), y)
+-#endif
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../usb/typec/adapter_class/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+diff --git a/drivers/power/mmi_discrete_turbo_charger/Kconfig b/drivers/power/mmi_discrete_turbo_charger/Kconfig
+new file mode 100644
+index 000000000000..f3cb071c55e5
+--- /dev/null
++++ b/drivers/power/mmi_discrete_turbo_charger/Kconfig
+@@ -0,0 +1,12 @@
++config MMI_DISCRETE_TURBO_CHARGER
++    tristate "MMI Discrete Turbo Charger Driver"
++    depends on TYPEC_ADAPTER_CLASS && MMI_CHARGER
++    default n
++    help
++        Say Y here if you have mmi discrete turbo charger support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called mmi_discrete_turbo_charger.
+diff --git a/drivers/power/mmi_parallel_charger_iio/Kconfig b/drivers/power/mmi_parallel_charger_iio/Kconfig
+new file mode 100644
+index 000000000000..15dc8d0eb981
+--- /dev/null
++++ b/drivers/power/mmi_parallel_charger_iio/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_PARALLEL_CHARGER_IIO
++        tristate "MMI Parallel Charger IIO"
++        default n
++        help
++         Say Y here if you have a mmi parallel charger iio compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_parallel_charger_iio.
+diff --git a/drivers/power/mmi_sc8549/Kconfig b/drivers/power/mmi_sc8549/Kconfig
+new file mode 100644
+index 000000000000..8933e161024f
+--- /dev/null
++++ b/drivers/power/mmi_sc8549/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_SC8549
++        tristate "MMI SC8549 PD"
++        default n
++        help
++         Say Y here if you have a mmi sc8549 compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_sc8549.
+diff --git a/drivers/power/qpnp_adaptive_charge/Kbuild b/drivers/power/qpnp_adaptive_charge/Kbuild
+index 41d52ec8b3d5..3cb4199eaaee 100755
+--- a/drivers/power/qpnp_adaptive_charge/Kbuild
++++ b/drivers/power/qpnp_adaptive_charge/Kbuild
+@@ -1,4 +1,4 @@
+-ifneq ($(filter m y,$(CONFIG_USE_MMI_CHARGER)),)
++ifneq ($(filter m y,$(CONFIG_MMI_CHARGER)),)
+ 	EXTRA_CFLAGS += -DUSE_MMI_CHARGER
+ 	EXTRA_CFLAGS += -I$(srctree)/$(src)/../mmi_charger
+ endif
+diff --git a/drivers/power/rt9426a_fg_mmi/Kconfig b/drivers/power/rt9426a_fg_mmi/Kconfig
+new file mode 100644
+index 000000000000..64809be4bde9
+--- /dev/null
++++ b/drivers/power/rt9426a_fg_mmi/Kconfig
+@@ -0,0 +1,9 @@
++config RT9426A_FG
++        tristate "RT9426A Fuel Guage driver"
++        default n
++        help
++         Say Y here if you have a RT9426A compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called rt9426a_fg_mmi.
+diff --git a/drivers/power/sd77426_fg_mmi/Kconfig b/drivers/power/sd77426_fg_mmi/Kconfig
+new file mode 100644
+index 000000000000..dbaf0ad0d216
+--- /dev/null
++++ b/drivers/power/sd77426_fg_mmi/Kconfig
+@@ -0,0 +1,9 @@
++config SD77426_FG
++        tristate "SD77426 Fuel Guage driver"
++        default n
++        help
++         Say Y here if you have a SD77426 compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called sd77426_fg_mmi.
+diff --git a/drivers/power/sgm4154x_chg_mmi/Kbuild b/drivers/power/sgm4154x_chg_mmi/Kbuild
+index b050e07ac04b..8ffa9791728b 100644
+--- a/drivers/power/sgm4154x_chg_mmi/Kbuild
++++ b/drivers/power/sgm4154x_chg_mmi/Kbuild
+@@ -1,28 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/sgm4154x_chg_mmi
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_TURBO_CHARGER)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_TURBO_CHARGER
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_WT6670_DETECTED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_WT6670_DETECTED
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_SGM41513_CHARGER)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_SGM41513_CHARGER
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_QC3P_Z350_DETECTED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_Z350_DETECTED
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_EXT_CHG_LED)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_EXT_CHG_LED
+-endif
+-
+-obj-m += sgm4154x_charger.o
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_discrete_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++obj-$(CONFIG_SGM4154X_CHARGER) += sgm4154x_charger.o
+diff --git a/drivers/power/sgm4154x_chg_mmi/Kconfig b/drivers/power/sgm4154x_chg_mmi/Kconfig
+new file mode 100644
+index 000000000000..c34882898d96
+--- /dev/null
++++ b/drivers/power/sgm4154x_chg_mmi/Kconfig
+@@ -0,0 +1,23 @@
++#
++# SGM4154X Charger driver
++#
++
++config SGM4154X_CHARGER
++    tristate "sgm4154x charger driver"
++    depends on MMI_DISCRETE_CHARGER_CLASS
++    default n
++    help
++        Say Y here if you have a sgm415x charging device in
++        your system.
++
++        To compile this driver as a module, choose M here: the
++        module will be called sgm415x_charger.
++
++config MMI_SGM41513_CHARGER
++    bool "Enable SGM4154X Moto SGM41513 Charger"
++    depends on SGM4154X_CHARGER
++    default n
++    help
++        Say Y here if you have a SGM4154X Moto SGM41513 Charger compatible device connected.
++
++        If unsure, say N.
+diff --git a/drivers/power/sm5602_fg_mmi/Kconfig b/drivers/power/sm5602_fg_mmi/Kconfig
+new file mode 100644
+index 000000000000..56a33f5f73b8
+--- /dev/null
++++ b/drivers/power/sm5602_fg_mmi/Kconfig
+@@ -0,0 +1,3 @@
++config MMI_SM5602_FG
++        tristate "sm5602_fg_mmi"
++        default n
+diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
+index df0499425657..fc509b133964 100644
+--- a/drivers/regulator/Kconfig
++++ b/drivers/regulator/Kconfig
+@@ -1232,5 +1232,9 @@ config VIRTIO_REGULATOR
+ 
+ source "drivers/regulator/wl2864c/Kconfig"
+ 
++source "drivers/regulator/wl2866d/Kconfig"
++
++source "drivers/regulator/wl2868c/Kconfig"
++
+ endif
+ 
+diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
+index 1d4048de63fd..6f26ec7de99f 100644
+--- a/drivers/regulator/Makefile
++++ b/drivers/regulator/Makefile
+@@ -152,5 +152,7 @@ obj-$(CONFIG_REGULATOR_STUB) += stub-regulator.o
+ obj-$(CONFIG_VIRTIO_REGULATOR) += virtio_regulator.o
+ 
+ obj-$(CONFIG_REGULATOR_WL2864C) += wl2864c/
++obj-$(CONFIG_REGULATOR_WL2866D) += wl2866d/
++obj-$(CONFIG_REGULATOR_WL2868C) += wl2868c/
+ 
+ ccflags-$(CONFIG_REGULATOR_DEBUG) += -DDEBUG
+diff --git a/drivers/regulator/wl2866d/Kconfig b/drivers/regulator/wl2866d/Kconfig
+new file mode 100644
+index 000000000000..3a713b20a0b4
+--- /dev/null
++++ b/drivers/regulator/wl2866d/Kconfig
+@@ -0,0 +1,9 @@
++config REGULATOR_WL2866D
++        tristate "WL2866D REGULATOR"
++        default n
++        help
++         Say Y here if you have a WL2866D compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called wl2866d-regulator.
+diff --git a/drivers/regulator/wl2868c/Kconfig b/drivers/regulator/wl2868c/Kconfig
+new file mode 100644
+index 000000000000..7e6c4f2049f0
+--- /dev/null
++++ b/drivers/regulator/wl2868c/Kconfig
+@@ -0,0 +1,9 @@
++config REGULATOR_WL2868C
++        tristate "WL2868C REGULATOR"
++        default n
++        help
++         Say Y here if you have a WL2868C compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called wl2868c-regulator.
+diff --git a/drivers/usb/typec/Kconfig b/drivers/usb/typec/Kconfig
+index 895e2418de53..07f924033362 100644
+--- a/drivers/usb/typec/Kconfig
++++ b/drivers/usb/typec/Kconfig
+@@ -50,6 +50,8 @@ source "drivers/usb/typec/tcpm/Kconfig"
+ 
+ source "drivers/usb/typec/ucsi/Kconfig"
+ 
++source "drivers/usb/typec/mmi_tcpc/Kconfig"
++
+ config TYPEC_TPS6598X
+ 	tristate "TI TPS6598x USB Power Delivery controller driver"
+ 	depends on I2C
+@@ -65,4 +67,6 @@ source "drivers/usb/typec/mux/Kconfig"
+ 
+ source "drivers/usb/typec/altmodes/Kconfig"
+ 
++source "drivers/usb/typec/adapter_class/Kconfig"
++
+ endif # TYPEC
+diff --git a/drivers/usb/typec/Makefile b/drivers/usb/typec/Makefile
+index 6696b7263d61..6a5b945408d7 100644
+--- a/drivers/usb/typec/Makefile
++++ b/drivers/usb/typec/Makefile
+@@ -6,3 +6,5 @@ obj-$(CONFIG_TYPEC_TCPM)	+= tcpm/
+ obj-$(CONFIG_TYPEC_UCSI)	+= ucsi/
+ obj-$(CONFIG_TYPEC_TPS6598X)	+= tps6598x.o
+ obj-$(CONFIG_TYPEC)		+= mux/
++obj-$(CONFIG_TCPC_CLASS)	+= mmi_tcpc/
++obj-$(CONFIG_TYPEC_ADAPTER_CLASS) += adapter_class/
+diff --git a/drivers/usb/typec/adapter_class/Kbuild b/drivers/usb/typec/adapter_class/Kbuild
+index f003c3c245e9..9e88ccb1f252 100755
+--- a/drivers/usb/typec/adapter_class/Kbuild
++++ b/drivers/usb/typec/adapter_class/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += adapter_class.o
++obj-$(CONFIG_TYPEC_ADAPTER_CLASS) += adapter_class.o
+diff --git a/drivers/usb/typec/adapter_class/Kconfig b/drivers/usb/typec/adapter_class/Kconfig
+new file mode 100644
+index 000000000000..e61abcc415e3
+--- /dev/null
++++ b/drivers/usb/typec/adapter_class/Kconfig
+@@ -0,0 +1,11 @@
++config TYPEC_ADAPTER_CLASS
++    tristate "Adapter Class Device Driver"
++    default n
++    help
++        Say Y here if you have Adapter Class Device support
++        in your system.
++
++        If unsure, say N.
++
++        To compile this driver as a module, choose M here: the
++        module will be called adapter_class.
+diff --git a/drivers/usb/typec/mmi_tcpc/Kbuild b/drivers/usb/typec/mmi_tcpc/Kbuild
+index e625a01a004e..a7cd6a1ad5e1 100644
+--- a/drivers/usb/typec/mmi_tcpc/Kbuild
++++ b/drivers/usb/typec/mmi_tcpc/Kbuild
+@@ -1,37 +1,20 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/usb/typec/mmi_tcpc
+-
+ subdir-ccflags-y += -Wall -Werror -DCONFIG_RT_REGMAP
+ 
+-EXTRA_CFLAGS += -DCONFIG_PD_DBG_INFO
++ccflags-y += -DCONFIG_PD_DBG_INFO
+ 
+-ifneq ($(filter m y,$(CONFIG_TCPC_CLASS)),)
+-	EXTRA_CFLAGS += -DCONFIG_TCPC_CLASS
+-endif
++ccflags-$(CONFIG_USB_POWER_DELIVERY) += -DCONFIG_USB_POWER_DELIVERY
+ 
+-ifneq ($(filter m y,$(CONFIG_USB_POWER_DELIVERY)),)
+-	EXTRA_CFLAGS += -DCONFIG_USB_POWER_DELIVERY
+-endif
++obj-$(CONFIG_TCPC_RT1711H)	+= tcpc_rt1711h.o
+ 
+-ifneq ($(filter m y,$(CONFIG_TCPC_RT1711H)),)
+-	obj-m	+= tcpc_rt1711h.o
+-endif
++obj-$(CONFIG_TCPC_AW35616)	+= tcpc_aw35616.o
+ 
+-ifneq ($(filter m y,$(CONFIG_TCPC_SGM7220)),)
+-	obj-m	+= tcpc_sgm7220.o
+-endif
+-
+-ifneq ($(CONFIG_TCPC_MAX_POLLING_COUNT),)
+-        EXTRA_CFLAGS += -DCONFIG_TCPC_MAX_POLLING_COUNT=$(CONFIG_TCPC_MAX_POLLING_COUNT)
+-endif
++obj-$(CONFIG_TCPC_SGM7220)	+= tcpc_sgm7220.o
+ 
+-tcpc_class-objs			+= tcpci_core.o tcpci_typec.o tcpci_timer.o \
++tcpc_class-objs	+= tcpci_core.o tcpci_typec.o tcpci_timer.o \
+ 		tcpm.o tcpci.o pd_dbg_info.o tcpci_alert.o rt-regmap.o tcpci_dual_role.o
+ 
+ ifneq ($(filter m y,$(CONFIG_USB_POWER_DELIVERY)),)
+-tcpc_class-objs			+= tcpci_event.o \
++tcpc_class-objs	+= tcpci_event.o \
+ 		pd_core.o pd_policy_engine.o pd_process_evt.o \
+ 		pd_dpm_core.o pd_dpm_uvdm.o pd_dpm_alt_mode_dp.o pd_dpm_pdo_select.o\
+ 		pd_dpm_reaction.o \
+@@ -44,8 +27,5 @@ tcpc_class-objs			+= tcpci_event.o \
+ 		pd_dpm_mmi_adapter.o
+ endif
+ 
+-obj-m	+= tcpc_class.o
+-obj-m	+= rt_pd_manager.o
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../adapter_class/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../power/mmi_discrete_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++obj-$(CONFIG_TCPC_CLASS)	+= tcpc_class.o
++obj-$(CONFIG_RT_PD_MANAGER)	+= rt_pd_manager.o
+diff --git a/drivers/usb/typec/mmi_tcpc/Kconfig b/drivers/usb/typec/mmi_tcpc/Kconfig
+new file mode 100644
+index 000000000000..1ccb40abe0e7
+--- /dev/null
++++ b/drivers/usb/typec/mmi_tcpc/Kconfig
+@@ -0,0 +1,41 @@
++config TCPC_RT1711H
++        tristate "TCPC RT1711H driver"
++        default n
++        depends on TCPC_CLASS
++        help
++         Say Y here if you have a rt1711h compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called tcpc_rt1711h.
++
++config TCPC_SGM7220
++        tristate "TCPC SGM7220 driver"
++        default n
++        depends on TCPC_CLASS
++        help
++         Say Y here if you have a sgm7220 compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called tcpc_sgm7220.
++
++config TCPC_CLASS
++        tristate "TCPC Class driver"
++        default n
++        help
++         Say Y here if you have a tcpc compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called tcpc_class.
++
++config RT_PD_MANAGER
++        tristate "RT PD Manager driver"
++        default n
++        help
++         Say Y here if you have a RT PD compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called rt_pd_manager.
+-- 
+2.39.2
+

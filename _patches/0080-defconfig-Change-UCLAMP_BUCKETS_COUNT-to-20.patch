@@ -1,0 +1,35 @@
+From c10882bbcab5f9bf69e28d79fb618420086f3d3b Mon Sep 17 00:00:00 2001
+From: Rick Yiu <rickyiu@google.com>
+Date: Wed, 14 Apr 2021 08:55:44 +0800
+Subject: [PATCH] defconfig: Change UCLAMP_BUCKETS_COUNT to 20
+
+Using the default setting 5 means the first bucket contains the
+uclamp values from 0 to 19 (in percentage), in this case, if the
+uclamp.min setting of a group is under 20, it will fall into this
+bucket with other groups that have uclamp.min set to 0, which
+increase the possibility of over boost. By setting the bucket
+count to 20 will ease this situation, while a uclamp.min greater
+than 4 will fall into a different bucket.
+
+Bug: 170487162
+Change-Id: Ife96b199bee36faedc8e129ade17e475cdbe44e0
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 9bd283988405..19301368514b 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -16,6 +16,7 @@ CONFIG_IKCONFIG=y
+ CONFIG_IKCONFIG_PROC=y
+ CONFIG_IKHEADERS=y
+ CONFIG_UCLAMP_TASK=y
++CONFIG_UCLAMP_BUCKETS_COUNT=20
+ CONFIG_CGROUPS=y
+ CONFIG_MEMCG=y
+ CONFIG_MEMCG_SWAP=y
+-- 
+2.39.2
+

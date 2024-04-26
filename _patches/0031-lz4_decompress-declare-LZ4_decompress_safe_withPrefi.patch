@@ -1,0 +1,43 @@
+From dc71d7610ac7ee8d3e9c467182cec572100564e4 Mon Sep 17 00:00:00 2001
+From: Rajat Asthana <thisisrast7@gmail.com>
+Date: Wed, 30 Jun 2021 18:56:13 -0700
+Subject: [PATCH] lz4_decompress: declare LZ4_decompress_safe_withPrefix64k
+ static
+
+Declare LZ4_decompress_safe_withPrefix64k as static to fix sparse
+warning:
+
+> warning: symbol 'LZ4_decompress_safe_withPrefix64k' was not declared.
+> Should it be static?
+
+Link: https://lkml.kernel.org/r/20210511154345.610569-1-thisisrast7@gmail.com
+Signed-off-by: Rajat Asthana <thisisrast7@gmail.com>
+Reviewed-by: Nick Terrell <terrelln@fb.com>
+Cc: Gao Xiang <hsiangkao@redhat.com>
+Cc: Joe Perches <joe@perches.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/6429313e9f9501bda50c509b46add7ce080fe543
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index 5b6705c4b2d2..fd1728d94bab 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -485,7 +485,7 @@ int LZ4_decompress_fast(const char *source, char *dest, int originalSize)
+ 
+ /* ===== Instantiate a few more decoding cases, used more than once. ===== */
+ 
+-int LZ4_decompress_safe_withPrefix64k(const char *source, char *dest,
++static int LZ4_decompress_safe_withPrefix64k(const char *source, char *dest,
+ 				      int compressedSize, int maxOutputSize)
+ {
+ 	return LZ4_decompress_generic(source, dest,
+-- 
+2.39.2
+

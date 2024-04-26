@@ -1,0 +1,53 @@
+From 835dc58d1493b33d2c12790e3be4ea787fbf0c3a Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Sun, 9 Aug 2020 22:20:08 -0700
+Subject: [PATCH] qcacld-3.0: Fix regulatory domain country names.
+
+Clang warns:
+
+../drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c:284:43: warning: suspicious concatenation of string literals in an array initialization; did you mean to separate the elements with a comma? [-Wstring-concatenation]
+        {CTRY_TURKS_AND_CAICOS, FCC3_WORLD, "TC" "TURKS AND CAICOS"},
+                                                 ^
+                                                ,
+../drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c:284:38: note: place parentheses around the string literal to silence warning
+        {CTRY_TURKS_AND_CAICOS, FCC3_WORLD, "TC" "TURKS AND CAICOS"},
+                                            ^
+../drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c:296:45: warning: suspicious concatenation of string literals in an array initialization; did you mean to separate the elements with a comma? [-Wstring-concatenation]
+        {CTRY_WALLIS_AND_FUTUNA, ETSI1_WORLD, "WF" "WALLIS"},
+                                                   ^
+                                                  ,
+../drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c:296:40: note: place parentheses around the string literal to silence warning
+        {CTRY_WALLIS_AND_FUTUNA, ETSI1_WORLD, "WF" "WALLIS"},
+                                              ^
+
+Change-Id: I35bc21e7946f03fc36fb912f46f742ec23cb8d99
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c b/drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c
+index 32818b055445..548a3976e653 100644
+--- a/drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c
++++ b/drivers/staging/qcacld-3.0/core/cds/src/cds_regdomain.c
+@@ -281,7 +281,7 @@ static const struct country_code_to_reg_dmn g_all_countries[] = {
+ 	{CTRY_TRINIDAD_Y_TOBAGO, FCC3_WORLD, "TT", "TRINIDAD AND TOBAGO"},
+ 	{CTRY_TUNISIA, ETSI3_WORLD, "TN", "TUNISIA"},
+ 	{CTRY_TURKEY, ETSI1_WORLD, "TR", "TURKEY"},
+-	{CTRY_TURKS_AND_CAICOS, FCC3_WORLD, "TC" "TURKS AND CAICOS"},
++	{CTRY_TURKS_AND_CAICOS, FCC3_WORLD, "TC", "TURKS AND CAICOS"},
+ 	{CTRY_UGANDA, FCC3_WORLD, "UG", "UGANDA"},
+ 	{CTRY_UKRAINE, ETSI9_WORLD, "UA", "UKRAINE"},
+ 	{CTRY_UAE, FCC3_WORLD, "AE", "UNITED ARAB EMIRATES"},
+@@ -293,7 +293,7 @@ static const struct country_code_to_reg_dmn g_all_countries[] = {
+ 	{CTRY_VENEZUELA, FCC2_ETSIC, "VE", "VENEZUELA"},
+ 	{CTRY_VIET_NAM, FCC3_WORLD, "VN", "VIETNAM"},
+ 	{CTRY_VIRGIN_ISLANDS, FCC3_FCCA, "VI", "VIRGIN ISLANDS"},
+-	{CTRY_WALLIS_AND_FUTUNA, ETSI1_WORLD, "WF" "WALLIS"},
++	{CTRY_WALLIS_AND_FUTUNA, ETSI1_WORLD, "WF", "WALLIS"},
+ 	{CTRY_YEMEN, NULL1_WORLD, "YE", "YEMEN"},
+ 	{CTRY_ZIMBABWE, ETSI1_WORLD, "ZW", "ZIMBABWE"},
+ 	{CTRY_JAPAN15, MKK5_MKKC, "JP", "JAPAN"},
+-- 
+2.39.2
+

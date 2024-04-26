@@ -1,0 +1,114 @@
+From 1b8c1bd944b3ebb03a5f5d6f4eacce278557cd11 Mon Sep 17 00:00:00 2001
+From: Woody Lin <woodylin@google.com>
+Date: Tue, 19 Jun 2018 05:00:40 +0000
+Subject: [PATCH] dtbo.img: build device tree overlay partition image
+
+Inspired by "828e0b45 yueyao@ build device tree overlay partition
+image", integrating the same feature into floral kernel. The difference
+is all build-time generated *.dtbo are packed into dtbo.img instead of
+packing only the dtbos specified by the dtboimg.cfg.
+
+dtbo.img is built only when CONFIG_BUILD_ARM64_DT_OVERLAY is set.
+
+[electimon: Forward port to 5.4]
+
+Change-Id: Ic0ed97fe699ee56e7272001064abb584690aa40a
+Signed-off-by: Woody Lin <woodylin@google.com>
+Signed-off-by: UtsavBalar1231 <utsavbalar1231@gmail.com>
+Signed-off-by: danascape <saalim.priv@gmail.com>
+Signed-off-by: danascape <danascape@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/Makefile        | 10 +++++++++-
+ arch/arm64/boot/.gitignore |  1 +
+ arch/arm64/boot/Makefile   |  7 ++++++-
+ scripts/Makefile.lib       |  5 +++++
+ 4 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
+index 7ee7ce7905f2..7e1717e0f30e 100644
+--- a/arch/arm64/Makefile
++++ b/arch/arm64/Makefile
+@@ -151,7 +151,9 @@ endif
+ boot		:= arch/arm64/boot
+ KBUILD_IMAGE	:= $(boot)/$(KBUILD_TARGET)
+ 
+-all:	$(KBUILD_TARGET)
++KBUILD_DTBO_IMG := dtbo.img
++
++all:	$(KBUILD_DTBO_IMG) $(KBUILD_TARGET)
+ 
+ Image: vmlinux
+ 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
+@@ -159,6 +161,9 @@ Image: vmlinux
+ Image.%: Image
+ 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
+ 
++dtbo.img: dtbs
++	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
++
+ zinstall install:
+ 	$(Q)$(MAKE) $(build)=$(boot) $@
+ 
+@@ -172,6 +177,9 @@ vdso_install:
+ archclean:
+ 	$(Q)$(MAKE) $(clean)=$(boot)
+ 
++CLEAN_FILES += $(boot)/Image $(boot)/Image.* $(boot)/dtbo.img
++MRPROPER_FILES += $(boot)/Image $(boot)/Image.* $(boot)/dtbo.img
++
+ ifeq ($(KBUILD_EXTMOD),)
+ # We need to generate vdso-offsets.h before compiling certain files in kernel/.
+ # In order to do that, we should use the archprepare target, but we can't since
+diff --git a/arch/arm64/boot/.gitignore b/arch/arm64/boot/.gitignore
+index 8dab0bb6ae66..1af90f138667 100644
+--- a/arch/arm64/boot/.gitignore
++++ b/arch/arm64/boot/.gitignore
+@@ -1,2 +1,3 @@
+ Image
+ Image.gz
++dtbo.img
+diff --git a/arch/arm64/boot/Makefile b/arch/arm64/boot/Makefile
+index c6bd6844b195..435691874f9f 100644
+--- a/arch/arm64/boot/Makefile
++++ b/arch/arm64/boot/Makefile
+@@ -16,7 +16,9 @@
+ 
+ OBJCOPYFLAGS_Image :=-O binary -R .note -R .note.gnu.build-id -R .comment -S
+ 
+-targets := Image Image.bz2 Image.gz Image.lz4 Image.lzma Image.lzo
++targets := Image Image.bz2 Image.gz Image.lz4 Image.lzma Image.lzo dtbo.img
++
++DTBO_OBJS := $(shell find $(obj)/dts/ -name \*.dtbo)
+ 
+ ifeq ($(CONFIG_QCOM_RTIC),y)
+ # Add RTIC DTB to the DTB list if RTIC MPGen is enabled
+@@ -51,6 +53,9 @@ $(obj)/Image.lzma: $(obj)/Image FORCE
+ $(obj)/Image.lzo: $(obj)/Image FORCE
+ 	$(call if_changed,lzo)
+ 
++$(obj)/dtbo.img: $(DTBO_OBJS) FORCE
++	$(call if_changed,mkdtimg)
++
+ install:
+ 	$(CONFIG_SHELL) $(srctree)/$(src)/install.sh $(KERNELRELEASE) \
+ 	$(obj)/Image System.map "$(INSTALL_PATH)"
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 690802b3cc64..9d80f421fd31 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -317,6 +317,11 @@ $(obj)/%.dt.yaml: $(src)/%.dts $(DTC) $(DT_TMP_SCHEMA) FORCE
+ 
+ dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
+ 
++# mkdtimg
++#----------------------------------------------------------------------------
++quiet_cmd_mkdtimg = DTBOIMG $@
++cmd_mkdtimg = mkdtimg create $@ --page_size=4096 $(filter-out FORCE,$^)
++
+ # Concatentate multiple files together
+ quiet_cmd_cat = CAT $@
+ cmd_cat = (cat $(filter-out FORCE,$^) > $@) || (rm -f $@; false)
+-- 
+2.39.2
+

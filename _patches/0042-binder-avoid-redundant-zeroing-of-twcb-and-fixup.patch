@@ -1,0 +1,43 @@
+From 052663d602d2653ad19860b681ebb6704482756c Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Sat, 18 Sep 2021 20:30:28 +0900
+Subject: [PATCH] binder: avoid redundant zeroing of twcb and fixup
+
+These are initialized properly from the code just below kzalloc().
+
+Replace it with kmalloc().
+
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/faea913cfc42ca5ed8f8344a9e4dc7975fb86680
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/android/binder.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+index 77b06f304754..1efaa6f2160b 100644
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -2044,7 +2044,7 @@ static void binder_deferred_fd_close(int fd)
+ {
+ 	struct binder_task_work_cb *twcb;
+ 
+-	twcb = kzalloc(sizeof(*twcb), GFP_KERNEL);
++	twcb = kmalloc(sizeof(*twcb), GFP_KERNEL);
+ 	if (!twcb)
+ 		return;
+ 	init_task_work(&twcb->twork, binder_do_fd_close);
+@@ -2421,7 +2421,7 @@ static int binder_translate_fd(u32 fd, binder_size_t fd_offset,
+ 	 * of the fd in the target needs to be done from a
+ 	 * target thread.
+ 	 */
+-	fixup = kzalloc(sizeof(*fixup), GFP_KERNEL);
++	fixup = kmalloc(sizeof(*fixup), GFP_KERNEL);
+ 	if (!fixup) {
+ 		ret = -ENOMEM;
+ 		goto err_alloc;
+-- 
+2.39.2
+

@@ -1,0 +1,29 @@
+From d5cd4449cb1ba985834f4f46cecb0fa623fb9e54 Mon Sep 17 00:00:00 2001
+From: Jake Weinstein <jake@aospa.co>
+Date: Thu, 24 Nov 2022 14:29:36 +0900
+Subject: [PATCH] defconfig: Lower NR_CPUS to 8
+
+We only have 8 cores.
+
+Change-Id: I4b0342e2b754efa1fedea0a6b0dd4d9876500482
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 86e3da6af213..295eb956b859 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -55,7 +55,7 @@ CONFIG_ARCH_QCOM=y
+ CONFIG_ARCH_HOLI=y
+ CONFIG_ARCH_BLAIR=y
+ CONFIG_SCHED_MC=y
+-CONFIG_NR_CPUS=32
++CONFIG_NR_CPUS=8
+ CONFIG_SECCOMP=y
+ CONFIG_PARAVIRT=y
+ CONFIG_ARM64_SW_TTBR0_PAN=y
+-- 
+2.39.2
+

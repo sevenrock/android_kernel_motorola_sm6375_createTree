@@ -1,0 +1,63 @@
+From 92dfd4437f4dd1beb2c151fab0cacd5a3c86ff55 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Wed, 24 Aug 2022 19:32:54 +0000
+Subject: [PATCH] lz4: Restore LZ with __maybe_unused
+
+Signed-off-by: electimon <electimon@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/df697369b071ddcb2a613132d2f0f8cab2c043e9
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ include/linux/lz4.h      | 4 +---
+ lib/lz4/lz4_decompress.c | 4 +---
+ 2 files changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/include/linux/lz4.h b/include/linux/lz4.h
+index 7f5af8471a06..d8e86e533e2f 100644
+--- a/include/linux/lz4.h
++++ b/include/linux/lz4.h
+@@ -296,7 +296,6 @@ int LZ4_decompress_fast(const char *source, char *dest, int originalSize);
+ int LZ4_decompress_safe(const char *source, char *dest, int compressedSize,
+ 	int maxDecompressedSize);
+ 
+-#if 0
+ /**
+  * LZ4_decompress_safe_partial() - Decompress a block of size 'compressedSize'
+  *	at position 'source' into buffer 'dest'
+@@ -322,9 +321,8 @@ int LZ4_decompress_safe(const char *source, char *dest, int compressedSize,
+  *	or a negative result in case of error
+  *
+  */
+-static int LZ4_decompress_safe_partial(const char *source, char *dest,
++int LZ4_decompress_safe_partial(const char *source, char *dest,
+ 	int compressedSize, int targetOutputSize, int maxDecompressedSize);
+-#endif
+ 
+ /*-************************************************************************
+  *	LZ4 HC Compression
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index fb7bc5580164..88f5272d7a25 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -691,8 +691,7 @@ int LZ4_decompress_safe(const char *source, char *dest,
+ 				      noDict, (BYTE *)dest, NULL, 0);
+ }
+ 
+-#if 0
+-static int LZ4_decompress_safe_partial(const char *src, char *dst,
++int __maybe_unused LZ4_decompress_safe_partial(const char *src, char *dst,
+ 	int compressedSize, int targetOutputSize, int dstCapacity)
+ {
+ 	dstCapacity = min(targetOutputSize, dstCapacity);
+@@ -700,7 +699,6 @@ static int LZ4_decompress_safe_partial(const char *src, char *dst,
+ 				      endOnInputSize, partial_decode,
+ 				      noDict, (BYTE *)dst, NULL, 0);
+ }
+-#endif
+ 
+ int LZ4_decompress_fast(const char *source, char *dest, int originalSize)
+ {
+-- 
+2.39.2
+

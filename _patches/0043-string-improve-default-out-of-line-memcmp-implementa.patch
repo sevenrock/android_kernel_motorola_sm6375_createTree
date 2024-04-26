@@ -1,0 +1,75 @@
+From ab33ac9de90da7c7f3b853caa899b8327b53d5d5 Mon Sep 17 00:00:00 2001
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Wed, 21 Jul 2021 12:01:28 -0700
+Subject: [PATCH] string: improve default out-of-line memcmp() implementation
+
+This just does the "if the architecture does efficient unaligned
+handling, start the memcmp using 'unsigned long' accesses", since
+Nikolay Borisov found a load that cares.
+
+This is basically the minimal patch, and limited to architectures that
+are known to not have slow unaligned handling.  We've had the stupid
+byte-at-a-time version forever, and nobody has ever even noticed before,
+so let's keep the fix minimal.
+
+A potential further improvement would be to align one of the sources in
+order to at least minimize unaligned cases, but the only real case of
+bigger memcmp() users seems to be the FIDEDUPERANGE ioctl().  As David
+Sterba says, the dedupe ioctl is typically called on ranges spanning
+many pages so the common case will all be page-aligned anyway.
+
+All the relevant architectures select HAVE_EFFICIENT_UNALIGNED_ACCESS,
+so I'm not going to worry about the combination of a very rare use-case
+and a rare architecture until somebody actually hits it.  Particularly
+since Nikolay also tested the more complex patch with extra alignment
+handling code, and it only added overhead.
+
+Link: https://lore.kernel.org/lkml/20210721135926.602840-1-nborisov@suse.com/
+Reported-by: Nikolay Borisov <nborisov@suse.com>
+Cc: David Sterba <dsterba@suse.cz>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/239614a2a463d0969e65d7a6691f9ec9474f00cb
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/string.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/lib/string.c b/lib/string.c
+index abfaa05181e2..592c10645771 100644
+--- a/lib/string.c
++++ b/lib/string.c
+@@ -29,6 +29,7 @@
+ #include <linux/errno.h>
+ #include <linux/slab.h>
+ 
++#include <asm/unaligned.h>
+ #include <asm/byteorder.h>
+ #include <asm/word-at-a-time.h>
+ #include <asm/page.h>
+@@ -905,6 +906,21 @@ __visible int memcmp(const void *cs, const void *ct, size_t count)
+ 	const unsigned char *su1, *su2;
+ 	int res = 0;
+ 
++#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
++	if (count >= sizeof(unsigned long)) {
++		const unsigned long *u1 = cs;
++		const unsigned long *u2 = ct;
++		do {
++			if (get_unaligned(u1) != get_unaligned(u2))
++				break;
++			u1++;
++			u2++;
++			count -= sizeof(unsigned long);
++		} while (count >= sizeof(unsigned long));
++		cs = u1;
++		ct = u2;
++	}
++#endif
+ 	for (su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
+ 		if ((res = *su1 - *su2) != 0)
+ 			break;
+-- 
+2.39.2
+

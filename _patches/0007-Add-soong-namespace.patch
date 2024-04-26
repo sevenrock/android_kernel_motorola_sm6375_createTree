@@ -1,0 +1,29 @@
+From fc7554c0c51df6391d13333434de2070b76cc117 Mon Sep 17 00:00:00 2001
+From: betaxab <betaxab@gmail.com>
+Date: Mon, 20 Mar 2023 14:06:51 +0800
+Subject: [PATCH] Add soong namespace
+
+Signed-off-by: betaxab <betaxab@gmail.com>
+
+Original patch:
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/77474e9dfc25406b81e3a5a4e8a71df8cecfbb9b
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ Android.bp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Android.bp b/Android.bp
+index a1fde7b44556..6f1c63eb4e1e 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -1,3 +1,6 @@
++soong_namespace {
++}
++
+ cc_binary_host {
+     name: "unifdef",
+     srcs: ["scripts/unifdef.c"],
+-- 
+2.39.2
+

@@ -1,0 +1,27 @@
+From 9737e4de157645cf728e81e936e2afec18c7a0e2 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 5 May 2024 00:22:12 +0200
+Subject: [PATCH] power: mmi_discrete_turbo_charger: Tone down log spam
+
+Change-Id: Id085a7f2db272cc0d3e77f8a61a36fd7433f63f8
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/mmi_discrete_turbo_charger/mmi_charger_core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/mmi_discrete_turbo_charger/mmi_charger_core.c b/drivers/power/mmi_discrete_turbo_charger/mmi_charger_core.c
+index 49409c315f03..c722ccd7c658 100644
+--- a/drivers/power/mmi_discrete_turbo_charger/mmi_charger_core.c
++++ b/drivers/power/mmi_discrete_turbo_charger/mmi_charger_core.c
+@@ -1107,7 +1107,7 @@ static void mmi_heartbeat_work(struct work_struct *work)
+ 	int hb_resch_time = 0, ret = 0;
+ 	union power_supply_propval val;
+ 
+-	mmi_chrg_info(chip, "MMI: Heartbeat!\n");
++	// mmi_chrg_info(chip, "MMI: Heartbeat!\n");
+ 	/* Have not been resumed so wait another 100 ms */
+ 	if (chip->suspended) {
+ 		mmi_chrg_err(chip, "SMBMMI: HB running before Resume\n");
+-- 
+2.39.2
+

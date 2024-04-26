@@ -1,0 +1,350 @@
+From c7de358c031ad63f6cd36d90c950228034014cfe Mon Sep 17 00:00:00 2001
+From: Park Ju Hyung <qkrwngud825@gmail.com>
+Date: Mon, 30 Sep 2019 21:52:05 +0900
+Subject: [PATCH] lz4: staticify functions
+
+Signed-off-by: Park Ju Hyung <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/953ae374947b49a0634a865016fe2e399b2b4dbe
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ include/linux/lz4.h      | 28 ++++++++++++++--------------
+ lib/lz4/lz4_compress.c   | 11 ++++-------
+ lib/lz4/lz4_decompress.c | 23 +++++++----------------
+ lib/lz4/lz4hc_compress.c | 11 ++++-------
+ 4 files changed, 29 insertions(+), 44 deletions(-)
+
+diff --git a/include/linux/lz4.h b/include/linux/lz4.h
+index b16e15b9587a..5463d88bc233 100644
+--- a/include/linux/lz4.h
++++ b/include/linux/lz4.h
+@@ -218,7 +218,7 @@ int LZ4_compress_default(const char *source, char *dest, int inputSize,
+  * Return: Number of bytes written into buffer 'dest'
+  *	(necessarily <= maxOutputSize) or 0 if compression fails
+  */
+-int LZ4_compress_fast(const char *source, char *dest, int inputSize,
++static int LZ4_compress_fast(const char *source, char *dest, int inputSize,
+ 	int maxOutputSize, int acceleration, void *wrkmem);
+ 
+ /**
+@@ -242,7 +242,7 @@ int LZ4_compress_fast(const char *source, char *dest, int inputSize,
+  * Return: Number of bytes written into 'dest' (necessarily <= targetDestSize)
+  *	or 0 if compression fails
+  */
+-int LZ4_compress_destSize(const char *source, char *dest, int *sourceSizePtr,
++static int LZ4_compress_destSize(const char *source, char *dest, int *sourceSizePtr,
+ 	int targetDestSize, void *wrkmem);
+ 
+ /*-************************************************************************
+@@ -317,7 +317,7 @@ int LZ4_decompress_safe(const char *source, char *dest, int compressedSize,
+  *	or a negative result in case of error
+  *
+  */
+-int LZ4_decompress_safe_partial(const char *source, char *dest,
++static int LZ4_decompress_safe_partial(const char *source, char *dest,
+ 	int compressedSize, int targetOutputSize, int maxDecompressedSize);
+ 
+ /*-************************************************************************
+@@ -358,7 +358,7 @@ int LZ4_compress_HC(const char *src, char *dst, int srcSize, int dstCapacity,
+  * Use this function to init an allocated `LZ4_streamHC_t` structure
+  * and start a new compression.
+  */
+-void LZ4_resetStreamHC(LZ4_streamHC_t *streamHCPtr, int compressionLevel);
++static void LZ4_resetStreamHC(LZ4_streamHC_t *streamHCPtr, int compressionLevel);
+ 
+ /**
+  * LZ4_loadDictHC() - Load a static dictionary into LZ4_streamHC
+@@ -373,7 +373,7 @@ void LZ4_resetStreamHC(LZ4_streamHC_t *streamHCPtr, int compressionLevel);
+  *
+  * Return : dictionary size, in bytes (necessarily <= 64 KB)
+  */
+-int	LZ4_loadDictHC(LZ4_streamHC_t *streamHCPtr, const char *dictionary,
++static int	LZ4_loadDictHC(LZ4_streamHC_t *streamHCPtr, const char *dictionary,
+ 	int dictSize);
+ 
+ /**
+@@ -412,7 +412,7 @@ int	LZ4_loadDictHC(LZ4_streamHC_t *streamHCPtr, const char *dictionary,
+  *
+  * Return: Number of bytes written into buffer 'dst'  or 0 if compression fails
+  */
+-int LZ4_compress_HC_continue(LZ4_streamHC_t *streamHCPtr, const char *src,
++static int LZ4_compress_HC_continue(LZ4_streamHC_t *streamHCPtr, const char *src,
+ 	char *dst, int srcSize, int maxDstSize);
+ 
+ /**
+@@ -431,7 +431,7 @@ int LZ4_compress_HC_continue(LZ4_streamHC_t *streamHCPtr, const char *src,
+  * Return : saved dictionary size in bytes (necessarily <= maxDictSize),
+  *	or 0 if error.
+  */
+-int LZ4_saveDictHC(LZ4_streamHC_t *streamHCPtr, char *safeBuffer,
++static int LZ4_saveDictHC(LZ4_streamHC_t *streamHCPtr, char *safeBuffer,
+ 	int maxDictSize);
+ 
+ /*-*********************************************
+@@ -447,7 +447,7 @@ int LZ4_saveDictHC(LZ4_streamHC_t *streamHCPtr, char *safeBuffer,
+  * Use this function to init an allocated `LZ4_stream_t` structure
+  * and start a new compression.
+  */
+-void LZ4_resetStream(LZ4_stream_t *LZ4_stream);
++static __always_inline void LZ4_resetStream(LZ4_stream_t *LZ4_stream);
+ 
+ /**
+  * LZ4_loadDict() - Load a static dictionary into LZ4_stream
+@@ -504,7 +504,7 @@ int LZ4_saveDict(LZ4_stream_t *streamPtr, char *safeBuffer, int dictSize);
+  *
+  * Return: Number of bytes written into buffer 'dst'  or 0 if compression fails
+  */
+-int LZ4_compress_fast_continue(LZ4_stream_t *streamPtr, const char *src,
++static int LZ4_compress_fast_continue(LZ4_stream_t *streamPtr, const char *src,
+ 	char *dst, int srcSize, int maxDstSize, int acceleration);
+ 
+ /**
+@@ -518,7 +518,7 @@ int LZ4_compress_fast_continue(LZ4_stream_t *streamPtr, const char *src,
+  *
+  * Return: 1 if OK, 0 if error
+  */
+-int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *dictionary, int dictSize);
+ 
+ /**
+@@ -557,7 +557,7 @@ int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
+  *	(necessarily <= maxDecompressedSize)
+  *	or a negative result in case of error
+  */
+-int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *source, char *dest, int compressedSize,
+ 	int maxDecompressedSize);
+ 
+@@ -596,7 +596,7 @@ int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+  *	(necessarily <= maxDecompressedSize)
+  *	or a negative result in case of error
+  */
+-int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *source, char *dest, int originalSize);
+ 
+ /**
+@@ -619,7 +619,7 @@ int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+  *	(necessarily <= maxDecompressedSize)
+  *	or a negative result in case of error
+  */
+-int LZ4_decompress_safe_usingDict(const char *source, char *dest,
++static int LZ4_decompress_safe_usingDict(const char *source, char *dest,
+ 	int compressedSize, int maxDecompressedSize, const char *dictStart,
+ 	int dictSize);
+ 
+@@ -642,7 +642,7 @@ int LZ4_decompress_safe_usingDict(const char *source, char *dest,
+  *	(necessarily <= maxDecompressedSize)
+  *	or a negative result in case of error
+  */
+-int LZ4_decompress_fast_usingDict(const char *source, char *dest,
++static int LZ4_decompress_fast_usingDict(const char *source, char *dest,
+ 	int originalSize, const char *dictStart, int dictSize);
+ 
+ #endif
+diff --git a/lib/lz4/lz4_compress.c b/lib/lz4/lz4_compress.c
+index 90bb67994688..ef29ba6df75e 100644
+--- a/lib/lz4/lz4_compress.c
++++ b/lib/lz4/lz4_compress.c
+@@ -500,13 +500,12 @@ static int LZ4_compress_fast_extState(
+ 	}
+ }
+ 
+-int LZ4_compress_fast(const char *source, char *dest, int inputSize,
++static int LZ4_compress_fast(const char *source, char *dest, int inputSize,
+ 	int maxOutputSize, int acceleration, void *wrkmem)
+ {
+ 	return LZ4_compress_fast_extState(wrkmem, source, dest, inputSize,
+ 		maxOutputSize, acceleration);
+ }
+-EXPORT_SYMBOL(LZ4_compress_fast);
+ 
+ int LZ4_compress_default(const char *source, char *dest, int inputSize,
+ 	int maxOutputSize, void *wrkmem)
+@@ -752,7 +751,7 @@ static int LZ4_compress_destSize_extState(
+ }
+ 
+ 
+-int LZ4_compress_destSize(
++static int LZ4_compress_destSize(
+ 	const char *src,
+ 	char *dst,
+ 	int *srcSizePtr,
+@@ -762,12 +761,11 @@ int LZ4_compress_destSize(
+ 	return LZ4_compress_destSize_extState(wrkmem, src, dst, srcSizePtr,
+ 		targetDstSize);
+ }
+-EXPORT_SYMBOL(LZ4_compress_destSize);
+ 
+ /*-******************************
+  *	Streaming functions
+  ********************************/
+-void LZ4_resetStream(LZ4_stream_t *LZ4_stream)
++static FORCE_INLINE void LZ4_resetStream(LZ4_stream_t *LZ4_stream)
+ {
+ 	memset(LZ4_stream, 0, sizeof(LZ4_stream_t));
+ }
+@@ -854,7 +852,7 @@ int LZ4_saveDict(LZ4_stream_t *LZ4_dict, char *safeBuffer, int dictSize)
+ }
+ EXPORT_SYMBOL(LZ4_saveDict);
+ 
+-int LZ4_compress_fast_continue(LZ4_stream_t *LZ4_stream, const char *source,
++static int LZ4_compress_fast_continue(LZ4_stream_t *LZ4_stream, const char *source,
+ 	char *dest, int inputSize, int maxOutputSize, int acceleration)
+ {
+ 	LZ4_stream_t_internal *streamPtr = &LZ4_stream->internal_donotuse;
+@@ -934,7 +932,6 @@ int LZ4_compress_fast_continue(LZ4_stream_t *LZ4_stream, const char *source,
+ 		return result;
+ 	}
+ }
+-EXPORT_SYMBOL(LZ4_compress_fast_continue);
+ 
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_DESCRIPTION("LZ4 compressor");
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index fd1728d94bab..c5f461e36ca3 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -466,7 +466,7 @@ int LZ4_decompress_safe(const char *source, char *dest,
+ 				      noDict, (BYTE *)dest, NULL, 0);
+ }
+ 
+-int LZ4_decompress_safe_partial(const char *src, char *dst,
++static int LZ4_decompress_safe_partial(const char *src, char *dst,
+ 	int compressedSize, int targetOutputSize, int dstCapacity)
+ {
+ 	dstCapacity = min(targetOutputSize, dstCapacity);
+@@ -507,7 +507,7 @@ static int LZ4_decompress_safe_withSmallPrefix(const char *source, char *dest,
+ 				      (BYTE *)dest - prefixSize, NULL, 0);
+ }
+ 
+-int LZ4_decompress_safe_forceExtDict(const char *source, char *dest,
++static int LZ4_decompress_safe_forceExtDict(const char *source, char *dest,
+ 				     int compressedSize, int maxOutputSize,
+ 				     const void *dictStart, size_t dictSize)
+ {
+@@ -561,7 +561,7 @@ int LZ4_decompress_fast_doubleDict(const char *source, char *dest,
+ 
+ /* ===== streaming decompression functions ===== */
+ 
+-int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *dictionary, int dictSize)
+ {
+ 	LZ4_streamDecode_t_internal *lz4sd =
+@@ -584,7 +584,7 @@ int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
+  * decoded data into a safe buffer,
+  * and indicate where it stands using LZ4_setStreamDecode()
+  */
+-int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *source, char *dest, int compressedSize, int maxOutputSize)
+ {
+ 	LZ4_streamDecode_t_internal *lz4sd =
+@@ -637,7 +637,7 @@ int LZ4_decompress_safe_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	return result;
+ }
+ 
+-int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
++static int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	const char *source, char *dest, int originalSize)
+ {
+ 	LZ4_streamDecode_t_internal *lz4sd = &LZ4_streamDecode->internal_donotuse;
+@@ -676,7 +676,7 @@ int LZ4_decompress_fast_continue(LZ4_streamDecode_t *LZ4_streamDecode,
+ 	return result;
+ }
+ 
+-int LZ4_decompress_safe_usingDict(const char *source, char *dest,
++static int LZ4_decompress_safe_usingDict(const char *source, char *dest,
+ 				  int compressedSize, int maxOutputSize,
+ 				  const char *dictStart, int dictSize)
+ {
+@@ -694,7 +694,7 @@ int LZ4_decompress_safe_usingDict(const char *source, char *dest,
+ 		compressedSize, maxOutputSize, dictStart, dictSize);
+ }
+ 
+-int LZ4_decompress_fast_usingDict(const char *source, char *dest,
++static int LZ4_decompress_fast_usingDict(const char *source, char *dest,
+ 				  int originalSize,
+ 				  const char *dictStart, int dictSize)
+ {
+@@ -706,15 +706,6 @@ int LZ4_decompress_fast_usingDict(const char *source, char *dest,
+ }
+ 
+ #ifndef STATIC
+-EXPORT_SYMBOL(LZ4_decompress_safe);
+-EXPORT_SYMBOL(LZ4_decompress_safe_partial);
+-EXPORT_SYMBOL(LZ4_decompress_fast);
+-EXPORT_SYMBOL(LZ4_setStreamDecode);
+-EXPORT_SYMBOL(LZ4_decompress_safe_continue);
+-EXPORT_SYMBOL(LZ4_decompress_fast_continue);
+-EXPORT_SYMBOL(LZ4_decompress_safe_usingDict);
+-EXPORT_SYMBOL(LZ4_decompress_fast_usingDict);
+-
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_DESCRIPTION("LZ4 decompressor");
+ #endif
+diff --git a/lib/lz4/lz4hc_compress.c b/lib/lz4/lz4hc_compress.c
+index e7ac8694b797..be8bfa09a74a 100644
+--- a/lib/lz4/lz4hc_compress.c
++++ b/lib/lz4/lz4hc_compress.c
+@@ -616,13 +616,13 @@ EXPORT_SYMBOL(LZ4_compress_HC);
+ /**************************************
+  *	Streaming Functions
+  **************************************/
+-void LZ4_resetStreamHC(LZ4_streamHC_t *LZ4_streamHCPtr, int compressionLevel)
++static void LZ4_resetStreamHC(LZ4_streamHC_t *LZ4_streamHCPtr, int compressionLevel)
+ {
+ 	LZ4_streamHCPtr->internal_donotuse.base = NULL;
+ 	LZ4_streamHCPtr->internal_donotuse.compressionLevel = (unsigned int)compressionLevel;
+ }
+ 
+-int LZ4_loadDictHC(LZ4_streamHC_t *LZ4_streamHCPtr,
++static int LZ4_loadDictHC(LZ4_streamHC_t *LZ4_streamHCPtr,
+ 	const char *dictionary,
+ 	int dictSize)
+ {
+@@ -638,7 +638,6 @@ int LZ4_loadDictHC(LZ4_streamHC_t *LZ4_streamHCPtr,
+ 	ctxPtr->end = (const BYTE *)dictionary + dictSize;
+ 	return dictSize;
+ }
+-EXPORT_SYMBOL(LZ4_loadDictHC);
+ 
+ /* compression */
+ 
+@@ -713,7 +712,7 @@ static int LZ4_compressHC_continue_generic(
+ 		inputSize, maxOutputSize, ctxPtr->compressionLevel, limit);
+ }
+ 
+-int LZ4_compress_HC_continue(
++static int LZ4_compress_HC_continue(
+ 	LZ4_streamHC_t *LZ4_streamHCPtr,
+ 	const char *source,
+ 	char *dest,
+@@ -727,11 +726,10 @@ int LZ4_compress_HC_continue(
+ 		return LZ4_compressHC_continue_generic(LZ4_streamHCPtr,
+ 			source, dest, inputSize, maxOutputSize, noLimit);
+ }
+-EXPORT_SYMBOL(LZ4_compress_HC_continue);
+ 
+ /* dictionary saving */
+ 
+-int LZ4_saveDictHC(
++static int LZ4_saveDictHC(
+ 	LZ4_streamHC_t *LZ4_streamHCPtr,
+ 	char *safeBuffer,
+ 	int dictSize)
+@@ -762,7 +760,6 @@ int LZ4_saveDictHC(
+ 	}
+ 	return dictSize;
+ }
+-EXPORT_SYMBOL(LZ4_saveDictHC);
+ 
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_DESCRIPTION("LZ4 HC compressor");
+-- 
+2.39.2
+

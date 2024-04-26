@@ -1,0 +1,201 @@
+From fc39d2f0559a2f9372680f210d9c30c4b8214657 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sun, 11 Jun 2023 16:35:00 -0400
+Subject: [PATCH] treewide: Fix various issues reported by clang
+
+Signed-off-by: electimon <electimon@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/soc/qcom/icnss2/main.c                              | 2 +-
+ drivers/soc/qcom/minidump_log.c                             | 2 +-
+ .../qca-wifi-host-cmn/hif/src/ce/ce_service_legacy.c        | 2 +-
+ .../qca-wifi-host-cmn/target_if/core/src/target_if_main.c   | 2 +-
+ .../staging/qcacld-3.0/core/mac/src/include/parser_api.h    | 2 +-
+ techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c             | 6 ------
+ techpack/audio/asoc/holi.c                                  | 4 ++--
+ techpack/camera/drivers/cam_ope/ope_hw_mgr/cam_ope_hw_mgr.c | 2 +-
+ techpack/camera/drivers/cam_utils/cam_debug_util.c          | 2 +-
+ techpack/display/msm/sde/sde_hw_dsc_1_2.c                   | 2 +-
+ techpack/display/msm/sde/sde_hw_vdc.c                       | 2 +-
+ 11 files changed, 11 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/soc/qcom/icnss2/main.c b/drivers/soc/qcom/icnss2/main.c
+index 51aff64aaa5c..969060b64181 100644
+--- a/drivers/soc/qcom/icnss2/main.c
++++ b/drivers/soc/qcom/icnss2/main.c
+@@ -116,7 +116,7 @@ static void icnss_set_plat_priv(struct icnss_priv *priv)
+ 	penv = priv;
+ }
+ 
+-static struct icnss_priv *icnss_get_plat_priv()
++static struct icnss_priv *icnss_get_plat_priv(void)
+ {
+ 	return penv;
+ }
+diff --git a/drivers/soc/qcom/minidump_log.c b/drivers/soc/qcom/minidump_log.c
+index 6d2310368f99..b71f782cc6ea 100644
+--- a/drivers/soc/qcom/minidump_log.c
++++ b/drivers/soc/qcom/minidump_log.c
+@@ -94,7 +94,7 @@ static size_t md_ftrace_buf_current;
+ 
+ static bool md_in_oops_handler;
+ static struct seq_buf *md_runq_seq_buf;
+-static md_align_offset;
++static int md_align_offset;
+ 
+ /* CPU context information */
+ #ifdef CONFIG_QCOM_MINIDUMP_PANIC_CPU_CONTEXT
+diff --git a/drivers/staging/qca-wifi-host-cmn/hif/src/ce/ce_service_legacy.c b/drivers/staging/qca-wifi-host-cmn/hif/src/ce/ce_service_legacy.c
+index 22929fff13c2..49c55f712da6 100644
+--- a/drivers/staging/qca-wifi-host-cmn/hif/src/ce/ce_service_legacy.c
++++ b/drivers/staging/qca-wifi-host-cmn/hif/src/ce/ce_service_legacy.c
+@@ -1317,7 +1317,7 @@ struct ce_ops ce_service_legacy = {
+ #endif
+ };
+ 
+-struct ce_ops *ce_services_legacy()
++struct ce_ops *ce_services_legacy(void)
+ {
+ 	return &ce_service_legacy;
+ }
+diff --git a/drivers/staging/qca-wifi-host-cmn/target_if/core/src/target_if_main.c b/drivers/staging/qca-wifi-host-cmn/target_if/core/src/target_if_main.c
+index f7617a50d565..237ad5eb4805 100644
+--- a/drivers/staging/qca-wifi-host-cmn/target_if/core/src/target_if_main.c
++++ b/drivers/staging/qca-wifi-host-cmn/target_if/core/src/target_if_main.c
+@@ -95,7 +95,7 @@
+ 
+ static struct target_if_ctx *g_target_if_ctx;
+ 
+-struct target_if_ctx *target_if_get_ctx()
++struct target_if_ctx *target_if_get_ctx(void)
+ {
+ 	return g_target_if_ctx;
+ }
+diff --git a/drivers/staging/qcacld-3.0/core/mac/src/include/parser_api.h b/drivers/staging/qcacld-3.0/core/mac/src/include/parser_api.h
+index ee86d543bfa5..ec6461a19d7d 100644
+--- a/drivers/staging/qcacld-3.0/core/mac/src/include/parser_api.h
++++ b/drivers/staging/qcacld-3.0/core/mac/src/include/parser_api.h
+@@ -1052,7 +1052,7 @@ QDF_STATUS populate_dot11f_rrm_ie(struct mac_context *mac,
+ 				struct pe_session *pe_session);
+ 
+ void populate_mdie(struct mac_context *mac, tDot11fIEMobilityDomain *pDot11f,
+-		   uint8_t mdie[]);
++		   uint8_t mdie[SIR_MDIE_SIZE]);
+ 
+ #ifdef WLAN_FEATURE_FILS_SK
+ /**
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+index 987ffd52e137..d86f8506f406 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+@@ -1323,7 +1323,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ {
+ 	int ret = -EINVAL;
+ 	uint32_t ctrl_value = 0;
+-	struct aw_device *aw_dev;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1332,8 +1331,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ 	aw_dev_dbg(aw882xx->dev, "ucontrol->value.integer.value[0]=%ld",
+ 			ucontrol->value.integer.value[0]);
+ 
+-	aw_dev = aw882xx->aw_pa;
+-
+ 	ctrl_value = ucontrol->value.integer.value[0];
+ 	if (aw882xx->pstream) {
+ 		ret = aw_dev_set_spin(ctrl_value);
+@@ -1350,7 +1347,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ static int aw882xx_get_spin(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+-	struct aw_device *aw_dev;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1358,8 +1354,6 @@ static int aw882xx_get_spin(struct snd_kcontrol *kcontrol,
+ 	int ctrl_value;
+ 	int ret = -EINVAL;
+ 
+-	aw_dev = aw882xx->aw_pa;
+-
+ 	if (aw882xx->pstream) {
+ 		ret = aw_dev_get_spin(&ctrl_value);
+ 		if (ret) {
+diff --git a/techpack/audio/asoc/holi.c b/techpack/audio/asoc/holi.c
+index 5351e2893a98..08da15c2efc0 100644
+--- a/techpack/audio/asoc/holi.c
++++ b/techpack/audio/asoc/holi.c
+@@ -764,7 +764,7 @@ static cpumask_t audio_cpu_map = CPU_MASK_NONE;
+ static struct dev_pm_qos_request *msm_audio_req = NULL;
+ static unsigned int qos_client_active_cnt = 0;
+ 
+-static void msm_audio_add_qos_request()
++static void msm_audio_add_qos_request(void)
+ {
+ 	int i;
+ 	int cpu = 0;
+@@ -793,7 +793,7 @@ static void msm_audio_add_qos_request()
+ 	}
+ }
+ 
+-static void msm_audio_remove_qos_request()
++static void msm_audio_remove_qos_request(void)
+ {
+ 	int cpu = 0;
+ 
+diff --git a/techpack/camera/drivers/cam_ope/ope_hw_mgr/cam_ope_hw_mgr.c b/techpack/camera/drivers/cam_ope/ope_hw_mgr/cam_ope_hw_mgr.c
+index 0bd8a844c297..e0591574547f 100644
+--- a/techpack/camera/drivers/cam_ope/ope_hw_mgr/cam_ope_hw_mgr.c
++++ b/techpack/camera/drivers/cam_ope/ope_hw_mgr/cam_ope_hw_mgr.c
+@@ -3496,7 +3496,7 @@ static int cam_ope_mgr_hw_open_u(void *hw_priv, void *fw_download_args)
+ 	return rc;
+ }
+ 
+-static cam_ope_mgr_hw_close_u(void *hw_priv, void *hw_close_args)
++static int cam_ope_mgr_hw_close_u(void *hw_priv, void *hw_close_args)
+ {
+ 	struct cam_ope_hw_mgr *hw_mgr;
+ 	int rc = 0;
+diff --git a/techpack/camera/drivers/cam_utils/cam_debug_util.c b/techpack/camera/drivers/cam_utils/cam_debug_util.c
+index 5f1a3f7f4876..f6c1764988ba 100644
+--- a/techpack/camera/drivers/cam_utils/cam_debug_util.c
++++ b/techpack/camera/drivers/cam_utils/cam_debug_util.c
+@@ -19,7 +19,7 @@ module_param(debug_type, uint, 0644);
+ 
+ struct camera_debug_settings cam_debug;
+ 
+-const struct camera_debug_settings *cam_debug_get_settings()
++const struct camera_debug_settings *cam_debug_get_settings(void)
+ {
+ 	return &cam_debug;
+ }
+diff --git a/techpack/display/msm/sde/sde_hw_dsc_1_2.c b/techpack/display/msm/sde/sde_hw_dsc_1_2.c
+index f58059381972..5ff361231870 100644
+--- a/techpack/display/msm/sde/sde_hw_dsc_1_2.c
++++ b/techpack/display/msm/sde/sde_hw_dsc_1_2.c
+@@ -77,7 +77,7 @@ static int _dsc_calc_ob_max_addr(struct sde_hw_dsc *hw_dsc, int num_ss)
+ 	return 0;
+ }
+ 
+-static inline _dsc_subblk_offset(struct sde_hw_dsc *hw_dsc, int s_id,
++static inline int _dsc_subblk_offset(struct sde_hw_dsc *hw_dsc, int s_id,
+ 		u32 *idx)
+ {
+ 	const struct sde_dsc_sub_blks *sblk;
+diff --git a/techpack/display/msm/sde/sde_hw_vdc.c b/techpack/display/msm/sde/sde_hw_vdc.c
+index f806d334bcff..074e5aab3f5c 100644
+--- a/techpack/display/msm/sde/sde_hw_vdc.c
++++ b/techpack/display/msm/sde/sde_hw_vdc.c
+@@ -64,7 +64,7 @@
+ 
+ #define VDC_CTL_BLOCK_SIZE         0x300
+ 
+-static inline _vdc_subblk_offset(struct sde_hw_vdc *hw_vdc, int s_id,
++static inline int _vdc_subblk_offset(struct sde_hw_vdc *hw_vdc, int s_id,
+ 		u32 *idx)
+ {
+ 	int rc = 0;
+-- 
+2.39.2
+

@@ -1,0 +1,31 @@
+From aeb54ad650f7a48149f22ce124ddf064e2643f49 Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@kerneltoast.com>
+Date: Fri, 1 Sep 2023 12:29:06 +0530
+Subject: [PATCH] ARM64: configs: Disable stack frame size warning
+
+The stack frame size warning can be deceptive when it is clear that a
+function with a large frame size won't cause stack overflows given how
+it is used. Since this warning is more of a nuisance rather than
+helpful, disable it.
+
+Change-Id: I5e27a1adc6644c23f0dce4a35b54ecb8d823a846
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 0cad46f6fa20..d4000ec2c688 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -870,6 +870,7 @@ CONFIG_DYNAMIC_DEBUG_CORE=y
+ CONFIG_DEBUG_INFO=y
+ CONFIG_DEBUG_INFO_DWARF4=y
+ # CONFIG_ENABLE_MUST_CHECK is not set
++CONFIG_FRAME_WARN=0
+ CONFIG_HEADERS_INSTALL=y
+ # CONFIG_SECTION_MISMATCH_WARN_ONLY is not set
+ CONFIG_MAGIC_SYSRQ=y
+-- 
+2.39.2
+

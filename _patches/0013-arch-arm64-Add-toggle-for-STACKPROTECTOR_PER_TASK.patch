@@ -1,0 +1,34 @@
+From 01c92a99ccbefbc26b3a42af8601dbfd423cb0a6 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sun, 11 Jun 2023 23:34:52 -0400
+Subject: [PATCH] arch: arm64: Add toggle for STACKPROTECTOR_PER_TASK
+
+* TI provides algorithm code as a linked object,
+  breaking builds that omit __stack_chk_guard.
+
+Signed-off-by: electimon <electimon@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/Kconfig | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index bcb062773076..56a36a2df8c5 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -1698,7 +1698,11 @@ config CC_HAVE_STACKPROTECTOR_SYSREG
+ 
+ config STACKPROTECTOR_PER_TASK
+ 	def_bool y
+-	depends on STACKPROTECTOR && CC_HAVE_STACKPROTECTOR_SYSREG
++	depends on STACKPROTECTOR && CC_HAVE_STACKPROTECTOR_SYSREG && STACKPROTECTOR_PER_TASK_ENABLED
++
++config STACKPROTECTOR_PER_TASK_ENABLED
++	default y
++	bool "Enable per task stack protector"
+ 
+ endmenu
+ 
+-- 
+2.39.2
+

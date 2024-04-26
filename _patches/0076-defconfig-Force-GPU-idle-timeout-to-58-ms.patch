@@ -1,0 +1,46 @@
+From 90caa6f7300a9a08931affa064294081f7dad6e3 Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@kerneltoast.com>
+Date: Sat, 26 Dec 2020 10:55:58 -0800
+Subject: [PATCH] defconfig: Force GPU idle timeout to 58 ms
+
+This matches the ULPS timeout used in msm_drm, which is defined as 58 ms
+by IDLE_POWERCOLLAPSE_DURATION. No need to keep the GPU running after
+the display enters a low-power state.
+
+[ghostrider-reborn: use config instead of dts for k5.4]
+
+Change-Id: I3c6f714b81ac9a5ed51a891e83bbf410c81c67e6
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ drivers/gpu/msm/Kconfig                    | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 99f226677b2c..b05febbf402d 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -493,6 +493,7 @@ CONFIG_QCOM_KGSL=y
+ CONFIG_DEVFREQ_GOV_QCOM_ADRENO_TZ=y
+ CONFIG_DEVFREQ_GOV_QCOM_GPUBW_MON=y
+ CONFIG_QCOM_KGSL_CONTEXT_DEBUG=y
++CONFIG_QCOM_KGSL_IDLE_TIMEOUT=58
+ CONFIG_BACKLIGHT_CLASS_DEVICE=y
+ CONFIG_BACKLIGHT_QCOM_SPMI_WLED=y
+ CONFIG_SOUND=y
+diff --git a/drivers/gpu/msm/Kconfig b/drivers/gpu/msm/Kconfig
+index fc01862f5641..21e247387da1 100644
+--- a/drivers/gpu/msm/Kconfig
++++ b/drivers/gpu/msm/Kconfig
+@@ -54,7 +54,7 @@ config QCOM_KGSL_IOCOHERENCY_DEFAULT
+ 	 the user can still selectively enable I/O coherency with a flag.
+ 
+ config QCOM_KGSL_IDLE_TIMEOUT
+-	int
++	int "GPU idle timeout value"
+ 	default 100000 if !QGKI
+ 	default 80
+ 	help
+-- 
+2.39.2
+

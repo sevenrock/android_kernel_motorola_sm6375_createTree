@@ -1,0 +1,76 @@
+From 0b04e6976ec38dbfe0560482d222ebc44bf8ab58 Mon Sep 17 00:00:00 2001
+From: Kazuki Hashimoto <kazukih@tuta.io>
+Date: Fri, 15 Jul 2022 15:32:24 +0900
+Subject: [PATCH] lz4: Remove unused functions
+
+Signed-off-by: Kazuki Hashimoto <kazukih@tuta.io>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/04b0b48f05ec7be9a5b28ff772171da5cb42b059
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 41 +---------------------------------------
+ 1 file changed, 1 insertion(+), 40 deletions(-)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index 6ba14966732c..fb7bc5580164 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -330,7 +330,7 @@ static FORCE_INLINE int LZ4_decompress_generic(
+ 			}
+ 
+ 			/* Fastpath check: Avoids a branch in LZ4_wildCopy32 if true */
+-			if (!(dict == usingExtDict) || (match >= lowPrefix)) {
++			if ((match >= lowPrefix)) {
+ 				if (offset >= 8) {
+ 					memcpy(op, match, 8);
+ 					memcpy(op + 8, match + 8, 8);
+@@ -341,45 +341,6 @@ static FORCE_INLINE int LZ4_decompress_generic(
+ 			}
+ 		}
+ 
+-		/* match starting within external dictionary */
+-		if ((dict == usingExtDict) && (match < lowPrefix)) {
+-			if (unlikely(op + length > oend - LASTLITERALS)) {
+-				if (partialDecoding) {
+-					/* reach end of buffer */
+-					length =
+-					    min(length, (size_t) (oend - op));
+-				} else {
+-					/* end-of-block condition violated */
+-					goto _output_error;
+-				}
+-			}
+-
+-			if (length <= (size_t) (lowPrefix - match)) {
+-				/* match fits entirely within external dictionary : just copy */
+-				memmove(op, dictEnd - (lowPrefix - match),
+-					length);
+-				op += length;
+-			} else {
+-				/* match stretches into both external dict and current block */
+-				size_t const copySize =
+-				    (size_t) (lowPrefix - match);
+-				size_t const restSize = length - copySize;
+-				memcpy(op, dictEnd - copySize, copySize);
+-				op += copySize;
+-				if (restSize > (size_t) (op - lowPrefix)) {	/* overlap copy */
+-					BYTE *const endOfMatch = op + restSize;
+-					const BYTE *copyFrom = lowPrefix;
+-					while (op < endOfMatch) {
+-						*op++ = *copyFrom++;
+-					}
+-				} else {
+-					memcpy(op, lowPrefix, restSize);
+-					op += restSize;
+-				}
+-			}
+-			continue;
+-		}
+-
+ 		/* copy match within block */
+ 		cpy = op + length;
+ 
+-- 
+2.39.2
+

@@ -1,0 +1,26 @@
+From 3003c81c1f3db6724ad6b4fad9565ba3fba3e262 Mon Sep 17 00:00:00 2001
+From: Notkerd69 <jerespn@gmail.com>
+Date: Fri, 15 Mar 2024 00:24:20 +0000
+Subject: [PATCH] rhodep: Disable CONFIG_MTK_TIMER
+
+Signed-off-by: Notkerd69 <jerespn@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index bcde52630592..2eb220b09743 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -632,7 +632,6 @@ CONFIG_SM_DEBUGCC_BLAIR=y
+ CONFIG_HWSPINLOCK=y
+ CONFIG_HWSPINLOCK_QCOM=y
+ CONFIG_SUN4I_TIMER=y
+-CONFIG_MTK_TIMER=y
+ CONFIG_MAILBOX=y
+ CONFIG_MSM_QMP=y
+ CONFIG_IOMMU_LIMIT_IOVA_ALIGNMENT=y
+-- 
+2.39.2
+

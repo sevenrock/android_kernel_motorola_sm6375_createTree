@@ -1,0 +1,28 @@
+From c45a3874eceb202f2f4484165f47abd73974293a Mon Sep 17 00:00:00 2001
+From: Park Ju Hyung <qkrwngud825@gmail.com>
+Date: Sun, 24 Feb 2019 01:35:10 +0900
+Subject: [PATCH] qcacld-3.0: Always force user build.
+
+Change-Id: I8cf9709bc29fde1e41b06f0811f74684161e4cc1
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/staging/qcacld-3.0/Kbuild | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/staging/qcacld-3.0/Kbuild b/drivers/staging/qcacld-3.0/Kbuild
+index 4fe62e5cf81c..9f7bf6b928b0 100644
+--- a/drivers/staging/qcacld-3.0/Kbuild
++++ b/drivers/staging/qcacld-3.0/Kbuild
+@@ -6,6 +6,9 @@ else
+ 	KERNEL_BUILD := n
+ endif
+ 
++# Force user build
++TARGET_BUILD_VARIANT := user
++
+ ifeq ($(KERNEL_BUILD), y)
+ 	# These are provided in external module based builds
+ 	# Need to explicitly define for Kernel-based builds
+-- 
+2.39.2
+

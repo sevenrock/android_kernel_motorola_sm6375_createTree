@@ -1,0 +1,38 @@
+From 430a5df88895965c5bb29b606c4f1b6793236007 Mon Sep 17 00:00:00 2001
+From: LuK1337 <priv.luk@gmail.com>
+Date: Wed, 28 Mar 2018 02:55:32 +0200
+Subject: [PATCH] drivers: staging: Include QCACLD 3.0 sources.
+
+ * Also remove Android.mk as it overwrites our kernel
+   source path.
+
+Change-Id: I6bca60fec211d320c7fb2f1541daf225a1671715
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/staging/Kconfig  | 2 ++
+ drivers/staging/Makefile | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/drivers/staging/Kconfig b/drivers/staging/Kconfig
+index 50453bf8ad77..a3252dc447cd 100644
+--- a/drivers/staging/Kconfig
++++ b/drivers/staging/Kconfig
+@@ -123,4 +123,6 @@ source "drivers/staging/uwb/Kconfig"
+ 
+ source "drivers/staging/qlge/Kconfig"
+ 
++source "drivers/staging/qcacld-3.0/Kconfig"
++
+ endif # STAGING
+diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
+index a080ed5ba62c..f860dcbf7aba 100644
+--- a/drivers/staging/Makefile
++++ b/drivers/staging/Makefile
+@@ -52,3 +52,4 @@ obj-$(CONFIG_ISDN_CAPI)		+= isdn/
+ obj-$(CONFIG_UWB)		+= uwb/
+ obj-$(CONFIG_USB_WUSB)		+= wusbcore/
+ obj-$(CONFIG_QLGE)		+= qlge/
++obj-$(CONFIG_QCA_CLD_WLAN)	+= qcacld-3.0/
+-- 
+2.39.2
+

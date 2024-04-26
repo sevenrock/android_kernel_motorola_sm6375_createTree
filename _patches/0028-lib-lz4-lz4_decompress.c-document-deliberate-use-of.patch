@@ -1,0 +1,39 @@
+From c817863bdfc174c15b0eae042869695d4f43db38 Mon Sep 17 00:00:00 2001
+From: Joe Perches <joe@perches.com>
+Date: Wed, 10 Jun 2020 18:41:32 -0700
+Subject: [PATCH] lib/lz4/lz4_decompress.c: document deliberate use of `&'
+
+This operation was intentional, but tools such as smatch will warn that it
+might not have been.
+
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Cc: Yann Collet <cyan@fb.com>
+Cc: Vasily Averin <vvs@virtuozzo.com>
+Cc: Gao Xiang <hsiangkao@aol.com>
+Link: http://lkml.kernel.org/r/3bf931c6ea0cae3e23f3485801986859851b4f04.camel@perches.com
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/03594154b5832026ee27d6aebdbae52af3f2ad3c
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index 0bc05b447f33..ad91309b2190 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -141,6 +141,9 @@ static FORCE_INLINE int LZ4_decompress_generic(
+ 		 * space in the output for those 18 bytes earlier, upon
+ 		 * entering the shortcut (in other words, there is a
+ 		 * combined check for both stages).
++		 *
++		 * The & in the likely() below is intentionally not && so that
++		 * some compilers can produce better parallelized runtime code
+ 		 */
+ 		if ((endOnInput ? length != RUN_MASK : length <= 8)
+ 		   /*
+-- 
+2.39.2
+

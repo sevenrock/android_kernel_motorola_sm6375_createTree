@@ -1,0 +1,40 @@
+From b1b4defc6104bd84dc4407a90262cc9a6f5f27c4 Mon Sep 17 00:00:00 2001
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Date: Thu, 3 Aug 2017 15:58:41 +0530
+Subject: [PATCH] defconfig: Enable power efficient workqueues
+
+commit cee22a15052f ("workqueues: Introduce new flag WQ_POWER_EFFICIENT
+for power oriented workqueues") introduced the concept of power
+efficient workqueues (4 years back), but it was never enabled in
+upstream kernel configs.
+
+Power efficient workqueues are simply marked as "unbound," so that jobs
+queued to them can run on any CPU in the system. It leaves the target
+CPU selection to the scheduler, which is the best place for such
+decision making. This improves power efficiency for workqueues which are
+otherwise pinned to a CPU.
+
+Enable it for ARM64 platforms as ARM platforms were the main target for
+the introduction of power efficient workqueues.
+
+Change-Id: I6eefe1e967701c62e557c0db7820c281b1349d08
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index d49de427c5c6..99f226677b2c 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -79,6 +79,7 @@ CONFIG_SUSPEND_SKIP_SYNC=y
+ CONFIG_PM_WAKELOCKS=y
+ CONFIG_PM_WAKELOCKS_LIMIT=0
+ # CONFIG_PM_WAKELOCKS_GC is not set
++CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
+ CONFIG_ENERGY_MODEL=y
+ CONFIG_CPU_IDLE=y
+ CONFIG_ARM_QCOM_LPM_CPUIDLE=y
+-- 
+2.39.2
+

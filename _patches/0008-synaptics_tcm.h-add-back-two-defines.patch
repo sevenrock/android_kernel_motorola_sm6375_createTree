@@ -1,0 +1,29 @@
+From b67f22d388a86e692c8486ea0e4a96460b5b0fa1 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sat, 20 Aug 2022 18:48:05 +0200
+Subject: [PATCH] synaptics_tcm.h: add back two defines
+
+They were removed before merging motorola-kernel-modules/android-12-release-ssu
+in patch "remove files to prevent merge errors with motorola-kernel-modules"
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ include/linux/input/synaptics_tcm.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/linux/input/synaptics_tcm.h b/include/linux/input/synaptics_tcm.h
+index d324a332c506..79cc668f698b 100644
+--- a/include/linux/input/synaptics_tcm.h
++++ b/include/linux/input/synaptics_tcm.h
+@@ -59,6 +59,8 @@ struct syna_tcm_board_data {
+ 	unsigned long irq_flags;
+ 	const char *pwr_reg_name;
+ 	const char *bus_reg_name;
++	const char *fw_name;
++	bool extend_report;
+ };
+ 
+ #endif
+-- 
+2.39.2
+

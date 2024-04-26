@@ -1,0 +1,35 @@
+From 18af066bafacfce6d2d35e6e07630a04c2ff5dc6 Mon Sep 17 00:00:00 2001
+From: Chenyang Zhong <zhongcy95@gmail.com>
+Date: Sat, 18 Jun 2022 22:29:15 -0400
+Subject: [PATCH] lib/lz4: fix token in slow decompress loop
+
+Looks like Chenxi Mao missed a line in the non-fast-decode path
+when doing the backport.
+
+ref:
+https://github.com/lz4/lz4/blob/v1.9.3/lib/lz4.c#L1930
+
+Signed-off-by: Chenyang Zhong <zhongcy95@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/6813173e58bb7217e6f0fcf606cc0a36ed2d7478
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ lib/lz4/lz4_decompress.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/lz4/lz4_decompress.c b/lib/lz4/lz4_decompress.c
+index f1b024311742..6ba14966732c 100644
+--- a/lib/lz4/lz4_decompress.c
++++ b/lib/lz4/lz4_decompress.c
+@@ -396,6 +396,7 @@ static FORCE_INLINE int LZ4_decompress_generic(
+ #endif
+ 	/* Main Loop : decode sequences */
+ 	while (1) {
++		token = *ip++;
+ 		length = token >> ML_BITS;
+ 
+ 		/* ip < iend before the increment */
+-- 
+2.39.2
+

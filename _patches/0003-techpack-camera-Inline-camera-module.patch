@@ -1,0 +1,35 @@
+From 85d1dc42af9662ba1a03c6c962f1a98d6b98a635 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sat, 6 Nov 2021 03:54:03 +0000
+Subject: [PATCH] techpack: camera: Inline camera module
+
+* Yeah i'm not making camera a module lol
+
+Signed-off-by: electimon <electimon@gmail.com>
+
+Original patch:
+https://github.com/moto-sm4350/kernel_motorola_osaka/commit/08645d2c10240a8dbeac5be4219b19900e0362b3
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/camera/config/holicamera.conf | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/techpack/camera/config/holicamera.conf b/techpack/camera/config/holicamera.conf
+index 85bc1dae00c6..0a15904a3a91 100644
+--- a/techpack/camera/config/holicamera.conf
++++ b/techpack/camera/config/holicamera.conf
+@@ -1,8 +1,8 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ # Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ 
+-$(info "HOLI SPECTRA_CAMERA IS MODULAR")
+-export CONFIG_SPECTRA_CAMERA=m
++#$(info "HOLI SPECTRA_CAMERA IS MODULAR")
++export CONFIG_SPECTRA_CAMERA=y
+ 
+ ifneq (,$(filter $(CONFIG_SPECTRA_CAMERA), y m))
+ export CONFIG_SPECTRA_ISP=y
+-- 
+2.39.2
+

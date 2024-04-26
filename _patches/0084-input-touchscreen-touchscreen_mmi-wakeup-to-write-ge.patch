@@ -1,0 +1,223 @@
+From 132b6ce1417944d08a5b4e50f2ee3a5f982d431d Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Sat, 14 Jan 2023 02:06:08 +0200
+Subject: [PATCH] input: touchscreen: touchscreen_mmi: wakeup to write gestures
+
+Change-Id: I839dad6e7123eb49bd328bb02b5e826d6b009add
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../touchscreen_mmi/touchscreen_mmi_class.c   | 75 ++++++++++++-------
+ .../touchscreen_mmi/touchscreen_mmi_gesture.c | 19 +++--
+ .../touchscreen_mmi/touchscreen_mmi_notif.c   | 11 +++
+ include/linux/touchscreen_mmi.h               |  7 ++
+ 4 files changed, 80 insertions(+), 32 deletions(-)
+
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+index ab18816606d4..03d6a5e6b72c 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+@@ -338,51 +338,72 @@ static ssize_t gesture_show(struct device *dev,
+ 
+ 	return scnprintf(buf, PAGE_SIZE, "%02x\n", touch_cdev->pdata.supported_gesture_type);
+ }
++
++static bool _gesture_set(struct ts_mmi_dev *touch_cdev,
++			 unsigned long bit, bool val)
++{
++	bool current_val = touch_cdev->gesture_mode_type & bit;
++
++	if (current_val == val)
++		return false;
++
++	if (val)
++		touch_cdev->gesture_mode_type |= bit;
++	else
++		touch_cdev->gesture_mode_type &= ~bit;
++
++	return val;
++}
++
++static void gesture_sync(struct ts_mmi_dev *touch_cdev)
++{
++	kfifo_put(&touch_cdev->cmd_pipe, TS_MMI_SET_GESTURES);
++	schedule_delayed_work(&touch_cdev->work, 0);
++}
++
++static void gesture_set(struct ts_mmi_dev *touch_cdev,
++			unsigned long bit, bool enable)
++{
++	bool sync;
++
++	mutex_lock(&touch_cdev->extif_mutex);
++	sync = _gesture_set(touch_cdev, bit, enable);
++	mutex_unlock(&touch_cdev->extif_mutex);
++
++	if (sync)
++		gesture_sync(touch_cdev);
++}
++
+ static ssize_t gesture_store(struct device *dev,
+ 			struct device_attribute *attr, const char *buf, size_t size)
+ {
+ 	struct ts_mmi_dev *touch_cdev = dev_get_drvdata(dev);
+ 	unsigned int value = 0;
++	unsigned long bit;
+ 	int err = 0;
+ 
+-	mutex_lock(&touch_cdev->extif_mutex);
+ 	err = sscanf(buf, "%d", &value);
+ 	if (err < 0) {
+ 		dev_err(dev, "forcereflash: Failed to convert value\n");
+ 		mutex_unlock(&touch_cdev->extif_mutex);
+ 		return -EINVAL;
+ 	}
+-	switch (value) {
+-		case 0x10:
+-			dev_info(dev, "%s: zero tap disable\n", __func__);
+-			touch_cdev->gesture_mode_type &= 0xFE;
+-			break;
+-		case 0x11:
+-			dev_info(dev, "%s: zero tap enable\n", __func__);
+-			touch_cdev->gesture_mode_type |= 0x01;
+-			break;
+-		case 0x20:
+-			dev_info(dev, "%s: single tap disable\n", __func__);
+-			touch_cdev->gesture_mode_type &= 0xFD;
+-			break;
+-		case 0x21:
+-			dev_info(dev, "%s: single tap enable\n", __func__);
+-			touch_cdev->gesture_mode_type |= 0x02;
++
++	switch (value >> 4) {
++		case 0x1:
++			bit = TS_MMI_GESTURE_ZERO;
+ 			break;
+-		case 0x30:
+-			dev_info(dev, "%s: double tap disable\n", __func__);
+-			touch_cdev->gesture_mode_type &= 0xFB;
++		case 0x2:
++			bit = TS_MMI_GESTURE_SINGLE;
+ 			break;
+-		case 0x31:
+-			dev_info(dev, "%s: double tap enable\n", __func__);
+-			touch_cdev->gesture_mode_type |= 0x04;
++		case 0x3:
++			bit = TS_MMI_GESTURE_DOUBLE;
+ 			break;
+ 		default:
+-			dev_info(dev, "%s: unsupport gesture mode type\n", __func__);
+-			;
++			return size;
+ 	}
+-	mutex_unlock(&touch_cdev->extif_mutex);
+-	dev_info(dev, "%s: gesture_mode_type = 0x%02x \n", __func__, touch_cdev->gesture_mode_type);
++
++	gesture_set(touch_cdev, bit, value & 0x1);
+ 
+ 	return size;
+ }
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+index cc079cb54ae8..415561fe1549 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+@@ -212,15 +212,21 @@ static inline void update_poison_center(struct touch_event_data *tev)
+ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ {
+ 	int key_code;
+-	bool need2report = true;
+ 	struct ts_mmi_dev *touch_cdev = sensor_pdata->touch_cdev;
++	unsigned char mode_type = touch_cdev->gesture_mode_type;
+ 
+ 	switch (gev->evcode) {
+ 	case 1:
++		if (!(mode_type & TS_MMI_GESTURE_SINGLE))
++			return 1;
++
+ 		key_code = KEY_F1;
+ 		pr_info("%s: single tap\n", __func__);
+ 			break;
+ 	case 2:
++		if (!(mode_type & TS_MMI_GESTURE_ZERO))
++			return 1;
++
+ 		key_code = KEY_F2;
+ 		if(gev->evdata.x == 0)
+ 			gev->evdata.x = touch_cdev->pdata.fod_x ;
+@@ -231,20 +237,23 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ 		pr_info("%s: zero tap; x=%x, y=%x\n", __func__, gev->evdata.x, gev->evdata.y);
+ 		break;
+ 	case 3:
++		if (!(mode_type & TS_MMI_GESTURE_ZERO))
++			return 1;
++
+ 		key_code = KEY_F3;
+ 		pr_info("%s: zero tap up\n", __func__);
+ 		break;
+ 	case 4:
++		if (!(mode_type & TS_MMI_GESTURE_DOUBLE))
++			return 1;
++
+ 		key_code = KEY_F4;
+ 		pr_info("%s: double tap\n", __func__);
+ 		break;
+ 	default:
+-		need2report = false;
+ 		pr_info("%s: unknown id=%x\n", __func__, gev->evcode);
+-	}
+-
+-	if (!need2report)
+ 		return 1;
++	}
+ 
+ 	input_report_key(sensor_pdata->input_sensor_dev, key_code, 1);
+ 	input_sync(sensor_pdata->input_sensor_dev);
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+index 3c7c048e779a..de276a7d8bfc 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+@@ -450,6 +450,17 @@ static void ts_mmi_worker_func(struct work_struct *w)
+ 				TRY_TO_CALL(update_liquid_detect_mode, touch_cdev->lpd_state);
+ 				break;
+ 
++		case TS_MMI_SET_GESTURES:
++			if (!atomic_read(&touch_cdev->touch_stopped))
++				break;
++
++			ts_mmi_queued_power_on(touch_cdev);
++			ts_mmi_queued_resume(touch_cdev);
++			ts_mmi_queued_stop(touch_cdev);
++			ts_mmi_queued_power_off(touch_cdev);
++
++			break;
++
+ 		default:
+ 			dev_dbg(DEV_MMI, "%s: unknown command %d\n", __func__, cmd);
+ 		}
+diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
+index 8c6424f1b762..b6123afb4906 100644
+--- a/include/linux/touchscreen_mmi.h
++++ b/include/linux/touchscreen_mmi.h
+@@ -296,6 +296,12 @@ enum ts_mmi_pm_mode {
+ 	TS_MMI_PM_GESTURE_SWITCH,
+ };
+ 
++enum ts_mmi_gesture_bit {
++	TS_MMI_GESTURE_ZERO = BIT(0),
++	TS_MMI_GESTURE_SINGLE = BIT(1),
++	TS_MMI_GESTURE_DOUBLE = BIT(2),
++};
++
+ enum ts_mmi_panel_event {
+ 	TS_MMI_EVENT_PRE_DISPLAY_OFF,
+ 	TS_MMI_EVENT_PRE_DISPLAY_ON,
+@@ -315,6 +321,7 @@ enum ts_mmi_work {
+ 	TS_MMI_DO_FPS,
+ 	TS_MMI_TASK_INIT,
+ 	TS_MMI_DO_LIQUID_DETECTION,
++	TS_MMI_SET_GESTURES,
+ };
+ 
+ #define TS_MMI_RESET_SOFT	0
+-- 
+2.39.2
+

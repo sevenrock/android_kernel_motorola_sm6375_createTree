@@ -1,0 +1,304 @@
+From a976d4b5976f07d82b98643b69b2388d8a2beb7b Mon Sep 17 00:00:00 2001
+From: Park Ju Hyung <qkrwngud825@gmail.com>
+Date: Thu, 7 Mar 2019 11:11:33 +0900
+Subject: [PATCH] qcacld-3.0: Nuke rx_wakelock code entirely.
+
+qcom_rx_wakelock is one of the major culprit to increased power consumption.
+
+Although its total wakelock time is quite low, it's catched very frequently
+and prevents the system from entering suspend repeatedly.
+
+Original intention of this wakelock is to prevent dropping unicast or
+local ARP packet, but I'm having a hard time understanding why are those
+packets critical to regular Android users.
+
+qcacld's packet filter will still allow notifications to flow in.
+
+Stop allowing this to be configurable on this kernel.
+Nuke this entirely to reduce resource usage.
+
+Change-Id: I8ae655b871e58dc1c9a880c831cc6a5e2d118594
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../qcacld-3.0/core/hdd/inc/hdd_dp_cfg.h      | 25 ------
+ .../qcacld-3.0/core/hdd/inc/wlan_hdd_cfg.h    |  1 -
+ .../qcacld-3.0/core/hdd/inc/wlan_hdd_main.h   |  1 -
+ .../qcacld-3.0/core/hdd/src/wlan_hdd_main.c   | 31 -------
+ .../core/hdd/src/wlan_hdd_softap_tx_rx.c      | 13 ---
+ .../qcacld-3.0/core/hdd/src/wlan_hdd_tx_rx.c  | 85 -------------------
+ 6 files changed, 156 deletions(-)
+
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/inc/hdd_dp_cfg.h b/drivers/staging/qcacld-3.0/core/hdd/inc/hdd_dp_cfg.h
+index 07008ca95f77..53a675984c90 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/inc/hdd_dp_cfg.h
++++ b/drivers/staging/qcacld-3.0/core/hdd/inc/hdd_dp_cfg.h
+@@ -1160,30 +1160,6 @@
+ 	CFG_INI_BOOL("enable_multicast_replay_filter", \
+ 	true, "Enable filtering of replayed multicast packets")
+ 
+-/*
+- * <ini>
+- * rx_wakelock_timeout - Amount of time to hold wakelock for RX unicast packets
+- * @Min: 0
+- * @Max: 100
+- * @Default: 50
+- *
+- * This ini item configures the amount of time, in milliseconds, that the driver
+- * should prevent system power collapse after receiving an RX unicast packet.
+- * A conigured value of 0 disables the RX Wakelock feature completely.
+- *
+- * Related: None.
+- *
+- * Supported Feature: RX Wakelock
+- *
+- * Usage: Internal/External
+- *
+- * </ini>
+- */
+-#define CFG_DP_RX_WAKELOCK_TIMEOUT \
+-	CFG_INI_UINT("rx_wakelock_timeout", \
+-	0, 100, 50, CFG_VALUE_OR_DEFAULT, \
+-	"Amount of time to hold wakelock for RX unicast packets")
+-
+ /*
+  * <ini>
+  * num_dp_rx_threads - Control to set the number of dp rx threads
+@@ -1535,7 +1511,6 @@
+ 	CFG(CFG_DP_CE_SERVICE_MAX_YIELD_TIME) \
+ 	CFG(CFG_DP_ENABLE_TCP_PARAM_UPDATE) \
+ 	CFG(CFG_DP_FILTER_MULTICAST_REPLAY) \
+-	CFG(CFG_DP_RX_WAKELOCK_TIMEOUT) \
+ 	CFG(CFG_DP_NUM_DP_RX_THREADS) \
+ 	CFG(CFG_DP_HTC_WMI_CREDIT_CNT) \
+ 	CFG(CFG_DP_ICMP_REQ_TO_FW_MARK_INTERVAL) \
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_cfg.h b/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_cfg.h
+index e56281f917d1..13d2e62a2734 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_cfg.h
++++ b/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_cfg.h
+@@ -205,7 +205,6 @@ struct hdd_config {
+ 	uint32_t rx_thread_affinity_mask;
+ 	uint8_t cpu_map_list[CFG_DP_RPS_RX_QUEUE_CPU_MAP_LIST_LEN];
+ 	bool multicast_replay_filter;
+-	uint32_t rx_wakelock_timeout;
+ 	uint8_t num_dp_rx_threads;
+ #ifdef CONFIG_DP_TRACE
+ 	bool enable_dp_trace;
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_main.h b/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_main.h
+index 5d74543caefc..003c5b51502a 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_main.h
++++ b/drivers/staging/qcacld-3.0/core/hdd/inc/wlan_hdd_main.h
+@@ -1960,7 +1960,6 @@ struct hdd_context {
+ 	/** P2P Device MAC Address for the adapter  */
+ 	struct qdf_mac_addr p2p_device_address;
+ 
+-	qdf_wake_lock_t rx_wake_lock;
+ 	qdf_wake_lock_t sap_wake_lock;
+ 
+ 	/* Flag keeps track of wiphy suspend/resume */
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c
+index cdd8b2c3dfb3..86b0d27e2802 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c
++++ b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c
+@@ -9308,32 +9308,6 @@ static int hdd_init_netlink_services(struct hdd_context *hdd_ctx)
+ 	return ret;
+ }
+ 
+-/**
+- * hdd_rx_wake_lock_destroy() - Destroy RX wakelock
+- * @hdd_ctx:	HDD context.
+- *
+- * Destroy RX wakelock.
+- *
+- * Return: None.
+- */
+-static void hdd_rx_wake_lock_destroy(struct hdd_context *hdd_ctx)
+-{
+-	qdf_wake_lock_destroy(&hdd_ctx->rx_wake_lock);
+-}
+-
+-/**
+- * hdd_rx_wake_lock_create() - Create RX wakelock
+- * @hdd_ctx:	HDD context.
+- *
+- * Create RX wakelock.
+- *
+- * Return: None.
+- */
+-static void hdd_rx_wake_lock_create(struct hdd_context *hdd_ctx)
+-{
+-	qdf_wake_lock_create(&hdd_ctx->rx_wake_lock, "qcom_rx_wakelock");
+-}
+-
+ /**
+  * hdd_context_deinit() - Deinitialize HDD context
+  * @hdd_ctx:    HDD context.
+@@ -9352,8 +9326,6 @@ static int hdd_context_deinit(struct hdd_context *hdd_ctx)
+ 
+ 	hdd_sap_context_destroy(hdd_ctx);
+ 
+-	hdd_rx_wake_lock_destroy(hdd_ctx);
+-
+ 	hdd_scan_context_destroy(hdd_ctx);
+ 
+ 	qdf_list_destroy(&hdd_ctx->hdd_adapters);
+@@ -12407,8 +12379,6 @@ static int hdd_context_init(struct hdd_context *hdd_ctx)
+ 	if (ret)
+ 		goto list_destroy;
+ 
+-	hdd_rx_wake_lock_create(hdd_ctx);
+-
+ 	ret = hdd_sap_context_init(hdd_ctx);
+ 	if (ret)
+ 		goto scan_destroy;
+@@ -12432,7 +12402,6 @@ static int hdd_context_init(struct hdd_context *hdd_ctx)
+ 
+ scan_destroy:
+ 	hdd_scan_context_destroy(hdd_ctx);
+-	hdd_rx_wake_lock_destroy(hdd_ctx);
+ list_destroy:
+ 	qdf_list_destroy(&hdd_ctx->hdd_adapters);
+ 
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_softap_tx_rx.c b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_softap_tx_rx.c
+index 4bdd7cae9fdb..bdf788dc5d89 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_softap_tx_rx.c
++++ b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_softap_tx_rx.c
+@@ -1163,19 +1163,6 @@ QDF_STATUS hdd_softap_rx_packet_cbk(void *adapter_context, qdf_nbuf_t rx_buf)
+ 
+ 		skb->protocol = eth_type_trans(skb, skb->dev);
+ 
+-		/* hold configurable wakelock for unicast traffic */
+-		if (!hdd_is_current_high_throughput(hdd_ctx) &&
+-		    hdd_ctx->config->rx_wakelock_timeout &&
+-		    skb->pkt_type != PACKET_BROADCAST &&
+-		    skb->pkt_type != PACKET_MULTICAST) {
+-			cds_host_diag_log_work(&hdd_ctx->rx_wake_lock,
+-						   hdd_ctx->config->rx_wakelock_timeout,
+-						   WIFI_POWER_EVENT_WAKELOCK_HOLD_RX);
+-			qdf_wake_lock_timeout_acquire(&hdd_ctx->rx_wake_lock,
+-							  hdd_ctx->config->
+-								  rx_wakelock_timeout);
+-		}
+-
+ 		/* Remove SKB from internal tracking table before submitting
+ 		 * it to stack
+ 		 */
+diff --git a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_tx_rx.c b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_tx_rx.c
+index f4ffa2002ce9..89f888723696 100644
+--- a/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_tx_rx.c
++++ b/drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_tx_rx.c
+@@ -1545,73 +1545,6 @@ static bool hdd_is_mcast_replay(struct sk_buff *skb)
+ 	return false;
+ }
+ 
+-/**
+- * hdd_is_arp_local() - check if local or non local arp
+- * @skb: pointer to sk_buff
+- *
+- * Return: true if local arp or false otherwise.
+- */
+-static bool hdd_is_arp_local(struct sk_buff *skb)
+-{
+-	struct arphdr *arp;
+-	struct in_ifaddr **ifap = NULL;
+-	struct in_ifaddr *ifa = NULL;
+-	struct in_device *in_dev;
+-	unsigned char *arp_ptr;
+-	__be32 tip;
+-
+-	arp = (struct arphdr *)skb->data;
+-	if (arp->ar_op == htons(ARPOP_REQUEST)) {
+-		/* if fail to acquire rtnl lock, assume it's local arp */
+-		if (!rtnl_trylock())
+-			return true;
+-
+-		in_dev = __in_dev_get_rtnl(skb->dev);
+-		if (in_dev) {
+-			for (ifap = &in_dev->ifa_list; (ifa = *ifap) != NULL;
+-				ifap = &ifa->ifa_next) {
+-				if (!strcmp(skb->dev->name, ifa->ifa_label))
+-					break;
+-			}
+-		}
+-
+-		if (ifa && ifa->ifa_local) {
+-			arp_ptr = (unsigned char *)(arp + 1);
+-			arp_ptr += (skb->dev->addr_len + 4 +
+-					skb->dev->addr_len);
+-			memcpy(&tip, arp_ptr, 4);
+-			hdd_debug("ARP packet: local IP: %x dest IP: %x",
+-				ifa->ifa_local, tip);
+-			if (ifa->ifa_local == tip) {
+-				rtnl_unlock();
+-				return true;
+-			}
+-		}
+-		rtnl_unlock();
+-	}
+-
+-	return false;
+-}
+-
+-/**
+- * hdd_is_rx_wake_lock_needed() - check if wake lock is needed
+- * @skb: pointer to sk_buff
+- *
+- * RX wake lock is needed for:
+- * 1) Unicast data packet OR
+- * 2) Local ARP data packet
+- *
+- * Return: true if wake lock is needed or false otherwise.
+- */
+-static bool hdd_is_rx_wake_lock_needed(struct sk_buff *skb)
+-{
+-	if ((skb->pkt_type != PACKET_BROADCAST &&
+-	     skb->pkt_type != PACKET_MULTICAST) || hdd_is_arp_local(skb))
+-		return true;
+-
+-	return false;
+-}
+-
+ #ifdef RECEIVE_OFFLOAD
+ /**
+  * hdd_resolve_rx_ol_mode() - Resolve Rx offload method, LRO or GRO
+@@ -2403,7 +2336,6 @@ QDF_STATUS hdd_rx_packet_cbk(void *adapter_context,
+ 	struct hdd_station_ctx *sta_ctx = NULL;
+ 	unsigned int cpu_index;
+ 	struct qdf_mac_addr *mac_addr, *dest_mac_addr;
+-	bool wake_lock = false;
+ 	uint8_t pkt_type = 0;
+ 	bool track_arp = false;
+ 	struct wlan_objmgr_vdev *vdev;
+@@ -2540,21 +2472,6 @@ QDF_STATUS hdd_rx_packet_cbk(void *adapter_context,
+ 			continue;
+ 		}
+ 
+-		/* hold configurable wakelock for unicast traffic */
+-		if (!hdd_is_current_high_throughput(hdd_ctx) &&
+-		    hdd_ctx->config->rx_wakelock_timeout &&
+-		    sta_ctx->conn_info.is_authenticated)
+-			wake_lock = hdd_is_rx_wake_lock_needed(skb);
+-
+-		if (wake_lock) {
+-			cds_host_diag_log_work(&hdd_ctx->rx_wake_lock,
+-						   hdd_ctx->config->rx_wakelock_timeout,
+-						   WIFI_POWER_EVENT_WAKELOCK_HOLD_RX);
+-			qdf_wake_lock_timeout_acquire(&hdd_ctx->rx_wake_lock,
+-							  hdd_ctx->config->
+-								  rx_wakelock_timeout);
+-		}
+-
+ 		/* Remove SKB from internal tracking table before submitting
+ 		 * it to stack
+ 		 */
+@@ -3683,8 +3600,6 @@ void hdd_dp_cfg_update(struct wlan_objmgr_psoc *psoc,
+ 	hdd_set_rx_mode_value(hdd_ctx);
+ 	config->multicast_replay_filter =
+ 		cfg_get(psoc, CFG_DP_FILTER_MULTICAST_REPLAY);
+-	config->rx_wakelock_timeout =
+-		cfg_get(psoc, CFG_DP_RX_WAKELOCK_TIMEOUT);
+ 	config->num_dp_rx_threads = cfg_get(psoc, CFG_DP_NUM_DP_RX_THREADS);
+ 	config->cfg_wmi_credit_cnt = cfg_get(psoc, CFG_DP_HTC_WMI_CREDIT_CNT);
+ 	config->icmp_req_to_fw_mark_interval =
+-- 
+2.39.2
+

@@ -1,0 +1,40 @@
+From 798654cc90db968db0a1a26e2111bec861441f98 Mon Sep 17 00:00:00 2001
+From: kdrag0n <dragon@khronodragon.com>
+Date: Fri, 8 Mar 2019 23:30:37 -0800
+Subject: [PATCH] dts: Disable unhandled or broken IRQ monitoring
+
+This is primarily intended for generic x86 kernels which may run on all
+sorts of broken systems. Our kernel will run on a very specific hardware
+configuration with known drivers and devices, which makes this
+unnecessary.
+
+Enable noirqdebug to avoid the minor overhead added to every IRQ
+handled.
+
+Suggested-by: Tyler Nijmeh <tylernij@gmail.com>
+Signed-off-by: kdrag0n <dragon@khronodragon.com>
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/91f75356358128d2fa62b773148086742accf62c
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/boot/dts/vendor/qcom/holi.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/vendor/qcom/holi.dtsi b/arch/arm64/boot/dts/vendor/qcom/holi.dtsi
+index c7378ad6475b..eb4aea8d5137 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/holi.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/holi.dtsi
+@@ -24,7 +24,7 @@
+ 	#size-cells = <2>;
+ 
+ 	chosen {
+-		bootargs = "log_buf_len=256K rcupdate.rcu_expedited=1 rcu_nocbs=0-7 kpti=off";
++		bootargs = "noirqdebug log_buf_len=256K rcupdate.rcu_expedited=1 rcu_nocbs=0-7 kpti=off";
+ 	};
+ 
+ 	memory { device_type = "memory"; reg = <0 0 0 0>; };
+-- 
+2.39.2
+

@@ -1,0 +1,27 @@
+From 57e8d87a20a67d4df3194453773b0c543e870d7d Mon Sep 17 00:00:00 2001
+From: Andrew Hexen <SyberHexen@gmail.com>
+Date: Thu, 20 Jul 2023 04:48:58 -0700
+Subject: [PATCH] rhodep: enable BOARD_USES_DOUBLE_TAP_CTRL
+
+Signed-off-by: Andrew Hexen <SyberHexen@gmail.com>
+Change-Id: I39937dce31e8dbcd76a393c94205efe4ff1bc2ad
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 19301368514b..7d920d8b14e7 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -382,6 +382,7 @@ CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y
+ CONFIG_GTP_LIMIT_USE_SUPPLIER=y
+ CONFIG_INPUT_TOUCHSCREEN_MMI=m
+ CONFIG_DRM_PANEL_NOTIFICATIONS=y
++CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y
+ CONFIG_INPUT_MISC=y
+ CONFIG_INPUT_QPNP_POWER_ON=y
+ CONFIG_INPUT_UINPUT=y
+-- 
+2.39.2
+

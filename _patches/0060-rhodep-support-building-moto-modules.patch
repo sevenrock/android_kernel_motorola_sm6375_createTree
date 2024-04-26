@@ -1,0 +1,1683 @@
+From 623bc20404a61c24192d3350d4484dd7ad53b596 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Fri, 25 Mar 2022 23:41:29 +0100
+Subject: [PATCH] rhodep: support building moto modules
+
+Rebased original commit
+https://github.com/LineageOS/android_kernel_motorola_sm7325/commit/3611b2da0ac4e2366f9ba1cd35bbbc9651906de3
+
+and replaced sound/soc/codecs/Makefile with
+https://github.com/LineageOS/android_kernel_motorola_sm7325/blob/3611b2da0ac4e2366f9ba1cd35bbbc9651906de3/sound/soc/codecs/Makefile
+
+after the original file was removed from the kernel tree to prepare
+the merge of motorola-kernel-modules.
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/Kconfig                               |  16 +
+ drivers/Makefile                              |   9 +
+ drivers/input/misc/Makefile                   |   5 +-
+ drivers/input/misc/goodix_fod_mmi/Kbuild      |  13 +-
+ drivers/input/misc/goodix_fod_mmi/Kconfig     |   6 +
+ drivers/input/touchscreen/Kconfig             |   4 +
+ drivers/input/touchscreen/Makefile            |   2 +
+ drivers/input/touchscreen/stmicro_mmi/Kbuild  |  19 +-
+ .../input/touchscreen/touchscreen_mmi/Kbuild  |  29 +-
+ .../input/touchscreen/touchscreen_mmi/Kconfig |  38 ++
+ drivers/media/platform/msm/Kconfig            |   1 +
+ drivers/media/platform/msm/Makefile           |   1 +
+ .../camera/cam_sensor_module/cam_cci/Kbuild   |  50 +-
+ .../camera/cam_sensor_module/cam_cci/Kconfig  |   2 +
+ drivers/misc/Kbuild                           |   6 -
+ drivers/misc/Kconfig                          |   4 +
+ drivers/misc/awinic/Kconfig                   |  11 +
+ drivers/misc/awinic/Makefile                  |   1 +
+ drivers/misc/awinic/aw8695/Kbuild             |   9 +-
+ drivers/misc/awinic/aw8695/Kconfig            |  15 +
+ drivers/misc/mmi_sys_temp/Kbuild              |   6 +-
+ drivers/misc/mmi_sys_temp/Kconfig             |   9 +
+ drivers/misc/sx937x/Kbuild                    |  35 +-
+ drivers/misc/sx937x/Kconfig                   |  41 ++
+ drivers/misc/utag/Kbuild                      |   6 +-
+ drivers/misc/utag/Kconfig                     |  14 +
+ drivers/mmi_annotate/Kconfig                  |   9 +
+ drivers/mmi_info/Kconfig                      |   9 +
+ drivers/mmi_relay/Kconfig                     |   8 +
+ drivers/moto_f_usbnet/Kconfig                 |   9 +
+ drivers/nfc/Kconfig                           |   1 +
+ drivers/nfc/Makefile                          |   1 +
+ drivers/nfc/st21nfc/Kbuild                    |   8 +-
+ drivers/nfc/st21nfc/Kconfig                   |   9 +
+ drivers/power/Kconfig                         |   5 +
+ drivers/power/Makefile                        |   4 +
+ drivers/power/bm_adsp_ulog/Kbuild             |   6 +-
+ drivers/power/bm_adsp_ulog/Kconfig            |   9 +
+ drivers/power/mmi_charger/Kbuild              |  17 +-
+ drivers/power/mmi_charger/Kconfig             |   9 +
+ drivers/power/qpnp_adaptive_charge/Kbuild     |  11 +-
+ drivers/power/qpnp_adaptive_charge/Kconfig    |   9 +
+ drivers/regulator/Kconfig                     |   2 +
+ drivers/regulator/Makefile                    |   2 +
+ drivers/regulator/wl2864c/Kbuild              |   7 +-
+ drivers/regulator/wl2864c/Kconfig             |   9 +
+ drivers/sensors/Kbuild                        |   6 +-
+ drivers/sensors/Kconfig                       |   4 +
+ drivers/tzlog_dump/Kconfig                    |   9 +
+ drivers/watchdog_cpu_ctx/Kconfig              |   9 +
+ drivers/watchdogtest/Kconfig                  |   9 +
+ sound/soc/codecs/Kconfig                      |  20 +
+ sound/soc/codecs/Makefile                     | 586 +++++++++++++++++-
+ 53 files changed, 958 insertions(+), 181 deletions(-)
+ create mode 100644 drivers/input/misc/goodix_fod_mmi/Kconfig
+ create mode 100644 drivers/input/touchscreen/touchscreen_mmi/Kconfig
+ create mode 100644 drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kconfig
+ delete mode 100644 drivers/misc/Kbuild
+ create mode 100644 drivers/misc/awinic/Kconfig
+ create mode 100644 drivers/misc/awinic/Makefile
+ create mode 100644 drivers/misc/awinic/aw8695/Kconfig
+ create mode 100644 drivers/misc/mmi_sys_temp/Kconfig
+ create mode 100644 drivers/misc/sx937x/Kconfig
+ create mode 100644 drivers/misc/utag/Kconfig
+ create mode 100644 drivers/mmi_annotate/Kconfig
+ create mode 100644 drivers/mmi_info/Kconfig
+ create mode 100644 drivers/mmi_relay/Kconfig
+ create mode 100644 drivers/moto_f_usbnet/Kconfig
+ create mode 100644 drivers/nfc/st21nfc/Kconfig
+ create mode 100755 drivers/power/bm_adsp_ulog/Kconfig
+ create mode 100644 drivers/power/mmi_charger/Kconfig
+ create mode 100755 drivers/power/qpnp_adaptive_charge/Kconfig
+ create mode 100644 drivers/regulator/wl2864c/Kconfig
+ create mode 100644 drivers/sensors/Kconfig
+ create mode 100644 drivers/tzlog_dump/Kconfig
+ create mode 100644 drivers/watchdog_cpu_ctx/Kconfig
+ create mode 100644 drivers/watchdogtest/Kconfig
+
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index e0eda1a5c3f9..d494e30841b0 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -230,4 +230,20 @@ source "drivers/interconnect/Kconfig"
+ 
+ source "drivers/counter/Kconfig"
+ 
++source "drivers/mmi_annotate/Kconfig"
++
++source "drivers/mmi_info/Kconfig"
++
++source "drivers/moto_f_usbnet/Kconfig"
++
++source "drivers/mmi_relay/Kconfig"
++
++source "drivers/sensors/Kconfig"
++
++source "drivers/tzlog_dump/Kconfig"
++
++source "drivers/watchdog_cpu_ctx/Kconfig"
++
++source "drivers/watchdogtest/Kconfig"
++
+ endmenu
+diff --git a/drivers/Makefile b/drivers/Makefile
+index aaef17cc6512..967f17c64e5c 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -186,3 +186,12 @@ obj-$(CONFIG_SIOX)		+= siox/
+ obj-$(CONFIG_GNSS)		+= gnss/
+ obj-$(CONFIG_INTERCONNECT)	+= interconnect/
+ obj-$(CONFIG_COUNTER)		+= counter/
++
++obj-$(CONFIG_MMI_ANNOTATE)	+= mmi_annotate/
++obj-$(CONFIG_MMI_INFO)		+= mmi_info/
++obj-$(CONFIG_MMI_RELAY)	+= mmi_relay/
++obj-$(CONFIG_MOTO_F_USBNET)	+= moto_f_usbnet/
++obj-$(CONFIG_SENSORS_CLASS)	+= sensors/
++obj-$(CONFIG_TZLOG_DUMP)	+= tzlog_dump/
++obj-$(CONFIG_WATCHDOG_CPU_CTX)	+= watchdog_cpu_ctx/
++obj-$(CONFIG_WATCHDOGTEST)	+= watchdogtest/
+diff --git a/drivers/input/misc/Makefile b/drivers/input/misc/Makefile
+index 1309fab92752..b4e94422cea7 100644
+--- a/drivers/input/misc/Makefile
++++ b/drivers/input/misc/Makefile
+@@ -87,4 +87,7 @@ obj-$(CONFIG_INPUT_WM831X_ON)		+= wm831x-on.o
+ obj-$(CONFIG_INPUT_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
+ obj-$(CONFIG_INPUT_YEALINK)		+= yealink.o
+ obj-$(CONFIG_INPUT_IDEAPAD_SLIDEBAR)	+= ideapad_slidebar.o
+-
++obj-$(CONFIG_FINGERPRINT_GOODIX_FOD_MMI) += goodix_fod_mmi/
++obj-$(CONFIG_INPUT_AWINIC_HAPTIC) += awinic/
++obj-$(CONFIG_SARSENSOR_SX937X) += sx937x/
++obj-$(CONFIG_MOTO_UTAGS) += utag/
+diff --git a/drivers/input/misc/goodix_fod_mmi/Kbuild b/drivers/input/misc/goodix_fod_mmi/Kbuild
+index 8f5edebe1ca1..c907cf3adf53 100644
+--- a/drivers/input/misc/goodix_fod_mmi/Kbuild
++++ b/drivers/input/misc/goodix_fod_mmi/Kbuild
+@@ -1,17 +1,12 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-
+ ifneq ($(filter m y,$(CONFIG_MMI_RELAY)),)
+-	EXTRA_CFLAGS += -DMMI_RELAY_MODULE
++	ccflags-y += -DMMI_RELAY_MODULE
+ endif
+ 
+-ifneq ($(filter banks%, $(TARGET_PRODUCT)),)
+-	EXTRA_CFLAGS += -DSOFTDEP_GPIO_PCAL6408
++ifneq ($(filter m y,$(INPUT_MISC_GOODIX_FOD_SOFTDEP)),)
++	ccflags-y += -DSOFTDEP_GPIO_PCAL6408
+ endif
+ 
+ goodix_fod_mmi-y += gf_spi.o netlink.o platform.o
+ 
+-obj-m += goodix_fod_mmi.o
++obj-$(CONFIG_FINGERPRINT_GOODIX_FOD_MMI) += goodix_fod_mmi.o
+ 
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../mmi_relay/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+diff --git a/drivers/input/misc/goodix_fod_mmi/Kconfig b/drivers/input/misc/goodix_fod_mmi/Kconfig
+new file mode 100644
+index 000000000000..7aeeb3b69617
+--- /dev/null
++++ b/drivers/input/misc/goodix_fod_mmi/Kconfig
+@@ -0,0 +1,6 @@
++config FINGERPRINT_GOODIX_FOD_MMI
++	tristate "Goodix FOD support"
++
++config INPUT_MISC_GOODIX_FOD_SOFTDEP
++	bool "Goodix FOD softdependency on GPIO_PCAL6408"
++	depends on FINGERPRINT_GOODIX_FOD_MMI
+\ No newline at end of file
+diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
+index 2c90661cc1ef..f8dbc3e868e7 100644
+--- a/drivers/input/touchscreen/Kconfig
++++ b/drivers/input/touchscreen/Kconfig
+@@ -1333,4 +1333,8 @@ source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+ 
+ source "drivers/input/touchscreen/nt36xxx/Kconfig"
+ 
++source "drivers/input/touchscreen/stmicro_mmi/Kconfig"
++
++source "drivers/input/touchscreen/touchscreen_mmi/Kconfig"
++
+ endif
+diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
+index d29fcb32e572..dfe8da830025 100644
+--- a/drivers/input/touchscreen/Makefile
++++ b/drivers/input/touchscreen/Makefile
+@@ -115,3 +115,5 @@ obj-$(CONFIG_TOUCHSCREEN_FTS)	+= focaltech_touch/
+ obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM)	+= synaptics_tcm/
+ obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx/
+ obj-$(CONFIG_TOUCHSCREEN_NT36XXX)	+= nt36xxx/
++obj-$(CONFIG_INPUT_TOUCHSCREEN_MMI)	+= touchscreen_mmi/
++obj-$(CONFIG_TOUCHSCREEN_FTS_TS)	+= stmicro_mmi/
+diff --git a/drivers/input/touchscreen/stmicro_mmi/Kbuild b/drivers/input/touchscreen/stmicro_mmi/Kbuild
+index 409745f6c512..ad6fe71ae56c 100644
+--- a/drivers/input/touchscreen/stmicro_mmi/Kbuild
++++ b/drivers/input/touchscreen/stmicro_mmi/Kbuild
+@@ -1,9 +1,4 @@
+-# add -Wall to try to catch everything we canss
+-# EXTRA_CFLAGS += -Wallss
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+-		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/input/touchscreen/stmicro_mmi
+ 
+-obj-m := stmicro_mmi.o
+ stmicro_mmi-objs := fts.o fts_proc.o
+ stmicro_mmi-objs += fts_lib/ftsCompensation.o
+ stmicro_mmi-objs += fts_lib/ftsCore.o
+@@ -15,27 +10,25 @@ stmicro_mmi-objs += fts_lib/ftsIO.o
+ stmicro_mmi-objs += fts_lib/ftsTest.o
+ stmicro_mmi-objs += fts_lib/ftsTime.o
+ stmicro_mmi-objs += fts_lib/ftsTool.o
++obj-$(CONFIG_TOUCHSCREEN_FTS_TS) := stmicro_mmi.o
+ 
+ ifneq ($(filter m y,$(CONFIG_DRM_PANEL_NOTIFICATIONS)),)
+-    EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_NOTIFICATIONS
++    ccflags-y += -DCONFIG_DRM_PANEL_NOTIFICATIONS
+ endif
+ 
+ ifneq ($(filter m y, $(CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
++	ccflags-y += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_ST_LIMIT_USE_SUPPLIER)),)
+-    EXTRA_CFLAGS += -DCONFIG_ST_LIMIT_USE_SUPPLIER
++    ccflags-y += -DCONFIG_ST_LIMIT_USE_SUPPLIER
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_INPUT_TOUCHSCREEN_MMI)),)
+-    EXTRA_CFLAGS += -DCONFIG_INPUT_TOUCHSCREEN_MMI
++    ccflags-y += -DCONFIG_INPUT_TOUCHSCREEN_MMI
+     stmicro_mmi-objs += fts_mmi_class.o
+ 
+ 	ifneq ($(filter m y, $(CONFIG_TOUCHCLASS_MMI_MULTIWAY_UPDATE_FW)),)
+-		EXTRA_CFLAGS += -DTS_MMI_TOUCH_MULTIWAY_UPDATE_FW
++		ccflags-y += -DTS_MMI_TOUCH_MULTIWAY_UPDATE_FW
+ 	endif
+ endif
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../touchscreen_mmi/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../mmi_info/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/Kbuild b/drivers/input/touchscreen/touchscreen_mmi/Kbuild
+index f937be291cf6..3cae69792d2c 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/Kbuild
++++ b/drivers/input/touchscreen/touchscreen_mmi/Kbuild
+@@ -1,41 +1,34 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+ ifneq ($(filter m y, $(CONFIG_PANEL_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_PANEL_NOTIFICATIONS
++	ccflags-y += -DCONFIG_PANEL_NOTIFICATIONS
+ endif
+ ifneq ($(filter m y, $(CONFIG_DRM_DYNAMIC_REFRESH_RATE)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_DYNAMIC_REFRESH_RATE
++	ccflags-y += -DCONFIG_DRM_DYNAMIC_REFRESH_RATE
+ endif
+ ifneq ($(filter m y, $(CONFIG_TOUCHCLASS_MMI_DEBUG_INFO)),)
+-	EXTRA_CFLAGS += -DCONFIG_TOUCHCLASS_MMI_DEBUG_INFO
++	ccflags-y += -DCONFIG_TOUCHCLASS_MMI_DEBUG_INFO
+ endif
+ ifneq ($(filter m y, $(CONFIG_TOUCHCLASS_MMI_GESTURE_POISON_EVENT)),)
+-	EXTRA_CFLAGS += -DTS_MMI_TOUCH_GESTURE_POISON_EVENT
++	ccflags-y += -DTS_MMI_TOUCH_GESTURE_POISON_EVENT
+ endif
+ ifneq ($(filter m y, $(CONFIG_TOUCHCLASS_MMI_MULTIWAY_UPDATE_FW)),)
+-	EXTRA_CFLAGS += -DTS_MMI_TOUCH_MULTIWAY_UPDATE_FW
++	ccflags-y += -DTS_MMI_TOUCH_MULTIWAY_UPDATE_FW
+ endif
+ ifneq ($(filter m y, $(CONFIG_DRM_PANEL_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_NOTIFICATIONS
++	ccflags-y += -DCONFIG_DRM_PANEL_NOTIFICATIONS
+ endif
+ ifneq ($(filter m y, $(CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
++	ccflags-y += -DCONFIG_DRM_PANEL_EVENT_NOTIFICATIONS
+ endif
+ ifneq ($(filter m y, $(CONFIG_TOUCH_PANEL_NOTIFICATIONS)),)
+-	EXTRA_CFLAGS += -DCONFIG_PANEL_NOTIFICATIONS
++	ccflags-y += -DCONFIG_PANEL_NOTIFICATIONS
+ endif
+ ifneq ($(filter m y, $(CONFIG_TS_KERNEL_USE_GKI)),)
+-	EXTRA_CFLAGS += -DCONFIG_TS_KERNEL_USE_GKI
++	ccflags-y += -DCONFIG_TS_KERNEL_USE_GKI
+ endif
+ ifneq ($(filter m y, $(CONFIG_BOARD_USES_DOUBLE_TAP_CTRL)),)
+-	EXTRA_CFLAGS += -DCONFIG_BOARD_USES_DOUBLE_TAP_CTRL
++	ccflags-y += -DCONFIG_BOARD_USES_DOUBLE_TAP_CTRL
+ endif
+ 
+-obj-m := touchscreen_mmi.o
+ touchscreen_mmi-objs := touchscreen_mmi_class.o touchscreen_mmi_panel.o touchscreen_mmi_notif.o touchscreen_mmi_gesture.o
+ 
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../sensors/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../../mmi_relay/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/../../kernel/msm-$(MODULE_KERNEL_VERSION)/Module.symvers
++obj-$(CONFIG_INPUT_TOUCHSCREEN_MMI) := touchscreen_mmi.o
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/Kconfig b/drivers/input/touchscreen/touchscreen_mmi/Kconfig
+new file mode 100644
+index 000000000000..7352c45f341b
+--- /dev/null
++++ b/drivers/input/touchscreen/touchscreen_mmi/Kconfig
+@@ -0,0 +1,38 @@
++config INPUT_TOUCHSCREEN_MMI
++	tristate "Moto touchscreen gestures"
++	default n
++	help
++	 Say Y here if you wish to include support for Moto touchscreen gestures.
++	 If unsure, say N.
++
++config TOUCHCLASS_MMI_DEBUG_INFO
++	bool "Moto touchscreen gestures debug info"
++	depends on INPUT_TOUCHSCREEN_MMI
++	default n
++	help
++	 Say Y here if you wish to include support for Moto touchscreen gestures debugging info.
++	 If unsure, say N.
++
++config DRM_DYNAMIC_REFRESH_RATE
++	bool "Moto DRM dynamic refresh rate"
++	depends on INPUT_TOUCHSCREEN_MMI
++	default n
++	help
++	 Say Y here if your panel supports drm dynamic refresh rate.
++	 If unsure, say N.
++
++config TOUCHCLASS_MMI_GESTURE_POISON_EVENT
++	bool "Moto gestures event poison"
++	depends on INPUT_TOUCHSCREEN_MMI
++	default n
++	help
++	 Say Y here if you wish to include support for Moto gestures event poison.
++	 If unsure, say N.
++
++config DRM_PANEL_NOTIFICATIONS
++	bool "Moto DRM panel notifications"
++	depends on INPUT_TOUCHSCREEN_MMI
++	default n
++	help
++	 Say Y here if your panel includes support for drm notifications.
++	 If unsure, say N.
+\ No newline at end of file
+diff --git a/drivers/media/platform/msm/Kconfig b/drivers/media/platform/msm/Kconfig
+index 009955e83490..5044e5cad8a3 100644
+--- a/drivers/media/platform/msm/Kconfig
++++ b/drivers/media/platform/msm/Kconfig
+@@ -3,3 +3,4 @@
+ source "drivers/media/platform/msm/synx/Kconfig"
+ source "drivers/media/platform/msm/cvp/Kconfig"
+ source "drivers/media/platform/msm/npu/Kconfig"
++source "drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kconfig"
+diff --git a/drivers/media/platform/msm/Makefile b/drivers/media/platform/msm/Makefile
+index b31237b525f1..581d2b2a480f 100644
+--- a/drivers/media/platform/msm/Makefile
++++ b/drivers/media/platform/msm/Makefile
+@@ -2,3 +2,4 @@
+ obj-$(CONFIG_MSM_NPU) += npu/
+ obj-$(CONFIG_MSM_GLOBAL_SYNX) += synx/
+ obj-$(CONFIG_MSM_CVP) += cvp/
++obj-$(CONFIG_CAMERA_CCI_INTF) += camera/cam_sensor_module/cam_cci/
+diff --git a/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
+index 0be27cdfd1af..b3a6afe414bb 100644
+--- a/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
++++ b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
+@@ -1,35 +1,15 @@
+-HAVE_KERNEL_4_19 = $(shell test -d $(ANDROID_BUILD_TOP)/kernel/msm-4.19 && echo 1)
+-
+-HAVE_KERNEL_5_4 = $(shell test -d $(ANDROID_BUILD_TOP)/kernel/msm-5.4 && echo 1)
+-
+-ifeq ($(HAVE_KERNEL_4_19),1)
+-        KERNEL_SOURCE_PATH ?= kernel/msm-4.19
+-else ifeq ($(HAVE_KERNEL_5_4),1)
+-        KERNEL_SOURCE_PATH ?= kernel/msm-5.4
+-else
+-        KERNEL_SOURCE_PATH ?= kernel/msm-4.9
+-endif
+-
+-HAVE_TECHPACK_CAMERA = $(shell test -d $(ANDROID_BUILD_TOP)/$(KERNEL_SOURCE_PATH)/techpack/camera && echo 1)
+-
+-ifeq ($(HAVE_TECHPACK_CAMERA),1)
+-        KERNEL_CAMERA_DRIVER_PATH ?= $(ANDROID_BUILD_TOP)/$(KERNEL_SOURCE_PATH)/techpack/camera/drivers
+-        EXTRA_CFLAGS += -DCONFIG_SPECTRA_CAMERA=1
+-        EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include
+-        EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include/uapi
+-        EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include/uapi/camera
+-else
+-        KERNEL_CAMERA_DRIVER_PATH ?= $(ANDROID_BUILD_TOP)/$(KERNEL_SOURCE_PATH)/drivers/media/platform/msm/camera
+-endif
+-
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_utils
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_cpas/include
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_sensor_io
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_sensor_utils
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_cci
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_req_mgr
+-EXTRA_CFLAGS += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_smmu
+-
+-obj-m	+= cci_intf.o
++KERNEL_CAMERA_DRIVER_PATH ?= $(src)/../../../../../../../techpack/camera/drivers
++
++ccflags-y += -DCONFIG_SPECTRA_CAMERA=1
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include/uapi
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include/uapi/camera
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_utils
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_cpas/include
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_sensor_io
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_sensor_utils
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_sensor_module/cam_cci
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_req_mgr
++ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/cam_smmu
++
++obj-$(CONFIG_CAMERA_CCI_INTF)	+= cci_intf.o
+diff --git a/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kconfig b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kconfig
+new file mode 100644
+index 000000000000..743d345103b0
+--- /dev/null
++++ b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kconfig
+@@ -0,0 +1,2 @@
++config CAMERA_CCI_INTF
++	tristate "Moto Camera CCI Interface"
+diff --git a/drivers/misc/Kbuild b/drivers/misc/Kbuild
+deleted file mode 100644
+index e49d268d867a..000000000000
+--- a/drivers/misc/Kbuild
++++ /dev/null
+@@ -1,6 +0,0 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+-cirrus_cs40l2x-objs = cs40l2x.o cs40l2x-tables.o
+-obj-m += cirrus_cs40l2x.o
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 4ffeae16c408..9ba14d11dbe3 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -539,4 +539,8 @@ source "drivers/misc/cxl/Kconfig"
+ source "drivers/misc/ocxl/Kconfig"
+ source "drivers/misc/cardreader/Kconfig"
+ source "drivers/misc/habanalabs/Kconfig"
++source "drivers/misc/awinic/Kconfig"
++source "drivers/misc/mmi_sys_temp/Kconfig"
++source "drivers/misc/sx937x/Kconfig"
++source "drivers/misc/utag/Kconfig"
+ endmenu
+diff --git a/drivers/misc/awinic/Kconfig b/drivers/misc/awinic/Kconfig
+new file mode 100644
+index 000000000000..dcb9e22a5ef1
+--- /dev/null
++++ b/drivers/misc/awinic/Kconfig
+@@ -0,0 +1,11 @@
++#
++# Awinic Haptic
++#
++
++menuconfig INPUT_AWINIC_HAPTIC
++	bool "Awinic Haptic"
++	default n
++	help
++	  Enables Awinic Haptic driver.
++
++source "drivers/misc/awinic/aw8695/Kconfig"
+\ No newline at end of file
+diff --git a/drivers/misc/awinic/Makefile b/drivers/misc/awinic/Makefile
+new file mode 100644
+index 000000000000..6eb002fd42f7
+--- /dev/null
++++ b/drivers/misc/awinic/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_AW8695_HAPTIC) += aw8695/
+diff --git a/drivers/misc/awinic/aw8695/Kbuild b/drivers/misc/awinic/aw8695/Kbuild
+index 20db7c5c2ae2..e408016f08e6 100644
+--- a/drivers/misc/awinic/aw8695/Kbuild
++++ b/drivers/misc/awinic/aw8695/Kbuild
+@@ -1,13 +1,10 @@
+ # add -Wall to try to catch everything we can.
+ ifneq ($(filter m y,$(CONFIG_AF_NOISE_ELIMINATION)),)
+-	EXTRA_CFLAGS += -DCONFIG_AF_NOISE_ELIMINATION
++	ccflags-y += -DCONFIG_AF_NOISE_ELIMINATION
+ endif
+ 
+ ifneq ($(filter y,$(CONFIG_AW8965_VIBRATOR_SHORT_WAV_ENABLE)),)
+-	EXTRA_CFLAGS += -DCONFIG_AW8965_VIBRATOR_SHORT_WAV_ENABLE
++	ccflags-y += -DCONFIG_AW8965_VIBRATOR_SHORT_WAV_ENABLE
+ endif
+ 
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += aw8695.o
++obj-$(CONFIG_AW8695_HAPTIC) += aw8695.o
+diff --git a/drivers/misc/awinic/aw8695/Kconfig b/drivers/misc/awinic/aw8695/Kconfig
+new file mode 100644
+index 000000000000..c47c9d03d0ec
+--- /dev/null
++++ b/drivers/misc/awinic/aw8695/Kconfig
+@@ -0,0 +1,15 @@
++#
++# AW8695 Driver
++#
++
++config AW8695_HAPTIC
++	tristate "Awinic AW8695 haptic driver"
++	depends on I2C && INPUT_AWINIC_HAPTIC
++	help
++	  Say Y here if you have Awinic AW8695 haptic controller
++	  chip in your system.
++
++	  If unsure, say N.
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called aw8695.
+\ No newline at end of file
+diff --git a/drivers/misc/mmi_sys_temp/Kbuild b/drivers/misc/mmi_sys_temp/Kbuild
+index d676833a3d63..6b5fa1cb4a93 100644
+--- a/drivers/misc/mmi_sys_temp/Kbuild
++++ b/drivers/misc/mmi_sys_temp/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += mmi_sys_temp.o
++obj-$(CONFIG_MMI_SYS_TEMP) += mmi_sys_temp.o
+diff --git a/drivers/misc/mmi_sys_temp/Kconfig b/drivers/misc/mmi_sys_temp/Kconfig
+new file mode 100644
+index 000000000000..7ac89986f5ad
+--- /dev/null
++++ b/drivers/misc/mmi_sys_temp/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_SYS_TEMP
++        tristate "MMI SYS TEMP"
++        default n
++        help
++         Say Y here if you have a mmi sys temp compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_sys_temp.
+\ No newline at end of file
+diff --git a/drivers/misc/sx937x/Kbuild b/drivers/misc/sx937x/Kbuild
+index 70d7682d7029..e8055ae7543c 100644
+--- a/drivers/misc/sx937x/Kbuild
++++ b/drivers/misc/sx937x/Kbuild
+@@ -1,40 +1,15 @@
+-KERNEL_DIR_PATH = $(shell find $(ANDROID_BUILD_TOP)/kernel/ -name "msm-*" -type d | head -1 | grep -i "kernel/msm-*")
+-
+-KERNEL_VERSION_NAME = $(shell basename $(KERNEL_DIR_PATH))
+-
+-KERNEL_PLATFORM_PATH = $(shell find $(ANDROID_BUILD_TOP) -maxdepth 1 -name "kernel_platform" -type d)
+-
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
++ccflags-y += -I$(src)/../../../drivers/base
+ 
+ ifneq ($(filter m y,$(CONFIG_SX937X_USB_CAL)),)
+-	EXTRA_CFLAGS += -DCONFIG_CAPSENSE_USB_CAL
++	ccflags-y += -DCONFIG_CAPSENSE_USB_CAL
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_SX937X_POWER_SUPPLY_ONLINE)),)
+-	EXTRA_CFLAGS += -DCONFIG_USE_POWER_SUPPLY_ONLINE
++	ccflags-y += -DCONFIG_USE_POWER_SUPPLY_ONLINE
+ endif
+ 
+ ifneq ($(filter m y,$(CONFIG_SX937X_FLIP_CAL)),)
+-	EXTRA_CFLAGS += -DCONFIG_CAPSENSE_FLIP_CAL
+-endif
+-
+-ifneq (,$(filter river%,$(TARGET_PRODUCT)))
+-EXTRA_CFLAGS += -DCONFIG_CAPSENSE_USB_CAL
++	ccflags-y += -DCONFIG_CAPSENSE_FLIP_CAL
+ endif
+ 
+-ifneq (,$(KERNEL_DIR_PATH))
+-        EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/kernel/$(KERNEL_VERSION_NAME)/drivers/base
+-else ifneq (,$(KERNEL_PLATFORM_PATH))
+-        EXTRA_CFLAGS += -I$(KERNEL_PLATFORM_PATH)/common/drivers/base
+-else
+-        EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/kernel/drivers/base
+-endif
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../sensors/$(GKI_OBJ_MODULE_DIR)/Module.symvers
+-
+-#sx937x_sar-y := sx937x_sar.o
+-
+-obj-m += sx937x_sar.o
+-
++obj-$(CONFIG_SARSENSOR_SX937X) += sx937x_sar.o
+diff --git a/drivers/misc/sx937x/Kconfig b/drivers/misc/sx937x/Kconfig
+new file mode 100644
+index 000000000000..daa0e3853d47
+--- /dev/null
++++ b/drivers/misc/sx937x/Kconfig
+@@ -0,0 +1,41 @@
++#
++# CapSense(TM) devices
++#
++
++config SARSENSOR_SX937X
++	tristate "sx937x Programming Driver"
++	help
++	  CapSense devices is the analog system contains the capacitive sensing
++	  hardware. Several hardware algorithms are supported. This hardware
++	  performs capacitive sensing and scanning without requiring external
++	  components. It contains internal flash memory, which have to be programmed
++	  with firmware using HSSP interface. Host Sourced Serial Programming (HSSP)
++	  refers to the programming of the target device on the board by using a host
++	  microcontroller. The PSoC 4 target is programmed through the SWD interface -
++	  ARM Serial Ware Debug. This option enables firmware programming driver and
++	  allows automatically identify device and matching firmware. See file
++	  Documentation/devicetree/bindings/misc/capsense_hssp.txt for details.
++
++config SX937X_USB_CAL
++	bool "Enable sx937x usb calibration"
++	depends on SARSENSOR_SX937X
++	help
++	  Enable Cap-sensor calibration when usb plug.
++
++	  To use SX937X_USB_CAL open the feature that it can enable cap-sensor calibration
++	  when usb plug.
++
++config SX937X_FLIP_CAL
++	bool "Enable sx937x flip calibration"
++	depends on SARSENSOR_SX937X
++	help
++	  Enable Cap-sensor calibration when flipping.
++
++	  To use SX937X_FLIP_CAL open the feature that it can enable cap-sensor calibration
++	  when flipping.
++
++config SX937X_POWER_SUPPLY_ONLINE
++	bool "Enable sx937x power supply online"
++	depends on SARSENSOR_SX937X
++
++
+diff --git a/drivers/misc/utag/Kbuild b/drivers/misc/utag/Kbuild
+index 89c6baff5215..c32d1eff6f4a 100644
+--- a/drivers/misc/utag/Kbuild
++++ b/drivers/misc/utag/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+-obj-m = utags.o
++obj-$(CONFIG_MOTO_UTAGS) = utags.o
+diff --git a/drivers/misc/utag/Kconfig b/drivers/misc/utag/Kconfig
+new file mode 100644
+index 000000000000..ea64b468392f
+--- /dev/null
++++ b/drivers/misc/utag/Kconfig
+@@ -0,0 +1,14 @@
++#
++# UTAGS Driver
++#
++
++config MOTO_UTAGS
++	tristate "Moto UTAGS driver"
++	help
++	  Say Y here if you have UTAGS
++	  defined in your system.
++
++	  If unsure, say N.
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called utags.
+\ No newline at end of file
+diff --git a/drivers/mmi_annotate/Kconfig b/drivers/mmi_annotate/Kconfig
+new file mode 100644
+index 000000000000..2b1a69706ceb
+--- /dev/null
++++ b/drivers/mmi_annotate/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_ANNOTATE
++        tristate "MMI ANNOTATE"
++        default n
++        help
++         Say Y here if you have a mmi annotate compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_annotate.
+\ No newline at end of file
+diff --git a/drivers/mmi_info/Kconfig b/drivers/mmi_info/Kconfig
+new file mode 100644
+index 000000000000..30976fe45318
+--- /dev/null
++++ b/drivers/mmi_info/Kconfig
+@@ -0,0 +1,9 @@
++config MMI_INFO
++        tristate "MMI INFO"
++        default n
++        help
++         Say Y here if you have a mmi info compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_info.
+\ No newline at end of file
+diff --git a/drivers/mmi_relay/Kconfig b/drivers/mmi_relay/Kconfig
+new file mode 100644
+index 000000000000..e24c8cca3386
+--- /dev/null
++++ b/drivers/mmi_relay/Kconfig
+@@ -0,0 +1,8 @@
++config MMI_RELAY
++        tristate "MMI RELAY"
++        default n
++        help
++         Say Y here if you have a MMI Relay
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_relay.
+\ No newline at end of file
+diff --git a/drivers/moto_f_usbnet/Kconfig b/drivers/moto_f_usbnet/Kconfig
+new file mode 100644
+index 000000000000..e72067b74151
+--- /dev/null
++++ b/drivers/moto_f_usbnet/Kconfig
+@@ -0,0 +1,9 @@
++config MOTO_F_USBNET
++        tristate "Moto USBNET Extension"
++        default n
++        help
++         Say Y here if you have a MOTO F USBNET compatible
++         device defined.
++
++         This driver can also be built as a module.  If so, the module
++         will be called f_usbnet.
+\ No newline at end of file
+diff --git a/drivers/nfc/Kconfig b/drivers/nfc/Kconfig
+index 36d414f63dbf..2d68b3f179a9 100644
+--- a/drivers/nfc/Kconfig
++++ b/drivers/nfc/Kconfig
+@@ -54,6 +54,7 @@ source "drivers/nfc/pn544/Kconfig"
+ source "drivers/nfc/pn533/Kconfig"
+ source "drivers/nfc/microread/Kconfig"
+ source "drivers/nfc/nfcmrvl/Kconfig"
++source "drivers/nfc/st21nfc/Kconfig"
+ source "drivers/nfc/st21nfca/Kconfig"
+ source "drivers/nfc/st-nci/Kconfig"
+ source "drivers/nfc/nxp-nci/Kconfig"
+diff --git a/drivers/nfc/Makefile b/drivers/nfc/Makefile
+index 7aa7c077b4a0..857f995dad8b 100644
+--- a/drivers/nfc/Makefile
++++ b/drivers/nfc/Makefile
+@@ -12,6 +12,7 @@ obj-$(CONFIG_NFC_SIM)		+= nfcsim.o
+ obj-$(CONFIG_NFC_PORT100)	+= port100.o
+ obj-$(CONFIG_NFC_MRVL)		+= nfcmrvl/
+ obj-$(CONFIG_NFC_TRF7970A)	+= trf7970a.o
++obj-$(CONFIG_NFC_ST21NFC)	+= st21nfc/
+ obj-$(CONFIG_NFC_ST21NFCA)  	+= st21nfca/
+ obj-$(CONFIG_NFC_ST_NCI)	+= st-nci/
+ obj-$(CONFIG_NFC_NXP_NCI)	+= nxp-nci/
+diff --git a/drivers/nfc/st21nfc/Kbuild b/drivers/nfc/st21nfc/Kbuild
+index 76794fa10ece..3727fbeb0752 100644
+--- a/drivers/nfc/st21nfc/Kbuild
++++ b/drivers/nfc/st21nfc/Kbuild
+@@ -1,7 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += st21nfc.o
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../mmi_info/Module.symvers
++obj-$(CONFIG_NFC_ST21NFC) += st21nfc.o
+diff --git a/drivers/nfc/st21nfc/Kconfig b/drivers/nfc/st21nfc/Kconfig
+new file mode 100644
+index 000000000000..8dab041c81dd
+--- /dev/null
++++ b/drivers/nfc/st21nfc/Kconfig
+@@ -0,0 +1,9 @@
++config NFC_ST21NFC
++        tristate "ST21NFC NFC"
++        default n
++        help
++         Say Y here if you have a ST21NFC compatible
++         chip.
++
++         This driver can also be built as a module.  If so, the module
++         will be called st21nfc.
+\ No newline at end of file
+diff --git a/drivers/power/Kconfig b/drivers/power/Kconfig
+index ff0350ca3b74..af8b08660ce2 100644
+--- a/drivers/power/Kconfig
++++ b/drivers/power/Kconfig
+@@ -2,3 +2,8 @@
+ source "drivers/power/avs/Kconfig"
+ source "drivers/power/reset/Kconfig"
+ source "drivers/power/supply/Kconfig"
++
++source "drivers/power/bm_adsp_ulog/Kconfig"
++source "drivers/power/mmi_charger/Kconfig"
++source "drivers/power/qpnp_adaptive_charge/Kconfig"
++
+diff --git a/drivers/power/Makefile b/drivers/power/Makefile
+index b7c2e372186b..75377b6d1d5c 100644
+--- a/drivers/power/Makefile
++++ b/drivers/power/Makefile
+@@ -2,3 +2,7 @@
+ obj-$(CONFIG_POWER_AVS)		+= avs/
+ obj-$(CONFIG_POWER_RESET)	+= reset/
+ obj-$(CONFIG_POWER_SUPPLY)	+= supply/
++
++obj-$(CONFIG_UBM_ADSP_ULOG	+= bm_adsp_ulog/
++obj-$(CONFIG_USE_MMI_CHARGER)	+= mmi_charger/
++obj-$(CONFIG_QPNP_ADAPTIVE_CHARGE)	+= qpnp_adaptive_charge/
+diff --git a/drivers/power/bm_adsp_ulog/Kbuild b/drivers/power/bm_adsp_ulog/Kbuild
+index 3272e839f8f6..0bab6699efee 100755
+--- a/drivers/power/bm_adsp_ulog/Kbuild
++++ b/drivers/power/bm_adsp_ulog/Kbuild
+@@ -1,6 +1,2 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += bm_adsp_ulog.o
++obj-$(CONFIG_BM_ADSP_ULOG) += bm_adsp_ulog.o
+ 
+diff --git a/drivers/power/bm_adsp_ulog/Kconfig b/drivers/power/bm_adsp_ulog/Kconfig
+new file mode 100755
+index 000000000000..e8221d295526
+--- /dev/null
++++ b/drivers/power/bm_adsp_ulog/Kconfig
+@@ -0,0 +1,9 @@
++config BM_ADSP_ULOG
++        tristate "BM ADSP ULOG"
++        default n
++        help
++         Say Y here if you have a bm adsp ulog compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called bm_adsp_ulog.
+diff --git a/drivers/power/mmi_charger/Kbuild b/drivers/power/mmi_charger/Kbuild
+index 4740d681513b..c1ab14765ca1 100755
+--- a/drivers/power/mmi_charger/Kbuild
++++ b/drivers/power/mmi_charger/Kbuild
+@@ -1,16 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/mmi_charger
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+-    EXTRA_CFLAGS += -DMMI_GKI_API_ALLOWANCE
+-endif
+-
+-ifneq ($(filter m y,$(CONFIG_MMI_RECHARGER_HAWAO_MODE)),)
+-        EXTRA_CFLAGS += -DCONFIG_MMI_RECHARGER_HAWAO_MODE
+-endif
+-
+-obj-m += mmi_charger.o
+-
+-KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../../mmi_info/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++obj-$(CONFIG_USE_MMI_CHARGER) += mmi_charger.o
+diff --git a/drivers/power/mmi_charger/Kconfig b/drivers/power/mmi_charger/Kconfig
+new file mode 100644
+index 000000000000..ad8495df665b
+--- /dev/null
++++ b/drivers/power/mmi_charger/Kconfig
+@@ -0,0 +1,9 @@
++config USE_MMI_CHARGER
++        tristate "MMI CHARGER"
++        default n
++        help
++         Say Y here if you have a mmi charger compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called mmi_charger.
+diff --git a/drivers/power/qpnp_adaptive_charge/Kbuild b/drivers/power/qpnp_adaptive_charge/Kbuild
+index 8471c67a4891..1f3b684c0ee0 100755
+--- a/drivers/power/qpnp_adaptive_charge/Kbuild
++++ b/drivers/power/qpnp_adaptive_charge/Kbuild
+@@ -1,15 +1,10 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+ ifneq ($(filter m y,$(CONFIG_USE_MMI_CHARGER)),)
+ 	EXTRA_CFLAGS += -DUSE_MMI_CHARGER
+-	EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/mmi_charger
+-	KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
++	EXTRA_CFLAGS += -I$(src)/../mmi_charger
+ endif
+ 
+ ifneq ($(filter m y, $(ADAPTIVE_TOLERANCE_OPTIMIZATION)),)
+-	EXTRA_CFLAGS += -DADAPTIVE_TOLERANCE_OPTIMIZATION
++	ccflags-y += -DADAPTIVE_TOLERANCE_OPTIMIZATION
+ endif
+ 
+-obj-m += qpnp_adaptive_charge.o
++obj-$(CONFIG_QPNP_ADAPTIVE_CHARGE) += qpnp_adaptive_charge.o
+diff --git a/drivers/power/qpnp_adaptive_charge/Kconfig b/drivers/power/qpnp_adaptive_charge/Kconfig
+new file mode 100755
+index 000000000000..b5bb5bc70c15
+--- /dev/null
++++ b/drivers/power/qpnp_adaptive_charge/Kconfig
+@@ -0,0 +1,9 @@
++config QPNP_ADAPTIVE_CHARGE
++        tristate "QPNP ADAPTIVE CHARGE"
++        default n
++        help
++         Say Y here if you have a qpnp adaptive charge compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called qpnp_adaptive_charge.
+\ No newline at end of file
+diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
+index 507c1984c973..df0499425657 100644
+--- a/drivers/regulator/Kconfig
++++ b/drivers/regulator/Kconfig
+@@ -1230,5 +1230,7 @@ config VIRTIO_REGULATOR
+ 	  regulator for pass through peripheral devices via regulator backend in
+ 	  host.
+ 
++source "drivers/regulator/wl2864c/Kconfig"
++
+ endif
+ 
+diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
+index fc812eef9615..1d4048de63fd 100644
+--- a/drivers/regulator/Makefile
++++ b/drivers/regulator/Makefile
+@@ -151,4 +151,6 @@ obj-$(CONFIG_REGULATOR_RPMH) += rpmh-regulator.o
+ obj-$(CONFIG_REGULATOR_STUB) += stub-regulator.o
+ obj-$(CONFIG_VIRTIO_REGULATOR) += virtio_regulator.o
+ 
++obj-$(CONFIG_REGULATOR_WL2864C) += wl2864c/
++
+ ccflags-$(CONFIG_REGULATOR_DEBUG) += -DDEBUG
+diff --git a/drivers/regulator/wl2864c/Kbuild b/drivers/regulator/wl2864c/Kbuild
+index 359e291dfdca..afc712c239c7 100644
+--- a/drivers/regulator/wl2864c/Kbuild
++++ b/drivers/regulator/wl2864c/Kbuild
+@@ -1,5 +1,2 @@
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
+-
+-wl2864c-objs += wl2864c-regulator.o
+-obj-m	+= wl2864c.o
++wl2864c-y += wl2864c-regulator.o
++obj-$(CONFIG_REGULATOR_WL2864C) += wl2864c.o
+diff --git a/drivers/regulator/wl2864c/Kconfig b/drivers/regulator/wl2864c/Kconfig
+new file mode 100644
+index 000000000000..1ee14c108bdc
+--- /dev/null
++++ b/drivers/regulator/wl2864c/Kconfig
+@@ -0,0 +1,9 @@
++config REGULATOR_WL2864C
++        tristate "WL2864C REGULATOR"
++        default n
++        help
++         Say Y here if you have a WL2864C compatible
++         device connected.
++
++         This driver can also be built as a module.  If so, the module
++         will be called wl2864c-regulator.
+\ No newline at end of file
+diff --git a/drivers/sensors/Kbuild b/drivers/sensors/Kbuild
+index b50ef6c2c4d8..fdbcb1362e04 100644
+--- a/drivers/sensors/Kbuild
++++ b/drivers/sensors/Kbuild
+@@ -1,5 +1 @@
+-# add -Wall to try to catch everything we can.
+-EXTRA_CFLAGS += -Wall
+-EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
+-
+-obj-m += sensors_class.o
+\ No newline at end of file
++obj-$(CONFIG_SENSORS_CLASS)	+= sensors_class.o
+diff --git a/drivers/sensors/Kconfig b/drivers/sensors/Kconfig
+new file mode 100644
+index 000000000000..903ff163880f
+--- /dev/null
++++ b/drivers/sensors/Kconfig
+@@ -0,0 +1,4 @@
++config SENSORS_CLASS
++	tristate "Enable Sensors Class Driver Support"
++	help
++	  Add support for sensors CLASS driver.
+diff --git a/drivers/tzlog_dump/Kconfig b/drivers/tzlog_dump/Kconfig
+new file mode 100644
+index 000000000000..1c219d115ef0
+--- /dev/null
++++ b/drivers/tzlog_dump/Kconfig
+@@ -0,0 +1,9 @@
++config TZLOG_DUMP
++        tristate "TZLOG DUMP"
++        default n
++        help
++         Say Y here if you have a tzlog compatible
++         device defined.
++
++         This driver can also be built as a module.  If so, the module
++         will be called tzlog_dump.
+\ No newline at end of file
+diff --git a/drivers/watchdog_cpu_ctx/Kconfig b/drivers/watchdog_cpu_ctx/Kconfig
+new file mode 100644
+index 000000000000..7962a8381828
+--- /dev/null
++++ b/drivers/watchdog_cpu_ctx/Kconfig
+@@ -0,0 +1,9 @@
++config WATCHDOG_CPU_CTX
++        tristate "WATCHDOG CPU CTX"
++        default n
++        help
++         Say Y here if you have a watchdog cpu ctx compatible
++         device defined.
++
++         This driver can also be built as a module.  If so, the module
++         will be called watchdog_cpu_ctx.
+\ No newline at end of file
+diff --git a/drivers/watchdogtest/Kconfig b/drivers/watchdogtest/Kconfig
+new file mode 100644
+index 000000000000..b5b1085b9576
+--- /dev/null
++++ b/drivers/watchdogtest/Kconfig
+@@ -0,0 +1,9 @@
++config WATCHDOGTEST
++        tristate "WATCHDOGTEST"
++        default n
++        help
++         Say Y here if you have a WATCHDOGTEST compatible
++         device defined.
++
++         This driver can also be built as a module.  If so, the module
++         will be called watchdogtest.
+\ No newline at end of file
+diff --git a/sound/soc/codecs/Kconfig b/sound/soc/codecs/Kconfig
+index dfc536cd9d2f..c701cf71a436 100644
+--- a/sound/soc/codecs/Kconfig
++++ b/sound/soc/codecs/Kconfig
+@@ -1492,4 +1492,24 @@ config SND_SOC_TPA6130A2
+ 	tristate "Texas Instruments TPA6130A2 headphone amplifier"
+ 	depends on I2C
+ 
++config SND_SOC_TAS2560
++	tristate
++
++config SND_SOC_TAS2560_ALGO
++	tristate
++	depends on SND_SOC_TAS2560
++
++config SND_SOC_TAS2560_CALIB
++	tristate
++	depends on SND_SOC_TAS2560
++
++config SND_SOC_TAS2562
++	tristate
++
++config SND_SOC_SMARTPA_AW882xx
++	tristate
++
++config SND_SOC_TFA9874
++	tristate
++
+ endmenu
+diff --git a/sound/soc/codecs/Makefile b/sound/soc/codecs/Makefile
+index 34b09dd815a7..ad5fbf70e1cc 100644
+--- a/sound/soc/codecs/Makefile
++++ b/sound/soc/codecs/Makefile
+@@ -1,10 +1,582 @@
+-KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
++# SPDX-License-Identifier: GPL-2.0
++snd-soc-88pm860x-objs := 88pm860x-codec.o
++snd-soc-ab8500-codec-objs := ab8500-codec.o
++snd-soc-ac97-objs := ac97.o
++snd-soc-ad1836-objs := ad1836.o
++snd-soc-ad193x-objs := ad193x.o
++snd-soc-ad193x-spi-objs := ad193x-spi.o
++snd-soc-ad193x-i2c-objs := ad193x-i2c.o
++snd-soc-ad1980-objs := ad1980.o
++snd-soc-ad73311-objs := ad73311.o
++snd-soc-adau-utils-objs := adau-utils.o
++snd-soc-adau1373-objs := adau1373.o
++snd-soc-adau1701-objs := adau1701.o
++snd-soc-adau17x1-objs := adau17x1.o
++snd-soc-adau1761-objs := adau1761.o
++snd-soc-adau1761-i2c-objs := adau1761-i2c.o
++snd-soc-adau1761-spi-objs := adau1761-spi.o
++snd-soc-adau1781-objs := adau1781.o
++snd-soc-adau1781-i2c-objs := adau1781-i2c.o
++snd-soc-adau1781-spi-objs := adau1781-spi.o
++snd-soc-adau1977-objs := adau1977.o
++snd-soc-adau1977-spi-objs := adau1977-spi.o
++snd-soc-adau1977-i2c-objs := adau1977-i2c.o
++snd-soc-adau7002-objs := adau7002.o
++snd-soc-adav80x-objs := adav80x.o
++snd-soc-adav801-objs := adav801.o
++snd-soc-adav803-objs := adav803.o
++snd-soc-ads117x-objs := ads117x.o
++snd-soc-ak4104-objs := ak4104.o
++snd-soc-ak4118-objs := ak4118.o
++snd-soc-ak4458-objs := ak4458.o
++snd-soc-ak4535-objs := ak4535.o
++snd-soc-ak4554-objs := ak4554.o
++snd-soc-ak4613-objs := ak4613.o
++snd-soc-ak4641-objs := ak4641.o
++snd-soc-ak4642-objs := ak4642.o
++snd-soc-ak4671-objs := ak4671.o
++snd-soc-ak5386-objs := ak5386.o
++snd-soc-ak5558-objs := ak5558.o
++snd-soc-arizona-objs := arizona.o
++snd-soc-bd28623-objs := bd28623.o
++snd-soc-bt-sco-objs := bt-sco.o
++snd-soc-cpcap-objs := cpcap.o
++snd-soc-cq93vc-objs := cq93vc.o
++snd-soc-cros-ec-codec-objs := cros_ec_codec.o
++snd-soc-cs35l32-objs := cs35l32.o
++snd-soc-cs35l33-objs := cs35l33.o
++snd-soc-cs35l34-objs := cs35l34.o
++snd-soc-cs35l35-objs := cs35l35.o
++snd-soc-cs35l36-objs := cs35l36.o
++snd-soc-cs42l42-objs := cs42l42.o
++snd-soc-cs42l51-objs := cs42l51.o
++snd-soc-cs42l51-i2c-objs := cs42l51-i2c.o
++snd-soc-cs42l52-objs := cs42l52.o
++snd-soc-cs42l56-objs := cs42l56.o
++snd-soc-cs42l73-objs := cs42l73.o
++snd-soc-cs4265-objs := cs4265.o
++snd-soc-cs4270-objs := cs4270.o
++snd-soc-cs4271-objs := cs4271.o
++snd-soc-cs4271-i2c-objs := cs4271-i2c.o
++snd-soc-cs4271-spi-objs := cs4271-spi.o
++snd-soc-cs42xx8-objs := cs42xx8.o
++snd-soc-cs42xx8-i2c-objs := cs42xx8-i2c.o
++snd-soc-cs43130-objs := cs43130.o
++snd-soc-cs4341-objs := cs4341.o
++snd-soc-cs4349-objs := cs4349.o
++snd-soc-cs47l15-objs := cs47l15.o
++snd-soc-cs47l24-objs := cs47l24.o
++snd-soc-cs47l35-objs := cs47l35.o
++snd-soc-cs47l85-objs := cs47l85.o
++snd-soc-cs47l90-objs := cs47l90.o
++snd-soc-cs47l92-objs := cs47l92.o
++snd-soc-cs53l30-objs := cs53l30.o
++snd-soc-cx20442-objs := cx20442.o
++snd-soc-cx2072x-objs := cx2072x.o
++snd-soc-da7210-objs := da7210.o
++snd-soc-da7213-objs := da7213.o
++snd-soc-da7218-objs := da7218.o
++snd-soc-da7219-objs := da7219.o da7219-aad.o
++snd-soc-da732x-objs := da732x.o
++snd-soc-da9055-objs := da9055.o
++snd-soc-dmic-objs := dmic.o
++snd-soc-es7134-objs := es7134.o
++snd-soc-es7241-objs := es7241.o
++snd-soc-es8316-objs := es8316.o
++snd-soc-es8328-objs := es8328.o
++snd-soc-es8328-i2c-objs := es8328-i2c.o
++snd-soc-es8328-spi-objs := es8328-spi.o
++snd-soc-gtm601-objs := gtm601.o
++snd-soc-hdac-hdmi-objs := hdac_hdmi.o
++snd-soc-hdac-hda-objs := hdac_hda.o
++snd-soc-ics43432-objs := ics43432.o
++snd-soc-inno-rk3036-objs := inno_rk3036.o
++snd-soc-isabelle-objs := isabelle.o
++snd-soc-jz4740-codec-objs := jz4740.o
++snd-soc-jz4725b-codec-objs := jz4725b.o
++snd-soc-l3-objs := l3.o
++snd-soc-lm4857-objs := lm4857.o
++snd-soc-lm49453-objs := lm49453.o
++snd-soc-lochnagar-sc-objs := lochnagar-sc.o
++snd-soc-madera-objs := madera.o
++snd-soc-max9759-objs := max9759.o
++snd-soc-max9768-objs := max9768.o
++snd-soc-max98088-objs := max98088.o
++snd-soc-max98090-objs := max98090.o
++snd-soc-max98095-objs := max98095.o
++snd-soc-max98357a-objs := max98357a.o
++snd-soc-max98371-objs := max98371.o
++snd-soc-max9867-objs := max9867.o
++snd-soc-max98925-objs := max98925.o
++snd-soc-max98926-objs := max98926.o
++snd-soc-max98927-objs := max98927.o
++snd-soc-max98373-objs := max98373.o
++snd-soc-max9850-objs := max9850.o
++snd-soc-max9860-objs := max9860.o
++snd-soc-mc13783-objs := mc13783.o
++snd-soc-ml26124-objs := ml26124.o
++snd-soc-msm8916-analog-objs := msm8916-wcd-analog.o
++snd-soc-msm8916-digital-objs := msm8916-wcd-digital.o
++snd-soc-mt6351-objs := mt6351.o
++snd-soc-mt6358-objs := mt6358.o
++snd-soc-nau8540-objs := nau8540.o
++snd-soc-nau8810-objs := nau8810.o
++snd-soc-nau8822-objs := nau8822.o
++snd-soc-nau8824-objs := nau8824.o
++snd-soc-nau8825-objs := nau8825.o
++snd-soc-hdmi-codec-objs := hdmi-codec.o
++snd-soc-pcm1681-objs := pcm1681.o
++snd-soc-pcm1789-codec-objs := pcm1789.o
++snd-soc-pcm1789-i2c-objs := pcm1789-i2c.o
++snd-soc-pcm179x-codec-objs := pcm179x.o
++snd-soc-pcm179x-i2c-objs := pcm179x-i2c.o
++snd-soc-pcm179x-spi-objs := pcm179x-spi.o
++snd-soc-pcm186x-objs := pcm186x.o
++snd-soc-pcm186x-i2c-objs := pcm186x-i2c.o
++snd-soc-pcm186x-spi-objs := pcm186x-spi.o
++snd-soc-pcm3008-objs := pcm3008.o
++snd-soc-pcm3060-objs := pcm3060.o
++snd-soc-pcm3060-i2c-objs := pcm3060-i2c.o
++snd-soc-pcm3060-spi-objs := pcm3060-spi.o
++snd-soc-pcm3168a-objs := pcm3168a.o
++snd-soc-pcm3168a-i2c-objs := pcm3168a-i2c.o
++snd-soc-pcm3168a-spi-objs := pcm3168a-spi.o
++snd-soc-pcm5102a-objs := pcm5102a.o
++snd-soc-pcm512x-objs := pcm512x.o
++snd-soc-pcm512x-i2c-objs := pcm512x-i2c.o
++snd-soc-pcm512x-spi-objs := pcm512x-spi.o
++snd-soc-rk3328-objs := rk3328_codec.o
++snd-soc-rl6231-objs := rl6231.o
++snd-soc-rl6347a-objs := rl6347a.o
++snd-soc-rt1011-objs := rt1011.o
++snd-soc-rt1305-objs := rt1305.o
++snd-soc-rt1308-objs := rt1308.o
++snd-soc-rt274-objs := rt274.o
++snd-soc-rt286-objs := rt286.o
++snd-soc-rt298-objs := rt298.o
++snd-soc-rt5514-objs := rt5514.o
++snd-soc-rt5514-spi-objs := rt5514-spi.o
++snd-soc-rt5616-objs := rt5616.o
++snd-soc-rt5631-objs := rt5631.o
++snd-soc-rt5640-objs := rt5640.o
++snd-soc-rt5645-objs := rt5645.o
++snd-soc-rt5651-objs := rt5651.o
++snd-soc-rt5659-objs := rt5659.o
++snd-soc-rt5660-objs := rt5660.o
++snd-soc-rt5663-objs := rt5663.o
++snd-soc-rt5665-objs := rt5665.o
++snd-soc-rt5668-objs := rt5668.o
++snd-soc-rt5670-objs := rt5670.o
++snd-soc-rt5677-objs := rt5677.o
++snd-soc-rt5677-spi-objs := rt5677-spi.o
++snd-soc-rt5682-objs := rt5682.o
++snd-soc-sgtl5000-objs := sgtl5000.o
++snd-soc-alc5623-objs := alc5623.o
++snd-soc-alc5632-objs := alc5632.o
++snd-soc-sigmadsp-objs := sigmadsp.o
++snd-soc-sigmadsp-i2c-objs := sigmadsp-i2c.o
++snd-soc-sigmadsp-regmap-objs := sigmadsp-regmap.o
++snd-soc-si476x-objs := si476x.o
++snd-soc-sirf-audio-codec-objs := sirf-audio-codec.o
++snd-soc-spdif-tx-objs := spdif_transmitter.o
++snd-soc-spdif-rx-objs := spdif_receiver.o
++snd-soc-ssm2305-objs := ssm2305.o
++snd-soc-ssm2518-objs := ssm2518.o
++snd-soc-ssm2602-objs := ssm2602.o
++snd-soc-ssm2602-spi-objs := ssm2602-spi.o
++snd-soc-ssm2602-i2c-objs := ssm2602-i2c.o
++snd-soc-ssm4567-objs := ssm4567.o
++snd-soc-sta32x-objs := sta32x.o
++snd-soc-sta350-objs := sta350.o
++snd-soc-sta529-objs := sta529.o
++snd-soc-stac9766-objs := stac9766.o
++snd-soc-sti-sas-objs := sti-sas.o
++snd-soc-tas5086-objs := tas5086.o
++snd-soc-tas571x-objs := tas571x.o
++snd-soc-tas5720-objs := tas5720.o
++snd-soc-tas6424-objs := tas6424.o
++snd-soc-tda7419-objs := tda7419.o
++snd-soc-tfa9879-objs := tfa9879.o
++snd-soc-tlv320aic23-objs := tlv320aic23.o
++snd-soc-tlv320aic23-i2c-objs := tlv320aic23-i2c.o
++snd-soc-tlv320aic23-spi-objs := tlv320aic23-spi.o
++snd-soc-tlv320aic26-objs := tlv320aic26.o
++snd-soc-tlv320aic31xx-objs := tlv320aic31xx.o
++snd-soc-tlv320aic32x4-objs := tlv320aic32x4.o tlv320aic32x4-clk.o
++snd-soc-tlv320aic32x4-i2c-objs := tlv320aic32x4-i2c.o
++snd-soc-tlv320aic32x4-spi-objs := tlv320aic32x4-spi.o
++snd-soc-tlv320aic3x-objs := tlv320aic3x.o
++snd-soc-tlv320dac33-objs := tlv320dac33.o
++snd-soc-tscs42xx-objs := tscs42xx.o
++snd-soc-tscs454-objs := tscs454.o
++snd-soc-ts3a227e-objs := ts3a227e.o
++snd-soc-twl4030-objs := twl4030.o
++snd-soc-twl6040-objs := twl6040.o
++snd-soc-uda1334-objs := uda1334.o
++snd-soc-uda134x-objs := uda134x.o
++snd-soc-uda1380-objs := uda1380.o
++snd-soc-wcd9335-objs := wcd-clsh-v2.o wcd9335.o
++snd-soc-wl1273-objs := wl1273.o
++snd-soc-wm-adsp-objs := wm_adsp.o
++snd-soc-wm0010-objs := wm0010.o
++snd-soc-wm1250-ev1-objs := wm1250-ev1.o
++snd-soc-wm2000-objs := wm2000.o
++snd-soc-wm2200-objs := wm2200.o
++snd-soc-wm5100-objs := wm5100.o wm5100-tables.o
++snd-soc-wm5102-objs := wm5102.o
++snd-soc-wm5110-objs := wm5110.o
++snd-soc-wm8350-objs := wm8350.o
++snd-soc-wm8400-objs := wm8400.o
++snd-soc-wm8510-objs := wm8510.o
++snd-soc-wm8523-objs := wm8523.o
++snd-soc-wm8524-objs := wm8524.o
++snd-soc-wm8580-objs := wm8580.o
++snd-soc-wm8711-objs := wm8711.o
++snd-soc-wm8727-objs := wm8727.o
++snd-soc-wm8728-objs := wm8728.o
++snd-soc-wm8731-objs := wm8731.o
++snd-soc-wm8737-objs := wm8737.o
++snd-soc-wm8741-objs := wm8741.o
++snd-soc-wm8750-objs := wm8750.o
++snd-soc-wm8753-objs := wm8753.o
++snd-soc-wm8770-objs := wm8770.o
++snd-soc-wm8776-objs := wm8776.o
++snd-soc-wm8782-objs := wm8782.o
++snd-soc-wm8804-objs := wm8804.o
++snd-soc-wm8804-i2c-objs := wm8804-i2c.o
++snd-soc-wm8804-spi-objs := wm8804-spi.o
++snd-soc-wm8900-objs := wm8900.o
++snd-soc-wm8903-objs := wm8903.o
++snd-soc-wm8904-objs := wm8904.o
++snd-soc-wm8996-objs := wm8996.o
++snd-soc-wm8940-objs := wm8940.o
++snd-soc-wm8955-objs := wm8955.o
++snd-soc-wm8960-objs := wm8960.o
++snd-soc-wm8961-objs := wm8961.o
++snd-soc-wm8962-objs := wm8962.o
++snd-soc-wm8971-objs := wm8971.o
++snd-soc-wm8974-objs := wm8974.o
++snd-soc-wm8978-objs := wm8978.o
++snd-soc-wm8983-objs := wm8983.o
++snd-soc-wm8985-objs := wm8985.o
++snd-soc-wm8988-objs := wm8988.o
++snd-soc-wm8990-objs := wm8990.o
++snd-soc-wm8991-objs := wm8991.o
++snd-soc-wm8993-objs := wm8993.o
++snd-soc-wm8994-objs := wm8994.o wm8958-dsp2.o
++snd-soc-wm8995-objs := wm8995.o
++snd-soc-wm8997-objs := wm8997.o
++snd-soc-wm8998-objs := wm8998.o
++snd-soc-wm9081-objs := wm9081.o
++snd-soc-wm9090-objs := wm9090.o
++snd-soc-wm9705-objs := wm9705.o
++snd-soc-wm9712-objs := wm9712.o
++snd-soc-wm9713-objs := wm9713.o
++snd-soc-wm-hubs-objs := wm_hubs.o
++snd-soc-zx-aud96p22-objs := zx_aud96p22.o
+ 
+-all:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
++snd-soc-tas2560-objs := tas2560-core.o tas2560-misc.o tas2560-codec.o tas2560-regmap.o
++snd-soc-tas2560_algo-objs := tas2560-algo.o
++snd-soc-tas2560_calib-objs := tas2560-calib.o
++snd-soc-tas2562-objs := tas2562-codec.o tas2562-regmap.o tas25xx-algo.o tas25xx-calib.o
++snd-soc-snd_smartpa_aw882xx-objs := aw882xx.o
++snd-soc-tfa9874-objs := tfa98xx.o tfa_container.o tfa_dsp.o tfa_init.o
++ifdef TFA_DEBUG
++ccflags-y += -DTFA_DEBUG -DDEBUG
++snd-soc-tfa9874-objs += tfa_debug.o
++endif
++# Amp
++snd-soc-max9877-objs := max9877.o
++snd-soc-max98504-objs := max98504.o
++snd-soc-simple-amplifier-objs := simple-amplifier.o
++snd-soc-tpa6130a2-objs := tpa6130a2.o
++snd-soc-tas2552-objs := tas2552.o
+ 
+-modules_install:
+-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
++obj-$(CONFIG_SND_SOC_88PM860X)	+= snd-soc-88pm860x.o
++obj-$(CONFIG_SND_SOC_AB8500_CODEC)	+= snd-soc-ab8500-codec.o
++obj-$(CONFIG_SND_SOC_AC97_CODEC)	+= snd-soc-ac97.o
++obj-$(CONFIG_SND_SOC_AD1836)	+= snd-soc-ad1836.o
++obj-$(CONFIG_SND_SOC_AD193X)	+= snd-soc-ad193x.o
++obj-$(CONFIG_SND_SOC_AD193X_SPI)	+= snd-soc-ad193x-spi.o
++obj-$(CONFIG_SND_SOC_AD193X_I2C)	+= snd-soc-ad193x-i2c.o
++obj-$(CONFIG_SND_SOC_AD1980)	+= snd-soc-ad1980.o
++obj-$(CONFIG_SND_SOC_AD73311) += snd-soc-ad73311.o
++obj-$(CONFIG_SND_SOC_ADAU_UTILS)	+= snd-soc-adau-utils.o
++obj-$(CONFIG_SND_SOC_ADAU1373)	+= snd-soc-adau1373.o
++obj-$(CONFIG_SND_SOC_ADAU1701)		+= snd-soc-adau1701.o
++obj-$(CONFIG_SND_SOC_ADAU17X1)		+= snd-soc-adau17x1.o
++obj-$(CONFIG_SND_SOC_ADAU1761)		+= snd-soc-adau1761.o
++obj-$(CONFIG_SND_SOC_ADAU1761_I2C)	+= snd-soc-adau1761-i2c.o
++obj-$(CONFIG_SND_SOC_ADAU1761_SPI)	+= snd-soc-adau1761-spi.o
++obj-$(CONFIG_SND_SOC_ADAU1781)		+= snd-soc-adau1781.o
++obj-$(CONFIG_SND_SOC_ADAU1781_I2C)	+= snd-soc-adau1781-i2c.o
++obj-$(CONFIG_SND_SOC_ADAU1781_SPI)	+= snd-soc-adau1781-spi.o
++obj-$(CONFIG_SND_SOC_ADAU1977)		+= snd-soc-adau1977.o
++obj-$(CONFIG_SND_SOC_ADAU1977_SPI)	+= snd-soc-adau1977-spi.o
++obj-$(CONFIG_SND_SOC_ADAU1977_I2C)	+= snd-soc-adau1977-i2c.o
++obj-$(CONFIG_SND_SOC_ADAU7002)	+= snd-soc-adau7002.o
++obj-$(CONFIG_SND_SOC_ADAV80X)  += snd-soc-adav80x.o
++obj-$(CONFIG_SND_SOC_ADAV801)  += snd-soc-adav801.o
++obj-$(CONFIG_SND_SOC_ADAV803)  += snd-soc-adav803.o
++obj-$(CONFIG_SND_SOC_ADS117X)	+= snd-soc-ads117x.o
++obj-$(CONFIG_SND_SOC_AK4104)	+= snd-soc-ak4104.o
++obj-$(CONFIG_SND_SOC_AK4118)	+= snd-soc-ak4118.o
++obj-$(CONFIG_SND_SOC_AK4458)	+= snd-soc-ak4458.o
++obj-$(CONFIG_SND_SOC_AK4535)	+= snd-soc-ak4535.o
++obj-$(CONFIG_SND_SOC_AK4554)	+= snd-soc-ak4554.o
++obj-$(CONFIG_SND_SOC_AK4613)	+= snd-soc-ak4613.o
++obj-$(CONFIG_SND_SOC_AK4641)	+= snd-soc-ak4641.o
++obj-$(CONFIG_SND_SOC_AK4642)	+= snd-soc-ak4642.o
++obj-$(CONFIG_SND_SOC_AK4671)	+= snd-soc-ak4671.o
++obj-$(CONFIG_SND_SOC_AK5386)	+= snd-soc-ak5386.o
++obj-$(CONFIG_SND_SOC_AK5558)	+= snd-soc-ak5558.o
++obj-$(CONFIG_SND_SOC_ALC5623)    += snd-soc-alc5623.o
++obj-$(CONFIG_SND_SOC_ALC5632)	+= snd-soc-alc5632.o
++obj-$(CONFIG_SND_SOC_ARIZONA)	+= snd-soc-arizona.o
++obj-$(CONFIG_SND_SOC_BD28623)	+= snd-soc-bd28623.o
++obj-$(CONFIG_SND_SOC_BT_SCO)	+= snd-soc-bt-sco.o
++obj-$(CONFIG_SND_SOC_CQ0093VC) += snd-soc-cq93vc.o
++obj-$(CONFIG_SND_SOC_CPCAP)	+= snd-soc-cpcap.o
++obj-$(CONFIG_SND_SOC_CROS_EC_CODEC)	+= snd-soc-cros-ec-codec.o
++obj-$(CONFIG_SND_SOC_CS35L32)	+= snd-soc-cs35l32.o
++obj-$(CONFIG_SND_SOC_CS35L33)	+= snd-soc-cs35l33.o
++obj-$(CONFIG_SND_SOC_CS35L34)	+= snd-soc-cs35l34.o
++obj-$(CONFIG_SND_SOC_CS35L35)	+= snd-soc-cs35l35.o
++obj-$(CONFIG_SND_SOC_CS35L36)	+= snd-soc-cs35l36.o
++obj-$(CONFIG_SND_SOC_CS42L42)	+= snd-soc-cs42l42.o
++obj-$(CONFIG_SND_SOC_CS42L51)	+= snd-soc-cs42l51.o
++obj-$(CONFIG_SND_SOC_CS42L51_I2C)	+= snd-soc-cs42l51-i2c.o
++obj-$(CONFIG_SND_SOC_CS42L52)	+= snd-soc-cs42l52.o
++obj-$(CONFIG_SND_SOC_CS42L56)	+= snd-soc-cs42l56.o
++obj-$(CONFIG_SND_SOC_CS42L73)	+= snd-soc-cs42l73.o
++obj-$(CONFIG_SND_SOC_CS4265)	+= snd-soc-cs4265.o
++obj-$(CONFIG_SND_SOC_CS4270)	+= snd-soc-cs4270.o
++obj-$(CONFIG_SND_SOC_CS4271)	+= snd-soc-cs4271.o
++obj-$(CONFIG_SND_SOC_CS4271_I2C)	+= snd-soc-cs4271-i2c.o
++obj-$(CONFIG_SND_SOC_CS4271_SPI)	+= snd-soc-cs4271-spi.o
++obj-$(CONFIG_SND_SOC_CS42XX8)	+= snd-soc-cs42xx8.o
++obj-$(CONFIG_SND_SOC_CS42XX8_I2C) += snd-soc-cs42xx8-i2c.o
++obj-$(CONFIG_SND_SOC_CS43130)   += snd-soc-cs43130.o
++obj-$(CONFIG_SND_SOC_CS4341)	+= snd-soc-cs4341.o
++obj-$(CONFIG_SND_SOC_CS4349)	+= snd-soc-cs4349.o
++obj-$(CONFIG_SND_SOC_CS47L24)	+= snd-soc-cs47l24.o
++obj-$(CONFIG_SND_SOC_CS47L15)	+= snd-soc-cs47l15.o
++obj-$(CONFIG_SND_SOC_CS47L35)	+= snd-soc-cs47l35.o
++obj-$(CONFIG_SND_SOC_CS47L85)	+= snd-soc-cs47l85.o
++obj-$(CONFIG_SND_SOC_CS47L90)	+= snd-soc-cs47l90.o
++obj-$(CONFIG_SND_SOC_CS47L92)	+= snd-soc-cs47l92.o
++obj-$(CONFIG_SND_SOC_CS53L30)	+= snd-soc-cs53l30.o
++obj-$(CONFIG_SND_SOC_CX20442)	+= snd-soc-cx20442.o
++obj-$(CONFIG_SND_SOC_CX2072X)	+= snd-soc-cx2072x.o
++obj-$(CONFIG_SND_SOC_DA7210)	+= snd-soc-da7210.o
++obj-$(CONFIG_SND_SOC_DA7213)	+= snd-soc-da7213.o
++obj-$(CONFIG_SND_SOC_DA7218)	+= snd-soc-da7218.o
++obj-$(CONFIG_SND_SOC_DA7219)	+= snd-soc-da7219.o
++obj-$(CONFIG_SND_SOC_DA732X)	+= snd-soc-da732x.o
++obj-$(CONFIG_SND_SOC_DA9055)	+= snd-soc-da9055.o
++obj-$(CONFIG_SND_SOC_DMIC)	+= snd-soc-dmic.o
++obj-$(CONFIG_SND_SOC_ES7134)	+= snd-soc-es7134.o
++obj-$(CONFIG_SND_SOC_ES7241)	+= snd-soc-es7241.o
++obj-$(CONFIG_SND_SOC_ES8316)    += snd-soc-es8316.o
++obj-$(CONFIG_SND_SOC_ES8328)	+= snd-soc-es8328.o
++obj-$(CONFIG_SND_SOC_ES8328_I2C)+= snd-soc-es8328-i2c.o
++obj-$(CONFIG_SND_SOC_ES8328_SPI)+= snd-soc-es8328-spi.o
++obj-$(CONFIG_SND_SOC_GTM601)    += snd-soc-gtm601.o
++obj-$(CONFIG_SND_SOC_HDAC_HDMI) += snd-soc-hdac-hdmi.o
++obj-$(CONFIG_SND_SOC_HDAC_HDA) += snd-soc-hdac-hda.o
++obj-$(CONFIG_SND_SOC_ICS43432)	+= snd-soc-ics43432.o
++obj-$(CONFIG_SND_SOC_INNO_RK3036)	+= snd-soc-inno-rk3036.o
++obj-$(CONFIG_SND_SOC_ISABELLE)	+= snd-soc-isabelle.o
++obj-$(CONFIG_SND_SOC_JZ4740_CODEC)	+= snd-soc-jz4740-codec.o
++obj-$(CONFIG_SND_SOC_JZ4725B_CODEC)	+= snd-soc-jz4725b-codec.o
++obj-$(CONFIG_SND_SOC_L3)	+= snd-soc-l3.o
++obj-$(CONFIG_SND_SOC_LM4857)	+= snd-soc-lm4857.o
++obj-$(CONFIG_SND_SOC_LM49453)   += snd-soc-lm49453.o
++obj-$(CONFIG_SND_SOC_LOCHNAGAR_SC)	+= snd-soc-lochnagar-sc.o
++obj-$(CONFIG_SND_SOC_MADERA)	+= snd-soc-madera.o
++obj-$(CONFIG_SND_SOC_MAX9759)	+= snd-soc-max9759.o
++obj-$(CONFIG_SND_SOC_MAX9768)	+= snd-soc-max9768.o
++obj-$(CONFIG_SND_SOC_MAX98088)	+= snd-soc-max98088.o
++obj-$(CONFIG_SND_SOC_MAX98090)	+= snd-soc-max98090.o
++obj-$(CONFIG_SND_SOC_MAX98095)	+= snd-soc-max98095.o
++obj-$(CONFIG_SND_SOC_MAX98357A)	+= snd-soc-max98357a.o
++obj-$(CONFIG_SND_SOC_MAX98371)	+= snd-soc-max98371.o
++obj-$(CONFIG_SND_SOC_MAX9867)	+= snd-soc-max9867.o
++obj-$(CONFIG_SND_SOC_MAX98925)	+= snd-soc-max98925.o
++obj-$(CONFIG_SND_SOC_MAX98926)	+= snd-soc-max98926.o
++obj-$(CONFIG_SND_SOC_MAX98927)	+= snd-soc-max98927.o
++obj-$(CONFIG_SND_SOC_MAX98373)	+= snd-soc-max98373.o
++obj-$(CONFIG_SND_SOC_MAX9850)	+= snd-soc-max9850.o
++obj-$(CONFIG_SND_SOC_MAX9860)	+= snd-soc-max9860.o
++obj-$(CONFIG_SND_SOC_MC13783)	+= snd-soc-mc13783.o
++obj-$(CONFIG_SND_SOC_ML26124)	+= snd-soc-ml26124.o
++obj-$(CONFIG_SND_SOC_MSM8916_WCD_ANALOG) +=snd-soc-msm8916-analog.o
++obj-$(CONFIG_SND_SOC_MSM8916_WCD_DIGITAL) +=snd-soc-msm8916-digital.o
++obj-$(CONFIG_SND_SOC_MT6351)	+= snd-soc-mt6351.o
++obj-$(CONFIG_SND_SOC_MT6358)	+= snd-soc-mt6358.o
++obj-$(CONFIG_SND_SOC_NAU8540)   += snd-soc-nau8540.o
++obj-$(CONFIG_SND_SOC_NAU8810)   += snd-soc-nau8810.o
++obj-$(CONFIG_SND_SOC_NAU8822)   += snd-soc-nau8822.o
++obj-$(CONFIG_SND_SOC_NAU8824)   += snd-soc-nau8824.o
++obj-$(CONFIG_SND_SOC_NAU8825)   += snd-soc-nau8825.o
++obj-$(CONFIG_SND_SOC_HDMI_CODEC)	+= snd-soc-hdmi-codec.o
++obj-$(CONFIG_SND_SOC_PCM1681)	+= snd-soc-pcm1681.o
++obj-$(CONFIG_SND_SOC_PCM179X)	+= snd-soc-pcm179x-codec.o
++obj-$(CONFIG_SND_SOC_PCM1789_I2C)	+= snd-soc-pcm1789-i2c.o
++obj-$(CONFIG_SND_SOC_PCM1789)	+= snd-soc-pcm1789-codec.o
++obj-$(CONFIG_SND_SOC_PCM179X_I2C)	+= snd-soc-pcm179x-i2c.o
++obj-$(CONFIG_SND_SOC_PCM179X_SPI)	+= snd-soc-pcm179x-spi.o
++obj-$(CONFIG_SND_SOC_PCM186X)	+= snd-soc-pcm186x.o
++obj-$(CONFIG_SND_SOC_PCM186X_I2C)	+= snd-soc-pcm186x-i2c.o
++obj-$(CONFIG_SND_SOC_PCM186X_SPI)	+= snd-soc-pcm186x-spi.o
++obj-$(CONFIG_SND_SOC_PCM3008)	+= snd-soc-pcm3008.o
++obj-$(CONFIG_SND_SOC_PCM3060)	+= snd-soc-pcm3060.o
++obj-$(CONFIG_SND_SOC_PCM3060_I2C)	+= snd-soc-pcm3060-i2c.o
++obj-$(CONFIG_SND_SOC_PCM3060_SPI)	+= snd-soc-pcm3060-spi.o
++obj-$(CONFIG_SND_SOC_PCM3168A)	+= snd-soc-pcm3168a.o
++obj-$(CONFIG_SND_SOC_PCM3168A_I2C)	+= snd-soc-pcm3168a-i2c.o
++obj-$(CONFIG_SND_SOC_PCM3168A_SPI)	+= snd-soc-pcm3168a-spi.o
++obj-$(CONFIG_SND_SOC_PCM5102A)	+= snd-soc-pcm5102a.o
++obj-$(CONFIG_SND_SOC_PCM512x)	+= snd-soc-pcm512x.o
++obj-$(CONFIG_SND_SOC_PCM512x_I2C)	+= snd-soc-pcm512x-i2c.o
++obj-$(CONFIG_SND_SOC_PCM512x_SPI)	+= snd-soc-pcm512x-spi.o
++obj-$(CONFIG_SND_SOC_RK3328)	+= snd-soc-rk3328.o
++obj-$(CONFIG_SND_SOC_RL6231)	+= snd-soc-rl6231.o
++obj-$(CONFIG_SND_SOC_RL6347A)	+= snd-soc-rl6347a.o
++obj-$(CONFIG_SND_SOC_RT1011)	+= snd-soc-rt1011.o
++obj-$(CONFIG_SND_SOC_RT1305)	+= snd-soc-rt1305.o
++obj-$(CONFIG_SND_SOC_RT1308)	+= snd-soc-rt1308.o
++obj-$(CONFIG_SND_SOC_RT274)	+= snd-soc-rt274.o
++obj-$(CONFIG_SND_SOC_RT286)	+= snd-soc-rt286.o
++obj-$(CONFIG_SND_SOC_RT298)	+= snd-soc-rt298.o
++obj-$(CONFIG_SND_SOC_RT5514)	+= snd-soc-rt5514.o
++obj-$(CONFIG_SND_SOC_RT5514_SPI)	+= snd-soc-rt5514-spi.o
++obj-$(CONFIG_SND_SOC_RT5514_SPI_BUILTIN)	+= snd-soc-rt5514-spi.o
++obj-$(CONFIG_SND_SOC_RT5616)	+= snd-soc-rt5616.o
++obj-$(CONFIG_SND_SOC_RT5631)	+= snd-soc-rt5631.o
++obj-$(CONFIG_SND_SOC_RT5640)	+= snd-soc-rt5640.o
++obj-$(CONFIG_SND_SOC_RT5645)	+= snd-soc-rt5645.o
++obj-$(CONFIG_SND_SOC_RT5651)	+= snd-soc-rt5651.o
++obj-$(CONFIG_SND_SOC_RT5659)	+= snd-soc-rt5659.o
++obj-$(CONFIG_SND_SOC_RT5660)	+= snd-soc-rt5660.o
++obj-$(CONFIG_SND_SOC_RT5663)	+= snd-soc-rt5663.o
++obj-$(CONFIG_SND_SOC_RT5665)	+= snd-soc-rt5665.o
++obj-$(CONFIG_SND_SOC_RT5668)	+= snd-soc-rt5668.o
++obj-$(CONFIG_SND_SOC_RT5670)	+= snd-soc-rt5670.o
++obj-$(CONFIG_SND_SOC_RT5677)	+= snd-soc-rt5677.o
++obj-$(CONFIG_SND_SOC_RT5677_SPI)	+= snd-soc-rt5677-spi.o
++obj-$(CONFIG_SND_SOC_RT5682)	+= snd-soc-rt5682.o
++obj-$(CONFIG_SND_SOC_SGTL5000)  += snd-soc-sgtl5000.o
++obj-$(CONFIG_SND_SOC_SIGMADSP)	+= snd-soc-sigmadsp.o
++obj-$(CONFIG_SND_SOC_SIGMADSP_I2C)	+= snd-soc-sigmadsp-i2c.o
++obj-$(CONFIG_SND_SOC_SIGMADSP_REGMAP)	+= snd-soc-sigmadsp-regmap.o
++obj-$(CONFIG_SND_SOC_SI476X)	+= snd-soc-si476x.o
++obj-$(CONFIG_SND_SOC_SPDIF)	+= snd-soc-spdif-rx.o snd-soc-spdif-tx.o
++obj-$(CONFIG_SND_SOC_SIRF_AUDIO_CODEC) += sirf-audio-codec.o
++obj-$(CONFIG_SND_SOC_SSM2305)	+= snd-soc-ssm2305.o
++obj-$(CONFIG_SND_SOC_SSM2518)	+= snd-soc-ssm2518.o
++obj-$(CONFIG_SND_SOC_SSM2602)	+= snd-soc-ssm2602.o
++obj-$(CONFIG_SND_SOC_SSM2602_SPI)	+= snd-soc-ssm2602-spi.o
++obj-$(CONFIG_SND_SOC_SSM2602_I2C)	+= snd-soc-ssm2602-i2c.o
++obj-$(CONFIG_SND_SOC_SSM4567)	+= snd-soc-ssm4567.o
++obj-$(CONFIG_SND_SOC_STA32X)   += snd-soc-sta32x.o
++obj-$(CONFIG_SND_SOC_STA350)   += snd-soc-sta350.o
++obj-$(CONFIG_SND_SOC_STA529)   += snd-soc-sta529.o
++obj-$(CONFIG_SND_SOC_STAC9766)	+= snd-soc-stac9766.o
++obj-$(CONFIG_SND_SOC_STI_SAS)	+= snd-soc-sti-sas.o
++obj-$(CONFIG_SND_SOC_TAS2552)	+= snd-soc-tas2552.o
++obj-$(CONFIG_SND_SOC_TAS5086)	+= snd-soc-tas5086.o
++obj-$(CONFIG_SND_SOC_TAS571X)	+= snd-soc-tas571x.o
++obj-$(CONFIG_SND_SOC_TAS5720)	+= snd-soc-tas5720.o
++obj-$(CONFIG_SND_SOC_TAS6424)	+= snd-soc-tas6424.o
++obj-$(CONFIG_SND_SOC_TDA7419)	+= snd-soc-tda7419.o
++obj-$(CONFIG_SND_SOC_TFA9879)	+= snd-soc-tfa9879.o
++obj-$(CONFIG_SND_SOC_TLV320AIC23)	+= snd-soc-tlv320aic23.o
++obj-$(CONFIG_SND_SOC_TLV320AIC23_I2C)	+= snd-soc-tlv320aic23-i2c.o
++obj-$(CONFIG_SND_SOC_TLV320AIC23_SPI)	+= snd-soc-tlv320aic23-spi.o
++obj-$(CONFIG_SND_SOC_TLV320AIC26)	+= snd-soc-tlv320aic26.o
++obj-$(CONFIG_SND_SOC_TLV320AIC31XX)     += snd-soc-tlv320aic31xx.o
++obj-$(CONFIG_SND_SOC_TLV320AIC32X4)     += snd-soc-tlv320aic32x4.o
++obj-$(CONFIG_SND_SOC_TLV320AIC32X4_I2C)	+= snd-soc-tlv320aic32x4-i2c.o
++obj-$(CONFIG_SND_SOC_TLV320AIC32X4_SPI)	+= snd-soc-tlv320aic32x4-spi.o
++obj-$(CONFIG_SND_SOC_TLV320AIC3X)	+= snd-soc-tlv320aic3x.o
++obj-$(CONFIG_SND_SOC_TLV320DAC33)	+= snd-soc-tlv320dac33.o
++obj-$(CONFIG_SND_SOC_TSCS42XX)	+= snd-soc-tscs42xx.o
++obj-$(CONFIG_SND_SOC_TSCS454)	+= snd-soc-tscs454.o
++obj-$(CONFIG_SND_SOC_TS3A227E)	+= snd-soc-ts3a227e.o
++obj-$(CONFIG_SND_SOC_TWL4030)	+= snd-soc-twl4030.o
++obj-$(CONFIG_SND_SOC_TWL6040)	+= snd-soc-twl6040.o
++obj-$(CONFIG_SND_SOC_UDA1334)	+= snd-soc-uda1334.o
++obj-$(CONFIG_SND_SOC_UDA134X)	+= snd-soc-uda134x.o
++obj-$(CONFIG_SND_SOC_UDA1380)	+= snd-soc-uda1380.o
++obj-$(CONFIG_SND_SOC_WCD9335)	+= snd-soc-wcd9335.o
++obj-$(CONFIG_SND_SOC_WL1273)	+= snd-soc-wl1273.o
++obj-$(CONFIG_SND_SOC_WM0010)	+= snd-soc-wm0010.o
++obj-$(CONFIG_SND_SOC_WM1250_EV1) += snd-soc-wm1250-ev1.o
++obj-$(CONFIG_SND_SOC_WM2000)	+= snd-soc-wm2000.o
++obj-$(CONFIG_SND_SOC_WM2200)	+= snd-soc-wm2200.o
++obj-$(CONFIG_SND_SOC_WM5100)	+= snd-soc-wm5100.o
++obj-$(CONFIG_SND_SOC_WM5102)	+= snd-soc-wm5102.o
++obj-$(CONFIG_SND_SOC_WM5110)	+= snd-soc-wm5110.o
++obj-$(CONFIG_SND_SOC_WM8350)	+= snd-soc-wm8350.o
++obj-$(CONFIG_SND_SOC_WM8400)	+= snd-soc-wm8400.o
++obj-$(CONFIG_SND_SOC_WM8510)	+= snd-soc-wm8510.o
++obj-$(CONFIG_SND_SOC_WM8523)	+= snd-soc-wm8523.o
++obj-$(CONFIG_SND_SOC_WM8524)	+= snd-soc-wm8524.o
++obj-$(CONFIG_SND_SOC_WM8580)	+= snd-soc-wm8580.o
++obj-$(CONFIG_SND_SOC_WM8711)	+= snd-soc-wm8711.o
++obj-$(CONFIG_SND_SOC_WM8727)	+= snd-soc-wm8727.o
++obj-$(CONFIG_SND_SOC_WM8728)	+= snd-soc-wm8728.o
++obj-$(CONFIG_SND_SOC_WM8731)	+= snd-soc-wm8731.o
++obj-$(CONFIG_SND_SOC_WM8737)	+= snd-soc-wm8737.o
++obj-$(CONFIG_SND_SOC_WM8741)	+= snd-soc-wm8741.o
++obj-$(CONFIG_SND_SOC_WM8750)	+= snd-soc-wm8750.o
++obj-$(CONFIG_SND_SOC_WM8753)	+= snd-soc-wm8753.o
++obj-$(CONFIG_SND_SOC_WM8770)	+= snd-soc-wm8770.o
++obj-$(CONFIG_SND_SOC_WM8776)	+= snd-soc-wm8776.o
++obj-$(CONFIG_SND_SOC_WM8782)	+= snd-soc-wm8782.o
++obj-$(CONFIG_SND_SOC_WM8804)	+= snd-soc-wm8804.o
++obj-$(CONFIG_SND_SOC_WM8804_I2C) += snd-soc-wm8804-i2c.o
++obj-$(CONFIG_SND_SOC_WM8804_SPI) += snd-soc-wm8804-spi.o
++obj-$(CONFIG_SND_SOC_WM8900)	+= snd-soc-wm8900.o
++obj-$(CONFIG_SND_SOC_WM8903)	+= snd-soc-wm8903.o
++obj-$(CONFIG_SND_SOC_WM8904)	+= snd-soc-wm8904.o
++obj-$(CONFIG_SND_SOC_WM8996)	+= snd-soc-wm8996.o
++obj-$(CONFIG_SND_SOC_WM8940)	+= snd-soc-wm8940.o
++obj-$(CONFIG_SND_SOC_WM8955)	+= snd-soc-wm8955.o
++obj-$(CONFIG_SND_SOC_WM8960)	+= snd-soc-wm8960.o
++obj-$(CONFIG_SND_SOC_WM8961)	+= snd-soc-wm8961.o
++obj-$(CONFIG_SND_SOC_WM8962)	+= snd-soc-wm8962.o
++obj-$(CONFIG_SND_SOC_WM8971)	+= snd-soc-wm8971.o
++obj-$(CONFIG_SND_SOC_WM8974)	+= snd-soc-wm8974.o
++obj-$(CONFIG_SND_SOC_WM8978)	+= snd-soc-wm8978.o
++obj-$(CONFIG_SND_SOC_WM8983)	+= snd-soc-wm8983.o
++obj-$(CONFIG_SND_SOC_WM8985)	+= snd-soc-wm8985.o
++obj-$(CONFIG_SND_SOC_WM8988)	+= snd-soc-wm8988.o
++obj-$(CONFIG_SND_SOC_WM8990)	+= snd-soc-wm8990.o
++obj-$(CONFIG_SND_SOC_WM8991)	+= snd-soc-wm8991.o
++obj-$(CONFIG_SND_SOC_WM8993)	+= snd-soc-wm8993.o
++obj-$(CONFIG_SND_SOC_WM8994)	+= snd-soc-wm8994.o
++obj-$(CONFIG_SND_SOC_WM8995)	+= snd-soc-wm8995.o
++obj-$(CONFIG_SND_SOC_WM8997)	+= snd-soc-wm8997.o
++obj-$(CONFIG_SND_SOC_WM8998)	+= snd-soc-wm8998.o
++obj-$(CONFIG_SND_SOC_WM9081)	+= snd-soc-wm9081.o
++obj-$(CONFIG_SND_SOC_WM9090)	+= snd-soc-wm9090.o
++obj-$(CONFIG_SND_SOC_WM9705)	+= snd-soc-wm9705.o
++obj-$(CONFIG_SND_SOC_WM9712)	+= snd-soc-wm9712.o
++obj-$(CONFIG_SND_SOC_WM9713)	+= snd-soc-wm9713.o
++obj-$(CONFIG_SND_SOC_WM_ADSP)	+= snd-soc-wm-adsp.o
++obj-$(CONFIG_SND_SOC_WM_HUBS)	+= snd-soc-wm-hubs.o
++obj-$(CONFIG_SND_SOC_ZX_AUD96P22) += snd-soc-zx-aud96p22.o
+ 
+-clean:
+-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
+\ No newline at end of file
++obj-$(CONFIG_SND_SOC_TAS2560) += snd-soc-tas2560.o
++obj-$(CONFIG_SND_SOC_TAS2560_ALGO) += snd-soc-tas2560_algo.o
++obj-$(CONFIG_SND_SOC_TAS2560_CALIB) += snd-soc-tas2560_calib.o
++obj-$(CONFIG_SND_SOC_SMARTPA_AW882xx) += snd-soc-snd_smartpa_aw882xx.o
++obj-$(CONFIG_SND_SOC_TFA9874) += snd-soc-tfa9874.o
++
++# Amp
++obj-$(CONFIG_SND_SOC_MAX9877)	+= snd-soc-max9877.o
++obj-$(CONFIG_SND_SOC_MAX98504)	+= snd-soc-max98504.o
++obj-$(CONFIG_SND_SOC_SIMPLE_AMPLIFIER)	+= snd-soc-simple-amplifier.o
++obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
+-- 
+2.39.2
+

@@ -1,0 +1,63 @@
+From 0a58537c725bc047837f457d4ac284cbe314c539 Mon Sep 17 00:00:00 2001
+From: Santhosh Behara <quic_sbehara@quicinc.com>
+Date: Tue, 18 Aug 2020 21:53:13 +0530
+Subject: [PATCH] msm: vidc: Rate limit frequently occurring error logs
+
+Rate limit frequently occurring error logs to avoid cpu
+watchdog timeout.
+
+[electimon: Include dqbuf as well]
+Bug: 163772974
+Change-Id: Ia09c33ce3900561da2e18631beca953de1cc8458
+Signed-off-by: Raylin Hsu <raylinhsu@google.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/998902adff554c02767f649cf1cbe5322a81d7da
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/video/msm/vidc/msm_vidc_common.c | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/techpack/video/msm/vidc/msm_vidc_common.c b/techpack/video/msm/vidc/msm_vidc_common.c
+index a793677718c7..74b1af287b7d 100644
+--- a/techpack/video/msm/vidc/msm_vidc_common.c
++++ b/techpack/video/msm/vidc/msm_vidc_common.c
+@@ -6856,8 +6856,15 @@ int msm_comm_qbuf_cache_operations(struct msm_vidc_inst *inst,
+ 			rc = msm_smem_cache_operations(mbuf->smem[i].dma_buf,
+ 					cache_op, offset, size, inst->sid);
+ 			if (rc)
+-				print_vidc_buffer(VIDC_ERR,
+-					"qbuf cache ops failed", inst, mbuf);
++				dprintk_ratelimit(VIDC_ERR,
++					"qbuf cache ops failed: %s: idx %2d fd %d off %d daddr %x size %d filled %d flags 0x%x ts %lld refcnt %d mflags 0x%x\n",
++					vb->type == INPUT_MPLANE ?
++					"OUTPUT" : "CAPTURE",
++					vb->index, vb->planes[i].m.fd,
++					vb->planes[i].data_offset, mbuf->smem[i].device_addr,
++					vb->planes[i].length, vb->planes[i].bytesused,
++					mbuf->vvb.flags, mbuf->vvb.vb2_buf.timestamp,
++					mbuf->smem[i].refcount, mbuf->flags);
+ 		}
+ 	}
+ 
+@@ -6918,8 +6925,15 @@ int msm_comm_dqbuf_cache_operations(struct msm_vidc_inst *inst,
+ 			rc = msm_smem_cache_operations(mbuf->smem[i].dma_buf,
+ 					cache_op, offset, size, inst->sid);
+ 			if (rc)
+-				print_vidc_buffer(VIDC_ERR,
+-					"dqbuf cache ops failed", inst, mbuf);
++				dprintk_ratelimit(VIDC_ERR,
++					"dqbuf cache ops failed: %s: idx %2d fd %d off %d daddr %x size %d filled %d flags 0x%x ts %lld refcnt %d mflags 0x%x\n",
++					vb->type == INPUT_MPLANE ?
++					"OUTPUT" : "CAPTURE",
++					vb->index, vb->planes[i].m.fd,
++					vb->planes[i].data_offset, mbuf->smem[i].device_addr,
++					vb->planes[i].length, vb->planes[i].bytesused,
++					mbuf->vvb.flags, mbuf->vvb.vb2_buf.timestamp,
++					mbuf->smem[i].refcount, mbuf->flags);
+ 		}
+ 	}
+ 
+-- 
+2.39.2
+

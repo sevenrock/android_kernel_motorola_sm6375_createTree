@@ -1,0 +1,27 @@
+From 1f00f51e97f43d3f1ab05128a77a5823d9ca9724 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 5 May 2024 00:17:25 +0200
+Subject: [PATCH] power: mmi_discrete_charger: Tone down log spam
+
+Change-Id: I95422364bfdbbb5753f179103b14e0ce73c16544
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/mmi_discrete_charger/mmi_discrete_charger_core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/mmi_discrete_charger/mmi_discrete_charger_core.c b/drivers/power/mmi_discrete_charger/mmi_discrete_charger_core.c
+index 1fbab2067aae..8faa7a9a9ef7 100644
+--- a/drivers/power/mmi_discrete_charger/mmi_discrete_charger_core.c
++++ b/drivers/power/mmi_discrete_charger/mmi_discrete_charger_core.c
+@@ -1330,7 +1330,7 @@ static void mmi_discrete_charger_work(struct work_struct *work)
+ 
+ 	mmi_discrete_config_chgmod_to_fg(chip);
+ 
+-	mmi_info(chip, "FV=%d, FCC=%d, CHGDIS=%d, USBICL=%d, USBDIS=%d\n",
++	mmi_dbg(chip, "FV=%d, FCC=%d, CHGDIS=%d, USBICL=%d, USBDIS=%d\n",
+ 		get_effective_result(chip->fv_votable),
+ 		get_effective_result(chip->fcc_votable),
+ 		get_effective_result(chip->chg_disable_votable),
+-- 
+2.39.2
+

@@ -1,0 +1,152 @@
+From 1bf5a90a1b41d552a30b275bd5f22573c3c47f63 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Tue, 21 Jun 2022 13:30:22 +0300
+Subject: [PATCH] input: touchscreen: mmi: implement double tap detection
+
+Uses single tap and detects whether it's been triggered twice.
+
+Change-Id: I722b74e900e521be9a1bf2eb62c8a7226b269717
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../touchscreen_mmi/touchscreen_mmi_class.c   | 32 +++++++++++++++++++
+ .../touchscreen_mmi/touchscreen_mmi_gesture.c | 29 +++++++++++++++++
+ .../touchscreen_mmi/touchscreen_mmi_notif.c   |  2 ++
+ include/linux/touchscreen_mmi.h               |  5 +++
+ 4 files changed, 68 insertions(+)
+
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+index a6156432822e..11a1659a75ee 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_class.c
+@@ -408,6 +408,36 @@ static ssize_t gesture_store(struct device *dev,
+ 	return size;
+ }
+ static DEVICE_ATTR(gesture, (S_IWUSR | S_IWGRP | S_IRUGO), gesture_show, gesture_store);
++
++static ssize_t double_tap_enabled_show(struct device *dev,
++				       struct device_attribute *attr, char *buf)
++{
++	struct ts_mmi_dev *touch_cdev = dev_get_drvdata(dev);
++
++	return snprintf(buf, PAGE_SIZE, "%u\n",
++			!!(touch_cdev->gesture_mode_type & TS_MMI_GESTURE_SINGLE));
++}
++static ssize_t double_tap_enabled_store(struct device *dev,
++					struct device_attribute *attr,
++					const char *buf, size_t count)
++{
++	struct ts_mmi_dev *touch_cdev = dev_get_drvdata(dev);
++
++	gesture_set(touch_cdev, TS_MMI_GESTURE_SINGLE, buf[0] != '0');
++
++	return count;
++}
++static DEVICE_ATTR_RW(double_tap_enabled);
++
++static ssize_t double_tap_pressed_show(struct device *dev,
++					 struct device_attribute *attr,
++					 char *buf)
++{
++	struct ts_mmi_dev *touch_cdev = dev_get_drvdata(dev);
++
++	return snprintf(buf, PAGE_SIZE, "%u\n", touch_cdev->double_tap_pressed);
++}
++static DEVICE_ATTR_RO(double_tap_pressed);
+ #endif
+ 
+ /*
+@@ -493,6 +523,8 @@ static struct attribute *sysfs_class_attrs[] = {
+ #endif
+ #ifdef CONFIG_BOARD_USES_DOUBLE_TAP_CTRL
+ 	&dev_attr_gesture.attr,
++	&dev_attr_double_tap_enabled.attr,
++	&dev_attr_double_tap_pressed.attr,
+ #endif
+ 	&dev_attr_liquid_detection_ctl.attr,
+ 	NULL,
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+index 415561fe1549..77bff7025a86 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
+@@ -209,6 +209,32 @@ static inline void update_poison_center(struct touch_event_data *tev)
+ }
+ #endif /* TS_MMI_TOUCH_GESTURE_POISON_EVENT */
+ 
++#define DOUBLE_TAP_MAX_TIME	(2 * NSEC_PER_SEC)
++
++static void ts_mmi_single_tap_handler(struct ts_mmi_dev *touch_cdev)
++{
++	unsigned char mode_type = touch_cdev->gesture_mode_type;
++	ktime_t now, tmp;
++
++	if (!touch_cdev->single_tap_pressed) {
++		touch_cdev->single_tap_pressed_time = ktime_get_boottime();
++		touch_cdev->single_tap_pressed = true;
++		return;
++	}
++
++	touch_cdev->single_tap_pressed = false;
++
++	now = ktime_get_boottime();
++	tmp = ktime_add(touch_cdev->single_tap_pressed_time,
++			DOUBLE_TAP_MAX_TIME);
++
++	if (ktime_after(now, tmp))
++		return;
++
++	touch_cdev->double_tap_pressed = true;
++	sysfs_notify(&DEV_MMI->kobj, NULL, "double_tap_pressed");
++}
++
+ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ {
+ 	int key_code;
+@@ -220,6 +246,7 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ 		if (!(mode_type & TS_MMI_GESTURE_SINGLE))
+ 			return 1;
+ 
++		ts_mmi_single_tap_handler(touch_cdev);
+ 		key_code = KEY_F1;
+ 		pr_info("%s: single tap\n", __func__);
+ 			break;
+@@ -249,6 +276,8 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ 
+ 		key_code = KEY_F4;
+ 		pr_info("%s: double tap\n", __func__);
++		touch_cdev->double_tap_pressed = true;
++		sysfs_notify(&DEV_MMI->kobj, NULL, "double_tap_pressed");
+ 		break;
+ 	default:
+ 		pr_info("%s: unknown id=%x\n", __func__, gev->evcode);
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+index de276a7d8bfc..cc7325e83556 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
++++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_notif.c
+@@ -365,6 +365,8 @@ static void ts_mmi_queued_resume(struct ts_mmi_dev *touch_cdev)
+ 	 */
+ 	mutex_lock(&touch_cdev->extif_mutex);
+ 	ts_mmi_restore_settings(touch_cdev);
++	touch_cdev->single_tap_pressed = false;
++	touch_cdev->double_tap_pressed = false;
+ 	touch_cdev->pm_mode = TS_MMI_PM_ACTIVE;
+ 	mutex_unlock(&touch_cdev->extif_mutex);
+ 	dev_info(DEV_MMI, "%s: done\n", __func__);
+diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
+index b6123afb4906..06d7dd7d6381 100644
+--- a/include/linux/touchscreen_mmi.h
++++ b/include/linux/touchscreen_mmi.h
+@@ -553,6 +553,11 @@ struct ts_mmi_dev {
+ 	int			update_baseline;
+ 	struct attribute_group	*extern_group;
+ 	struct list_head	node;
++
++	ktime_t			single_tap_pressed_time;
++	bool			single_tap_pressed;
++	bool			double_tap_pressed;
++
+ 	/*
+ 	 * vendor provided
+ 	 */
+-- 
+2.39.2
+

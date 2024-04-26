@@ -1,0 +1,27 @@
+From 56f09f79cc585cd0688fe3e335a249e024280507 Mon Sep 17 00:00:00 2001
+From: Jake Weinstein <jake@aospa.co>
+Date: Fri, 1 Sep 2023 12:32:49 +0530
+Subject: [PATCH] defconfig: Enable more crypto routines
+
+Change-Id: I1c1d4523a62ed7380505b3804055570a3e743220
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index d4000ec2c688..46238726abf1 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -107,6 +107,8 @@ CONFIG_AW882XX_STEREO_SMARTPA=y
+ CONFIG_AW882XX_MAPSIZE_16K=y
+ CONFIG_CAMERA_FLASH_PWM=y
+ CONFIG_CAM_SENSOR_PROBE_RETRY=y
++CONFIG_CRYPTO_CHACHA20_NEON=y
++CONFIG_CRYPTO_POLY1305_NEON=y
+ CONFIG_KPROBES=y
+ CONFIG_JUMP_LABEL=y
+ CONFIG_SHADOW_CALL_STACK=y
+-- 
+2.39.2
+

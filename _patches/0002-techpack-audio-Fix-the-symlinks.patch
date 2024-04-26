@@ -1,0 +1,35 @@
+From 250de31ef8a479e1265f523f3e1b41426e950678 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Mon, 22 Feb 2021 04:00:03 -0500
+Subject: [PATCH] techpack: audio: Fix the symlinks...
+
+Original patch:
+https://github.com/moto-sm4350/kernel_motorola_osaka/commit/d98066e044807a4be75edc87cb36c8fa55db700c
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/audio/soc/core.h          | 2 +-
+ techpack/audio/soc/pinctrl-utils.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/techpack/audio/soc/core.h b/techpack/audio/soc/core.h
+index fcefe83a1508..8a2fa90df8cb 120000
+--- a/techpack/audio/soc/core.h
++++ b/techpack/audio/soc/core.h
+@@ -1 +1 @@
+-../../../../../kernel/msm-5.4/drivers/pinctrl/core.h
+\ No newline at end of file
++../../../drivers/pinctrl/core.h
+\ No newline at end of file
+diff --git a/techpack/audio/soc/pinctrl-utils.h b/techpack/audio/soc/pinctrl-utils.h
+index 6135de470b8f..9aab5f24bd14 120000
+--- a/techpack/audio/soc/pinctrl-utils.h
++++ b/techpack/audio/soc/pinctrl-utils.h
+@@ -1 +1 @@
+-../../../../../kernel/msm-5.4/drivers/pinctrl/pinctrl-utils.h
+\ No newline at end of file
++../../../drivers/pinctrl/pinctrl-utils.h
+\ No newline at end of file
+-- 
+2.39.2
+

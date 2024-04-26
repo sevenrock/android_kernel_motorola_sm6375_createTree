@@ -1,0 +1,29 @@
+From b93fbc92dbf2b6d81f4ef21dc88c5d5e1bcfcec7 Mon Sep 17 00:00:00 2001
+From: Alexander Koskovich <zvnexus@outlook.com>
+Date: Mon, 14 Dec 2020 07:09:46 -0700
+Subject: [PATCH] qcacld-3.0: Disable build tagging.
+
+ * Doesn't work as an inline kernel module.
+
+Change-Id: I10ffa5213db737267cf9d908442dd1dee0a26e53
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/staging/qcacld-3.0/configs/qca6390_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/qcacld-3.0/configs/qca6390_defconfig b/drivers/staging/qcacld-3.0/configs/qca6390_defconfig
+index 62399687a015..6e108b9add96 100644
+--- a/drivers/staging/qcacld-3.0/configs/qca6390_defconfig
++++ b/drivers/staging/qcacld-3.0/configs/qca6390_defconfig
+@@ -71,7 +71,7 @@ endif
+ 
+ ifneq ($(DEVELOPER_DISABLE_BUILD_TIMESTAMP), y)
+ ifneq ($(WLAN_DISABLE_BUILD_TAG), y)
+-CONFIG_BUILD_TAG := y
++CONFIG_BUILD_TAG := n
+ endif
+ endif
+ 
+-- 
+2.39.2
+

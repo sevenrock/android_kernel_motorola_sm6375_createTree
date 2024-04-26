@@ -1,0 +1,31 @@
+From 4a52ea8cb27ad684753e822f5d9bba76beae6e5d Mon Sep 17 00:00:00 2001
+From: Forenche <prahul2003@gmail.com>
+Date: Fri, 9 Jun 2023 23:48:29 +0530
+Subject: [PATCH] drivers/sx937x: Fixup header path
+
+Signed-off-by: Forenche <prahul2003@gmail.com>
+
+Original patch:
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/62260d733d6216fa6428ae99421398530803c914
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/misc/sx937x/sx937x_sar.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/misc/sx937x/sx937x_sar.c b/drivers/misc/sx937x/sx937x_sar.c
+index 1ce2acaf7fc4..f91891935634 100644
+--- a/drivers/misc/sx937x/sx937x_sar.c
++++ b/drivers/misc/sx937x/sx937x_sar.c
+@@ -34,7 +34,7 @@
+ #include <linux/power_supply.h>
+ #include <linux/sensors.h>
+ #include <linux/input/sx937x.h> 	/* main struct, interrupt,init,pointers */
+-#include "base.h"
++#include "../../base/base.h"
+ 
+ #define LOG_TAG "[sar SX937x]: "
+ 
+-- 
+2.39.2
+

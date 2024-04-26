@@ -1,0 +1,41 @@
+From 009bcf4d79faa1c5ffcae3da5f3a4cc1a30b9ded Mon Sep 17 00:00:00 2001
+From: Pedro Bertoleti <pedrohfb@motorola.com>
+Date: Tue, 23 Nov 2021 14:28:59 -0300
+Subject: [PATCH] defconfig: Set CONFIG_HZ_300 to y
+
+Accordingly to (CR), using CONFIG_HZ=300 brings significant
+improvement on launch time. FPS tests results can be seen at
+http://perf.mot.com/apps/fps/rungraphs/?runids=44715,44749 .
+
+Therefore, this gerrit sets CONFIG_HZ_300 property to y
+(in order to configure CONFIG_HZ property value to 300).
+
+Change-Id: Ic9c965a7414e2bc3e863f987707418cd381ada8b
+Reviewed-on: https://gerrit.mot.com/2126434
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Rafael Ortolan <rafones@motorola.com>
+Reviewed-by: Fernanda Schmidt <fschmidt@motorola.com>
+Reviewed-by: Carlos Pinho <cpinho@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index b05febbf402d..6cd23cfcdd13 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -57,6 +57,7 @@ CONFIG_ARCH_HOLI=y
+ CONFIG_ARCH_BLAIR=y
+ CONFIG_SCHED_MC=y
+ CONFIG_NR_CPUS=8
++CONFIG_HZ_300=y
+ CONFIG_SECCOMP=y
+ CONFIG_PARAVIRT=y
+ # CONFIG_UNMAP_KERNEL_AT_EL0 is not set
+-- 
+2.39.2
+

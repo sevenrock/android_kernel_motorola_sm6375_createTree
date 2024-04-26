@@ -1,0 +1,22 @@
+From eb41dd0ecd17a48a3ad5359aa7b307c4e882ac1c Mon Sep 17 00:00:00 2001
+From: LuK1337 <priv.luk@gmail.com>
+Date: Tue, 11 Dec 2018 09:50:01 +0100
+Subject: [PATCH] Android: Add empty Android.mk file
+
+* This prevents inclusion of drivers/staging/greybus/tools/Android.mk
+  which will conflict in case we have more than 1 kernel tree in AOSP
+  source dir.
+
+Change-Id: I335bca7b6d6463b1ffc673ab5367603347516e13
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ Android.mk | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 Android.mk
+
+diff --git a/Android.mk b/Android.mk
+new file mode 100644
+index 000000000000..e69de29bb2d1
+-- 
+2.39.2
+

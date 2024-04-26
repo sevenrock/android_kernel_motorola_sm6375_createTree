@@ -1,0 +1,28 @@
+From c7b7034ba5673dde363ad38e065b003f9257c343 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Mon, 22 Nov 2021 17:43:24 +0000
+Subject: [PATCH] root: Unhide generated defconfigs
+
+Signed-off-by: electimon <electimon@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .gitignore | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index a04e5410b2f2..21dbb0468af7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -147,9 +147,6 @@ x509.genkey
+ # Clang's compilation database file
+ /compile_commands.json
+ 
+-# generated defconfigs
+-arch/*/configs/vendor/*_defconfig
+-
+ # vendor device tree directories
+ arch/arm64/boot/dts/vendor
+ arch/arm/boot/dts/vendor
+-- 
+2.39.2
+

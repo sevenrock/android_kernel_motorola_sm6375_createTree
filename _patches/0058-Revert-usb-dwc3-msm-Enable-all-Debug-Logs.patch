@@ -1,0 +1,31 @@
+From b3d9bc24a9c9b1690efd8d034a023641ceb0b0f3 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 5 May 2024 14:44:39 +0200
+Subject: [PATCH] Revert "usb/dwc3: msm: Enable all Debug Logs"
+
+This reverts commit 4702b4adf1289f7ac6a404fddc8639c7e73749ae.
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/usb/dwc3/dwc3-msm.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/usb/dwc3/dwc3-msm.c b/drivers/usb/dwc3/dwc3-msm.c
+index 02838de73116..7fc8df860bcb 100644
+--- a/drivers/usb/dwc3/dwc3-msm.c
++++ b/drivers/usb/dwc3/dwc3-msm.c
+@@ -65,11 +65,6 @@
+ /* AHB2PHY read/write waite value */
+ #define ONE_READ_WRITE_WAIT 0x11
+ 
+-#undef dev_dbg
+-#undef pr_debug
+-#define dev_dbg dev_err
+-#define pr_debug pr_err
+-
+ /* XHCI registers */
+ #define USB3_HCSPARAMS1		(0x4)
+ #define USB3_PORTSC		(0x420)
+-- 
+2.39.2
+

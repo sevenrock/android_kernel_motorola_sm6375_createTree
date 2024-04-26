@@ -1,0 +1,48 @@
+From 8acc8ed5605cacfa75d3890c6de6705b92ce03f3 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Sun, 3 Apr 2022 21:45:46 +0200
+Subject: [PATCH] drivers: fix include paths for moto modules
+
+Change-Id: I19f007feb491e3fbaf6e34e987e2d34143a4e2db
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild  | 2 +-
+ drivers/misc/sx937x/Kbuild                                      | 2 +-
+ drivers/power/qpnp_adaptive_charge/Kbuild                       | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
+index b3a6afe414bb..9f333a285e96 100644
+--- a/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
++++ b/drivers/media/platform/msm/camera/cam_sensor_module/cam_cci/Kbuild
+@@ -1,4 +1,4 @@
+-KERNEL_CAMERA_DRIVER_PATH ?= $(src)/../../../../../../../techpack/camera/drivers
++KERNEL_CAMERA_DRIVER_PATH ?= $(srctree)/$(src)/../../../../../../../techpack/camera/drivers
+ 
+ ccflags-y += -DCONFIG_SPECTRA_CAMERA=1
+ ccflags-y += -I$(KERNEL_CAMERA_DRIVER_PATH)/../include
+diff --git a/drivers/misc/sx937x/Kbuild b/drivers/misc/sx937x/Kbuild
+index e8055ae7543c..20e9b282dfbe 100644
+--- a/drivers/misc/sx937x/Kbuild
++++ b/drivers/misc/sx937x/Kbuild
+@@ -1,4 +1,4 @@
+-ccflags-y += -I$(src)/../../../drivers/base
++ccflags-y += -I$(srctree)/$(src)/../../../drivers/base
+ 
+ ifneq ($(filter m y,$(CONFIG_SX937X_USB_CAL)),)
+ 	ccflags-y += -DCONFIG_CAPSENSE_USB_CAL
+diff --git a/drivers/power/qpnp_adaptive_charge/Kbuild b/drivers/power/qpnp_adaptive_charge/Kbuild
+index 1f3b684c0ee0..41d52ec8b3d5 100755
+--- a/drivers/power/qpnp_adaptive_charge/Kbuild
++++ b/drivers/power/qpnp_adaptive_charge/Kbuild
+@@ -1,6 +1,6 @@
+ ifneq ($(filter m y,$(CONFIG_USE_MMI_CHARGER)),)
+ 	EXTRA_CFLAGS += -DUSE_MMI_CHARGER
+-	EXTRA_CFLAGS += -I$(src)/../mmi_charger
++	EXTRA_CFLAGS += -I$(srctree)/$(src)/../mmi_charger
+ endif
+ 
+ ifneq ($(filter m y, $(ADAPTIVE_TOLERANCE_OPTIMIZATION)),)
+-- 
+2.39.2
+

@@ -1,0 +1,46 @@
+From a30b966c74e2daa7d6be9fb625f24ef36f48a375 Mon Sep 17 00:00:00 2001
+From: Wei Wang <wvw@google.com>
+Date: Mon, 26 Oct 2020 15:26:48 -0700
+Subject: [PATCH] defconfig: Enable CONFIG_FAIR_GROUP_SCHED
+
+Enable CONFIG_FAIR_GROUP_SCHED with proper tuning can help prioritize
+important work in Android. The feature was taken off due to improper
+setting on the background tasks' share. Now Tasks in root group has
+already moved into a newly created system subgroup, so the shares can be
+properly set.
+
++----------------------------------------------------------------------------------------+
+| Cold App Launch Time (* w/ prio120 8 threads running in root cpuset)                   |
++----------------------------------------+--------+------+---------+-----------+---------+
+|                                        | chrome | maps | youtube | playstore | setting |
++----------------------------------------+--------+------+---------+-----------+---------+
+| No CONFIG_FAIR_GROUP_SCHED support(*)  |    591 | 1314 |     887 |      1952 |     551 |
++----------------------------------------+--------+------+---------+-----------+---------+
+| CONFIG_FAIR_GROUP_SCHED w/ 1% limit(*) |    567 |  637 |     668 |      1450 |     529 |
++----------------------------------------+--------+------+---------+-----------+---------+
+| No stress runnning (best case)         |    416 |  463 |     484 |      1075 |     363 |
++----------------------------------------+--------+------+---------+-----------+---------+
+
+Bug: 171740453
+Test: Build and boot
+Change-Id: Ibb7e48c93136e3967da6381d7c0c94d0cdaee443
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index d031755ffca0..9bd283988405 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -21,7 +21,6 @@ CONFIG_MEMCG=y
+ CONFIG_MEMCG_SWAP=y
+ CONFIG_BLK_CGROUP=y
+ CONFIG_CGROUP_SCHED=y
+-# CONFIG_FAIR_GROUP_SCHED is not set
+ CONFIG_UCLAMP_TASK_GROUP=y
+ CONFIG_CGROUP_FREEZER=y
+ CONFIG_CPUSETS=y
+-- 
+2.39.2
+

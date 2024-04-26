@@ -1,0 +1,29 @@
+From b057544afaa831c2ab955c081e9dc44d8fbb7e76 Mon Sep 17 00:00:00 2001
+From: Miguel de Dios <migueldedios@google.com>
+Date: Sun, 22 Nov 2020 19:09:32 +0300
+Subject: [PATCH] defconfig: Disable UNMAP_KERNEL_AT_EL0
+
+This causes a perf regression on the *_syscall bionic benchmarks.
+
+Bug: 120161344
+Change-Id: I313510c64471b8109456b30314a3d85a1d1d5cae
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index c26870824c01..1d099c56c70b 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -58,6 +58,7 @@ CONFIG_SCHED_MC=y
+ CONFIG_NR_CPUS=8
+ CONFIG_SECCOMP=y
+ CONFIG_PARAVIRT=y
++# CONFIG_UNMAP_KERNEL_AT_EL0 is not set
+ CONFIG_ARM64_SW_TTBR0_PAN=y
+ CONFIG_COMPAT=y
+ CONFIG_ARMV8_DEPRECATED=y
+-- 
+2.39.2
+

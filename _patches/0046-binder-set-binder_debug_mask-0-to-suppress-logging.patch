@@ -1,0 +1,36 @@
+From 335ae8d9b14fc5da799dee49308671d1c0873d08 Mon Sep 17 00:00:00 2001
+From: John Dias <joaodias@google.com>
+Date: Fri, 12 Aug 2016 08:36:08 -0700
+Subject: [PATCH] binder: set binder_debug_mask=0 to suppress logging
+
+Excessive logging -- not present on angler -- is affecting
+performance, contributing to missed audio deadlines and likely other
+latency-dependent tasks.
+
+Signed-off-by: Alex Naidis <alex.naidis@linux.com>
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+
+https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/670785edf70eb34e6446d7786fc3cc7c2950b175
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/android/binder.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+index 1efaa6f2160b..7332b197b3af 100644
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -117,8 +117,7 @@ enum {
+ 	BINDER_DEBUG_PRIORITY_CAP           = 1U << 13,
+ 	BINDER_DEBUG_SPINLOCKS              = 1U << 14,
+ };
+-static uint32_t binder_debug_mask = BINDER_DEBUG_USER_ERROR |
+-	BINDER_DEBUG_FAILED_TRANSACTION | BINDER_DEBUG_DEAD_TRANSACTION;
++static uint32_t binder_debug_mask = 0;
+ module_param_named(debug_mask, binder_debug_mask, uint, 0644);
+ 
+ char *binder_devices_param = CONFIG_ANDROID_BINDER_DEVICES;
+-- 
+2.39.2
+

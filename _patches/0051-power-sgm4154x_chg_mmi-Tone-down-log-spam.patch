@@ -1,0 +1,50 @@
+From f8f876b6293ce15e01dd829714e8959ae800cf6c Mon Sep 17 00:00:00 2001
+From: Michael Bestas <mkbestas@lineageos.org>
+Date: Fri, 19 May 2023 02:03:02 +0300
+Subject: [PATCH] power: sgm4154x_chg_mmi: Tone down log spam
+
+Change-Id: Ia1f2d45e58c9ee814a0e80b67fc4a8fa2a6c5ac0
+
+Original patch:
+https://github.com/LineageOS/android_kernel_motorola_sm6225/commit/dcb5134649670fc2738b808253c363d6a80689f8
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/sgm4154x_chg_mmi/sgm4154x_charger.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/power/sgm4154x_chg_mmi/sgm4154x_charger.c b/drivers/power/sgm4154x_chg_mmi/sgm4154x_charger.c
+index d7df093aedbd..e0eba07922ce 100644
+--- a/drivers/power/sgm4154x_chg_mmi/sgm4154x_charger.c
++++ b/drivers/power/sgm4154x_chg_mmi/sgm4154x_charger.c
+@@ -931,8 +931,7 @@ static int sgm4154x_get_state(struct sgm4154x_device *sgm,
+ 	state->therm_stat = !!(chrg_stat & SGM4154x_THERM_STAT);
+ 	state->vsys_stat = !!(chrg_stat & SGM4154x_VSYS_STAT);
+ 
+-	pr_err("%s chrg_stat =%d,chrg_type =%d online = %d\n",__func__,state->chrg_stat,state->chrg_type,state->online);
+-
++	pr_debug("%s chrg_stat =%d,chrg_type =%d online = %d\n",__func__,state->chrg_stat,state->chrg_type,state->online);
+ 
+ 	ret = mmi_regmap_read(sgm, SGM4154x_CHRG_FAULT, &fault);
+ 	if (ret){
+@@ -1431,7 +1430,7 @@ static void sgm4154x_dump_register(struct sgm4154x_device * sgm)
+ 
+ 	for(i=0; i<=SGM4154x_CHRG_CTRL_f; i++) {
+ 		mmi_regmap_read(sgm, i, &reg);
+-		pr_err("%s REG[0x%x]=0x%x\n", __func__, i, reg);
++		pr_debug("%s REG[0x%x]=0x%x\n", __func__, i, reg);
+ 	}
+ }
+ 
+@@ -1701,7 +1700,7 @@ static void charger_monitor_work_func(struct work_struct *work)
+ 	}
+ 
+ 	sgm4154x_dump_register(sgm);
+-	pr_err("%s\n",__func__);
++	pr_debug("%s\n",__func__);
+ OUT:
+ 	schedule_delayed_work(&sgm->charge_monitor_work, 10*HZ);
+ }
+-- 
+2.39.2
+

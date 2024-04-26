@@ -1,0 +1,29 @@
+From 8161596edd0888e13e7c6f9687ed11c7b25e5382 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Fri, 27 Jan 2023 15:31:28 +0200
+Subject: [PATCH] input: touchscreen: touchscreen_mmi: add
+ BOARD_USES_DOUBLE_TAP_CTRL config
+
+Change-Id: I92869a2e94460826578d676786e93fbb98b9d77f
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/input/touchscreen/touchscreen_mmi/Kconfig | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/touchscreen_mmi/Kconfig b/drivers/input/touchscreen/touchscreen_mmi/Kconfig
+index 7352c45f341b..53d44297d4e7 100644
+--- a/drivers/input/touchscreen/touchscreen_mmi/Kconfig
++++ b/drivers/input/touchscreen/touchscreen_mmi/Kconfig
+@@ -35,4 +35,7 @@ config DRM_PANEL_NOTIFICATIONS
+ 	default n
+ 	help
+ 	 Say Y here if your panel includes support for drm notifications.
+-	 If unsure, say N.
+\ No newline at end of file
++	 If unsure, say N.
++
++config BOARD_USES_DOUBLE_TAP_CTRL
++	bool "Board uses Double Tap Control"
+-- 
+2.39.2
+

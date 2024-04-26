@@ -1,0 +1,27 @@
+From 16aa7b64dd165e3c7a8127316cff77800d0d370e Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 5 May 2024 00:17:46 +0200
+Subject: [PATCH] power: cw2217b_fg_mmi: Tone down log spam
+
+Change-Id: Idf98ccfcfd87271b77b1b7d4180d958222c5f3ef
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/cw2217b_fg_mmi/cw2217B_fuel_gauge_base.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/cw2217b_fg_mmi/cw2217B_fuel_gauge_base.c b/drivers/power/cw2217b_fg_mmi/cw2217B_fuel_gauge_base.c
+index 766e8e125955..1f82bc5111cc 100644
+--- a/drivers/power/cw2217b_fg_mmi/cw2217B_fuel_gauge_base.c
++++ b/drivers/power/cw2217b_fg_mmi/cw2217B_fuel_gauge_base.c
+@@ -14,7 +14,7 @@
+ #include <linux/sizes.h>
+ #include <linux/regulator/consumer.h>
+ 
+-#define CWFG_ENABLE_LOG 1 /* CHANGE Customer need to change this for enable/disable log */
++#define CWFG_ENABLE_LOG 0 /* CHANGE Customer need to change this for enable/disable log */
+ 
+ #define CW_PROPERTIES cw_bat->bms_name
+ 
+-- 
+2.39.2
+
