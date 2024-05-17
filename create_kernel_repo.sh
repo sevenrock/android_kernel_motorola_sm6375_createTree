@@ -31,17 +31,26 @@ then
     git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-13-release-t1sus33.1-124-6-8-1 --single-branch
 fi
 
-if [ ! -d $WORK_DIR/kernel-codelinaro-5.4-r3 ]
+if [ -d $WORK_DIR/kernel-codelinaro-5.4-r3 ]
 then
+    cd $WORK_DIR/kernel-codelinaro-5.4-r3
+    git fetch origin
+    git reset LA.UM.9.16.r1-16900-MANNAR.QSSI15.0 --hard
+else
     git clone https://git.codelinaro.org/clo/la/kernel/msm-5.4.git --branch kernel.lnx.5.4.r3-rel --single-branch kernel-codelinaro-5.4-r3
+fi
+cd $WORK_DIR/kernel-codelinaro-5.4-r3
 
-# revert commit to solve rebase conflict with moto kernel
+# revert codelinaro commits to solve rebase conflicts with moto kernel
 # moto has slightly different version of codelinaro commit
 # https://github.com/MotorolaMobilityLLC/kernel-msm/commit/483961db6f0054b1c75bbc61fa052782826ef382
-    cd $WORK_DIR/kernel-codelinaro-5.4-r3
-    git revert acf2f0eb6a4a --no-edit
-    cd $WORK_DIR
-fi
+git revert acf2f0eb6a4aabcfae75f869af836cdc30f29419 --no-edit
+
+# prevent conflict with moto commit
+# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/adef11527df8cdeed539fc370ba1ddb09a4c68bd
+git revert e46fa2494859f4774f64d067816eedcf10d767d6 --no-edit
+
+cd $WORK_DIR
 
 if [ ! -d $WORK_DIR/android_kernel_motorola_sm6375 ]
 then
