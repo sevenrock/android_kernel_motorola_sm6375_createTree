@@ -35,7 +35,7 @@ if [ -d $WORK_DIR/kernel-codelinaro-5.4-r3 ]
 then
     cd $WORK_DIR/kernel-codelinaro-5.4-r3
     git fetch origin
-    git reset LA.UM.9.16.r1-16900-MANNAR.QSSI15.0 --hard
+    git reset LA.UM.9.16.r1-17000-MANNAR.QSSI14.0 --hard
 else
     git clone https://git.codelinaro.org/clo/la/kernel/msm-5.4.git --branch kernel.lnx.5.4.r3-rel --single-branch kernel-codelinaro-5.4-r3
 fi
