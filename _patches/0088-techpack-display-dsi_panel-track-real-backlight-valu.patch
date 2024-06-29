@@ -1,0 +1,52 @@
+From 5073fd96b238b201edbfbb0da8a053bae122f1d0 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Fri, 10 Sep 2021 00:47:53 +0300
+Subject: [PATCH] techpack: display: dsi_panel: track real backlight value
+
+Change-Id: I23bc8619541ab86cc5451a792dcb790cfd37cf97
+
+Original patch:
+https://github.com/ArrowOS-Devices/android_kernel_motorola_dubai/commit/26c03e9a2965342a6f7ebe26d2fc1851e8425ab1
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/dsi/dsi_panel.c | 3 +++
+ techpack/display/msm/dsi/dsi_panel.h | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
+index 8a8744cfd90b..198c2a13b474 100644
+--- a/techpack/display/msm/dsi/dsi_panel.c
++++ b/techpack/display/msm/dsi/dsi_panel.c
+@@ -951,6 +951,8 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
+ 		rc = -ENOTSUPP;
+ 	}
+ 
++	bl->real_bl_level = bl_lvl;
++
+ 	return rc;
+ }
+ 
+@@ -3160,6 +3162,7 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
+ 
+ 	panel->bl_config.bl_scale = MAX_BL_SCALE_LEVEL;
+ 	panel->bl_config.bl_scale_sv = MAX_SV_BL_SCALE_LEVEL;
++	panel->bl_config.real_bl_level = 0;
+ 
+ 	rc = utils->read_u32(utils->data, "qcom,mdss-dsi-bl-min-level", &val);
+ 	if (rc) {
+diff --git a/techpack/display/msm/dsi/dsi_panel.h b/techpack/display/msm/dsi/dsi_panel.h
+index ec7d27bff028..ae1a7c60cf88 100644
+--- a/techpack/display/msm/dsi/dsi_panel.h
++++ b/techpack/display/msm/dsi/dsi_panel.h
+@@ -172,6 +172,7 @@ struct dsi_backlight_config {
+ 	bool bl_inverted_dbv;
+ 	bool bl_demura_cmd;
+ 	u32 demura_type;
++	u32 real_bl_level;
+ 
+ 	int en_gpio;
+ 	/* PWM params */
+-- 
+2.39.2
+

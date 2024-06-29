@@ -1,0 +1,82 @@
+From 1a3d0e520a600dca9a4f20bd504ebb6848217388 Mon Sep 17 00:00:00 2001
+From: Adithya R <gh0strider.2k18.reborn@gmail.com>
+Date: Wed, 5 Apr 2023 13:29:47 +0530
+Subject: [PATCH] arm64: dts: rhodep: Allow setting brightness upto 4095
+
+3514-4095 is HBM.
+
+Ported from original patch:
+https://github.com/ArrowOS-Devices/android_kernel_motorola_dubai/commit/7181678edf130ffc735934502a6bc9102f665ec8
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../boot/dts/vendor/qcom/rhodep-display.dtsi  | 20 +++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/vendor/qcom/rhodep-display.dtsi b/arch/arm64/boot/dts/vendor/qcom/rhodep-display.dtsi
+index ee6def6ed74d..8e1101836880 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/rhodep-display.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/rhodep-display.dtsi
+@@ -122,9 +122,9 @@
+ 	qcom,mdss-dsi-bl-remap;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <9>;
+-	qcom,mdss-dsi-bl-max-level = <3514>;
++	qcom,mdss-dsi-bl-max-level = <4095>;
+ 	qcom,mdss-dsi-bl-default-level = <1757>;
+-	qcom,mdss-brightness-max-level = <3514>;
++	qcom,mdss-brightness-max-level = <4095>;
+ 	qcom,platform-te-gpio = <&tlmm 23 0>;
+ 	qcom,platform-reset-gpio = <&pmr735a_gpios 2 0>;
+ 	qcom,bl-dsc-cmd-state = "dsi_hs_mode";
+@@ -194,9 +194,9 @@
+ 	qcom,mdss-dsi-bl-remap;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <9>;
+-	qcom,mdss-dsi-bl-max-level = <3514>;
++	qcom,mdss-dsi-bl-max-level = <4095>;
+ 	qcom,mdss-dsi-bl-default-level = <1757>;
+-	qcom,mdss-brightness-max-level = <3514>;
++	qcom,mdss-brightness-max-level = <4095>;
+ 	qcom,platform-te-gpio = <&tlmm 23 0>;
+ 	qcom,platform-reset-gpio = <&pmr735a_gpios 2 0>;
+ 	qcom,bl-dsc-cmd-state = "dsi_hs_mode";
+@@ -266,9 +266,9 @@
+ 	qcom,mdss-dsi-bl-remap;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <9>;
+-	qcom,mdss-dsi-bl-max-level = <3514>;
++	qcom,mdss-dsi-bl-max-level = <4095>;
+ 	qcom,mdss-dsi-bl-default-level = <1757>;
+-	qcom,mdss-brightness-max-level = <3514>;
++	qcom,mdss-brightness-max-level = <4095>;
+ 	qcom,platform-te-gpio = <&tlmm 23 0>;
+ 	qcom,platform-reset-gpio = <&pmr735a_gpios 2 0>;
+ 	qcom,bl-dsc-cmd-state = "dsi_hs_mode";
+@@ -338,9 +338,9 @@
+ 	qcom,mdss-dsi-bl-remap;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <9>;
+-	qcom,mdss-dsi-bl-max-level = <3514>;
++	qcom,mdss-dsi-bl-max-level = <4095>;
+ 	qcom,mdss-dsi-bl-default-level = <1757>;
+-	qcom,mdss-brightness-max-level = <3514>;
++	qcom,mdss-brightness-max-level = <4095>;
+ 	qcom,platform-te-gpio = <&tlmm 23 0>;
+ 	qcom,platform-reset-gpio = <&pmr735a_gpios 2 0>;
+ 	qcom,bl-dsc-cmd-state = "dsi_hs_mode";
+@@ -410,9 +410,9 @@
+ 	qcom,mdss-dsi-bl-remap;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <9>;
+-	qcom,mdss-dsi-bl-max-level = <3514>;
++	qcom,mdss-dsi-bl-max-level = <4095>;
+ 	qcom,mdss-dsi-bl-default-level = <1757>;
+-	qcom,mdss-brightness-max-level = <3514>;
++	qcom,mdss-brightness-max-level = <4095>;
+ 	qcom,platform-te-gpio = <&tlmm 23 0>;
+ 	qcom,platform-reset-gpio = <&pmr735a_gpios 2 0>;
+ 	qcom,bl-dsc-cmd-state = "dsi_hs_mode";
+-- 
+2.39.2
+
