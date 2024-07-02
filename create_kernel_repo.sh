@@ -26,8 +26,12 @@ delete_subrepos () {
     done
 }
 
-if [ ! -d $WORK_DIR/kernel-msm ]
+if [ -d $WORK_DIR/kernel-msm ]
 then
+    cd $WORK_DIR/kernel-msm
+    git fetch origin android-13-release-t1sus33.1-124-6-8-1
+    git reset origin/android-13-release-t1sus33.1-124-6-8-1 --hard
+else
     git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-13-release-t1sus33.1-124-6-8-1 --single-branch
 fi
 
@@ -124,7 +128,7 @@ git fetch codelinaro
 git fetch moto-kernel
 git checkout lineage-21
 
-git reset MMI-T1SUS33.1-124-6-8-1 --hard
+git reset moto-kernel/android-13-release-t1sus33.1-124-6-8-1 --hard
 git rebase codelinaro/kernel.lnx.5.4.r3-rel
 
 git remote add techpack-audio ../kernel-msm-5.4-techpack-audio
