@@ -1,0 +1,25 @@
+From b28e695e3fe43257703377a85469804fbaf3142e Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sat, 17 Aug 2024 18:10:34 +0200
+Subject: [PATCH] rhodep: Disable pstore compression
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/rhodep_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/rhodep_defconfig b/arch/arm64/configs/vendor/rhodep_defconfig
+index 7d920d8b14e7..1ce3cea3fdcd 100644
+--- a/arch/arm64/configs/vendor/rhodep_defconfig
++++ b/arch/arm64/configs/vendor/rhodep_defconfig
+@@ -792,6 +792,7 @@ CONFIG_EXFAT_FS=m
+ CONFIG_TMPFS=y
+ # CONFIG_EFIVAR_FS is not set
+ CONFIG_PSTORE=y
++# CONFIG_PSTORE_DEFLATE_COMPRESS is not set
+ CONFIG_PSTORE_CONSOLE=y
+ CONFIG_PSTORE_PMSG=y
+ CONFIG_PSTORE_RAM=y
+-- 
+2.39.2
+
