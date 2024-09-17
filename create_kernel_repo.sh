@@ -39,7 +39,7 @@ if [ -d $WORK_DIR/kernel-codelinaro-5.4-r3 ]
 then
     cd $WORK_DIR/kernel-codelinaro-5.4-r3
     git fetch origin
-    git reset LA.UM.9.16.r1-17000-MANNAR.QSSI14.0 --hard
+    git reset LA.UM.9.16.r1-17300-MANNAR.QSSI15.0 --hard
 else
     git clone https://git.codelinaro.org/clo/la/kernel/msm-5.4.git --branch kernel.lnx.5.4.r3-rel --single-branch kernel-codelinaro-5.4-r3
 fi
@@ -54,6 +54,14 @@ git revert acf2f0eb6a4aabcfae75f869af836cdc30f29419 --no-edit
 # https://github.com/MotorolaMobilityLLC/kernel-msm/commit/adef11527df8cdeed539fc370ba1ddb09a4c68bd
 git revert e46fa2494859f4774f64d067816eedcf10d767d6 --no-edit
 
+# prevent conflict with moto commit
+# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/2536b440f3e1da8cdb67a72577dd12f8fa90bebc
+git revert ff29a6cf6e84f4ccbab2d0853cf20e6c2821ef38 --no-edit
+
+# prevent conflict with moto commit
+# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/fe51fee88a1481e9685fba3833691685488deb38
+git revert 9d501ea8822df775478424b196cc9e3f510b35a3 --no-edit
+
 cd $WORK_DIR
 
 if [ ! -d $WORK_DIR/android_kernel_motorola_sm6375 ]
@@ -67,7 +75,7 @@ fi
 
 delete_subrepos
 
-git clone --branch android-13-release-t1sus33.1-124-6-8-1 https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-audio.git
+git clone --branch android-13-release-t1ssis33.1-75-7-1 https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-audio.git
 git clone --branch android-13-release-t1rd33.116-33-3 https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-camera.git
 git clone --branch android-13-release-t1ssm33.1-121-4 https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-display.git
 git clone --branch android-13-release-t1ssm33.1-121-4 https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-video.git
@@ -133,7 +141,7 @@ git rebase codelinaro/kernel.lnx.5.4.r3-rel
 
 git remote add techpack-audio ../kernel-msm-5.4-techpack-audio
 git fetch techpack-audio --no-tags
-git merge --no-edit --allow-unrelated-histories techpack-audio/android-13-release-t1sus33.1-124-6-8-1
+git merge --no-edit --allow-unrelated-histories techpack-audio/android-13-release-t1ssis33.1-75-7-1
 git remote remove techpack-audio
 
 git remote add techpack-camera ../kernel-msm-5.4-techpack-camera/
