@@ -310,3 +310,6 @@ git commit -a -m "treewide: remove Android.mk"
 
 for i in $WORK_DIR/_patches/*; do echo "--- patching $i"; git am --keep-cr $i || break; done
 check_rc $? "git am"
+git checkout -b lineage-21_no_fp_no_nfc
+for i in $WORK_DIR/_patches_no_fp_no_nfc/*; do echo "--- patching $i"; git am --keep-cr $i || break; done
+check_rc $? "git am"
