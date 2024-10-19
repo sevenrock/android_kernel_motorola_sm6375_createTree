@@ -134,10 +134,7 @@ for i in \
             filter_repo_subdir=techpack/audio/
             ;;
         kernel-msm-5.4-techpack-camera)
-# cherry-pick only, rebase is broken
             moto_branch=android-13-release-t1rd33.116-33-3
-            codelinaro_repo=platform/vendor/opensource/camera-kernel
-            codelinaro_branch=camera-kernel.lnx.4.0.r2-rel
             filter_repo_subdir=techpack/camera/
             ;;
         kernel-msm-5.4-techpack-display)
@@ -227,12 +224,6 @@ for i in \
 
         echoyellow "rebase moto $i on codelinaro $codelinaro_repo"
         case $i in
-            kernel-msm-5.4-techpack-camera)
-                git cherry-pick 575f20ea96c0492a660bdd9d9ca631c6574f95e7
-                check_rc $? "git cherry-pick"
-                git cherry-pick 45e9dd3937dc830f16ea0aa801d51ebd2c8cbf3e
-                check_rc $? "git cherry-pick"
-                ;;
             kernel-msm-5.4-techpack-display)
                 git cherry-pick a4fdef4c120bbdf44f54156013d25a6a3af795e4
                 check_rc $? "git cherry-pick"
