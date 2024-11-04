@@ -1,0 +1,44 @@
+From bd50587a5ab6fd069c93048aa9b30fabf3ada87b Mon Sep 17 00:00:00 2001
+From: Alexander Winkowski <dereference23@outlook.com>
+Date: Tue, 22 Aug 2023 13:03:56 +0000
+Subject: [PATCH] techpack: audio: Fix indentation in
+ wsa881x_visense_adc_ctrl()
+
+Cross-checked with msm-4.14 and msm-5.15 tags. The change does not exist
+as a separate commit and is squashed into the initial import.
+
+Change-Id: Ib3defedf0fbd5b7cdccdfba26383313ff05b4ef0
+Signed-off-by: Alexander Winkowski <dereference23@outlook.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/audio/asoc/codecs/wsa881x-analog.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/techpack/audio/asoc/codecs/wsa881x-analog.c b/techpack/audio/asoc/codecs/wsa881x-analog.c
+index 57615c414ba8..de8b6ea658f5 100755
+--- a/techpack/audio/asoc/codecs/wsa881x-analog.c
++++ b/techpack/audio/asoc/codecs/wsa881x-analog.c
+@@ -548,13 +548,13 @@ static int wsa881x_visense_adc_ctrl(struct snd_soc_component *component,
+ 			snd_soc_component_update_bits(component,
+ 					WSA881X_ADC_SEL_IBIAS,
+ 					0x70, 0x40);
+-			snd_soc_component_update_bits(component,
+-					WSA881X_ADC_EN_SEL_IBIAS,
+-					0x07, 0x04);
+-			snd_soc_component_update_bits(component,
+-					WSA881X_ADC_EN_MODU_V, 0x80, 0x80);
+-			snd_soc_component_update_bits(component,
+-					WSA881X_ADC_EN_MODU_I, 0x80, 0x80);
++		snd_soc_component_update_bits(component,
++				WSA881X_ADC_EN_SEL_IBIAS,
++				0x07, 0x04);
++		snd_soc_component_update_bits(component,
++				WSA881X_ADC_EN_MODU_V, 0x80, 0x80);
++		snd_soc_component_update_bits(component,
++				WSA881X_ADC_EN_MODU_I, 0x80, 0x80);
+ 	} else {
+ 		/* Ensure: Speaker Protection has been stopped */
+ 		snd_soc_component_update_bits(component,
+-- 
+2.39.5
+

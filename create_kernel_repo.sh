@@ -36,42 +36,58 @@ then
 else
     git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-13-release-t1sus33.1-124-6-8-1 --single-branch
     check_rc $? "git clone"
+    cd $WORK_DIR/kernel-msm
+    curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
+    chmod +x .git/hooks/commit-msg
 fi
 
-echoyellow "download codelinaro kernel"
-if [ -d $WORK_DIR/kernel-codelinaro-5.4-r3 ]
+# Revert "fs:EROFS:Porting 5.10 erofs to 5.4"
+git revert --no-edit f2496ea48764
+check_rc $? "git revert"
+
+# Revert "Penang: resolve kasan panic"
+# Revert "Penang: kasan panic"
+# Revert "penang: device suspend tests fail"
+# Revert "net: qrtr: get svc_id before queueing sk_buff"
+git revert --no-edit 011d4a88c74e 6ed5195034fe 608b5e5affae 625e3bd86868
+check_rc $? "git revert"
+
+# Revert "af_unix: Fix garbage collector racing against connect()"
+# Revert "af_unix: Do not use atomic ops for unix_sk(sk)->inflight."
+git revert --no-edit 61a21da82e11 ba912f951d19
+check_rc $? "git revert"
+
+echoyellow "download LineageOS qcom sm8350 kernel"
+if [ -d $WORK_DIR/android_kernel_qcom_sm8350 ]
 then
-    cd $WORK_DIR/kernel-codelinaro-5.4-r3
+    cd $WORK_DIR/android_kernel_qcom_sm8350
     git fetch origin
     check_rc $? "git fetch"
-    git reset LA.UM.9.16.r1-17300-MANNAR.QSSI15.0 --hard
+    git reset origin/lineage-20 --hard
     check_rc $? "git reset"
 else
-    git clone https://git.codelinaro.org/clo/la/kernel/msm-5.4.git --branch kernel.lnx.5.4.r3-rel --single-branch kernel-codelinaro-5.4-r3
+    cd $WORK_DIR
+    git clone https://github.com/LineageOS/android_kernel_qcom_sm8350.git
     check_rc $? "git clone"
+    cd $WORK_DIR/android_kernel_qcom_sm8350
+    curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
+    chmod +x .git/hooks/commit-msg
 fi
-cd $WORK_DIR/kernel-codelinaro-5.4-r3
 
-# revert codelinaro commits to solve rebase conflicts with moto kernel
-# moto has slightly different version of codelinaro commit
-# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/483961db6f0054b1c75bbc61fa052782826ef382
-git revert acf2f0eb6a4aabcfae75f869af836cdc30f29419 --no-edit
+# Revert "qseecom: Add flush_work based on flag"
+git revert --no-edit 23d03fa257af1da4041b4d6bbf63e63dd5ebc8a1
 check_rc $? "git revert"
 
-# prevent conflict with moto commit
-# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/adef11527df8cdeed539fc370ba1ddb09a4c68bd
-git revert e46fa2494859f4774f64d067816eedcf10d767d6 --no-edit
+# Revert "mmc: sdhci-msm: Disable partial_init and clk-scaling to avoid RED error"
+git revert --no-edit e46fa2494859f4774f64d067816eedcf10d767d6
 check_rc $? "git revert"
 
-# prevent conflict with moto commit
-# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/2536b440f3e1da8cdb67a72577dd12f8fa90bebc
-git revert ff29a6cf6e84f4ccbab2d0853cf20e6c2821ef38 --no-edit
+# Revert "soc: qcom: smem: Add boundary checks for partitions"
+git revert --no-edit 58e401790ae9f1bbaab96eda7d2e21fb4b020247
 check_rc $? "git revert"
 
-# prevent conflict with moto commit
-# https://github.com/MotorolaMobilityLLC/kernel-msm/commit/fe51fee88a1481e9685fba3833691685488deb38
-git revert 9d501ea8822df775478424b196cc9e3f510b35a3 --no-edit
-check_rc $? "git revert"
+for i in $WORK_DIR/_patches_prepare_sm8350/*; do echo "--- patching $i"; git am --keep-cr $i || break; done
+check_rc $? "git am"
 
 cd $WORK_DIR
 
@@ -80,18 +96,42 @@ if [ ! -d $WORK_DIR/android_kernel_motorola_sm6375 ]
 then
     git init -b lineage-21 $WORK_DIR/android_kernel_motorola_sm6375
     cd $WORK_DIR/android_kernel_motorola_sm6375
-    git remote add codelinaro ../kernel-codelinaro-5.4-r3
+    curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
+    chmod +x .git/hooks/commit-msg
+    git remote add los_qcom_common ../android_kernel_qcom_sm8350
     git remote add moto-kernel ../kernel-msm
 fi
 
+echoyellow "prepare new sm6375 kernel repo"
 cd $WORK_DIR/android_kernel_motorola_sm6375
-git fetch codelinaro
+git fetch los_qcom_common
+check_rc $? "git fetch"
 git fetch moto-kernel
-git checkout lineage-21
+check_rc $? "git fetch"
+git checkout -b lineage-21
+check_rc $? "git checkout"
+git reset los_qcom_common/lineage-20 --hard
+check_rc $? "git reset"
 
-git reset moto-kernel/android-13-release-t1sus33.1-124-6-8-1 --hard
-git rebase codelinaro/kernel.lnx.5.4.r3-rel
-check_rc $? "git rebase"
+git rm -r techpack/
+git restore --staged techpack/Kbuild techpack/.gitignore techpack/stub/*
+git restore techpack/Kbuild techpack/.gitignore techpack/stub/*
+git commit -m "prepare: remove techpack/"
+check_rc $? "git commit"
+
+git rm -r arch/arm64/boot/dts/vendor/
+git commit -m "prepare: remove arch/arm64/boot/dts/vendor/"
+check_rc $? "git commit"
+
+git merge moto-kernel/android-13-release-t1sus33.1-124-6-8-1 -m "Merge remote-tracking branch 'moto-kernel/android-13-release-t1sus33.1-124-6-8-1' into lineage-21
+
+MMI-T1SUS33.1-124-6-12"
+check_rc $? "git merge"
+
+git mv Androidbp Android.bp
+check_rc $? "git mv"
+git commit -m "prepare: Androidbp -> Android.bp"
+check_rc $? "git commit"
 
 for i in \
     kernel-camera-devicetree \
@@ -106,8 +146,6 @@ for i in \
     vendor-qcom-opensource-datarmnet \
     vendor-qcom-opensource-datarmnet-ext \
     vendor-qcom-opensource-wlan-fw-api \
-    vendor-qcom-opensource-wlan-qcacld-3.0 \
-    vendor-qcom-opensource-wlan-qca-wifi-host-cmn \
     ; \
     do
     rm -rf $WORK_DIR/$i
@@ -124,7 +162,7 @@ for i in \
             filter_repo_subdir=arch/arm64/boot/dts/vendor/
             ;;
         kernel-display-devicetree)
-            moto_branch=android-13-release-traa
+            moto_branch=android-13-release-ttpn
             filter_repo_subdir=arch/arm64/boot/dts/vendor/qcom/
             ;;
         kernel-msm-5.4-techpack-audio)
@@ -166,7 +204,7 @@ for i in \
             filter_repo_subdir=drivers/staging/fw-api/
             ;;
         vendor-qcom-opensource-wlan-qcacld-3.0)
-            moto_branch=android-13-release-ttpn
+            moto_branch=android-13-release-t1tpn33.58-94r1
             codelinaro_repo=platform/vendor/qcom-opensource/wlan/qcacld-3.0
             codelinaro_branch=wlan-cld3.driver.lnx.2.0.r22-rel
             filter_repo_subdir=drivers/staging/qcacld-3.0/
@@ -278,7 +316,7 @@ for i in \
 
     case $i in
         motorola-kernel-modules)
-            git rm sound/soc/codecs/Makefile include/linux/input/synaptics_tcm.h fs/exfat/Makefile fs/exfat/Kconfig drivers/misc/Makefile drivers/leds/trigger/Makefile Documentation/devicetree/bindings
+            git rm sound/soc/codecs/Makefile include/linux/input/synaptics_tcm.h fs/exfat/Makefile fs/exfat/Kconfig fs/exfat/README.md drivers/misc/Makefile drivers/leds/trigger/Makefile Documentation/devicetree/bindings
             check_rc $? "git rm"
             git commit -m "remove files to prevent merge errors with motorola-kernel-modules"
             ;;
