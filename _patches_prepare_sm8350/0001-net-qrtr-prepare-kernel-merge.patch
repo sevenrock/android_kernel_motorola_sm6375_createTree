@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Wed, 23 Oct 2024 00:32:31 +0200
+Subject: [PATCH] net/qrtr: prepare kernel merge
+
+Change-Id: I8795c750dc57625c64159abf551be8d6d5f1e49a
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ net/qrtr/smd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/qrtr/smd.c b/net/qrtr/smd.c
+index d37818404b98..c1a63d0caafd 100644
+--- a/net/qrtr/smd.c
++++ b/net/qrtr/smd.c
+@@ -95,8 +95,8 @@ static int qcom_smd_qrtr_probe(struct rpmsg_device *rpdev)
+ 		of_property_read_u32_array(rpdev->dev.of_node, "qcom,non-wake-svc",
+ 				svc_arr.arr, size);
+ 	}
+-	rc = qrtr_endpoint_register(&qdev->ep, net_id, rt, &svc_arr);
+-	kfree(svc_arr.arr);
++	rc = qrtr_endpoint_register(&qdev->ep, net_id, rt, svc_arr);
++	kfree(svc_arr);
+ 
+ 	if (rc)
+ 		return rc;
+-- 
+2.39.5
+

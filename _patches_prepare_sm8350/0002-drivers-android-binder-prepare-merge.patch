@@ -1,0 +1,752 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Tue, 22 Oct 2024 21:30:31 +0200
+Subject: [PATCH] drivers/android/binder: prepare merge
+
+Change-Id: Ifba12507754dca30b55d8954ca83421eec6777cd
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/android/binder.c          | 425 +-----------------------------
+ drivers/android/binder_internal.h |  35 +--
+ 2 files changed, 18 insertions(+), 442 deletions(-)
+
+diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+index ec18ba16dab2..00f6de623ffe 100644
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -433,16 +433,6 @@ binder_enqueue_thread_work_ilocked(struct binder_thread *thread,
+ {
+ 	WARN_ON(!list_empty(&thread->waiting_thread_node));
+ 	binder_enqueue_work_ilocked(work, &thread->todo);
+-
+-	/* (e)poll-based threads require an explicit wakeup signal when
+-	 * queuing their own work; they rely on these events to consume
+-	 * messages without I/O block. Without it, threads risk waiting
+-	 * indefinitely without handling the work.
+-	 */
+-	if (thread->looper & BINDER_LOOPER_STATE_POLL &&
+-	    thread->pid == current->pid && !thread->process_todo)
+-		wake_up_interruptible_sync(&thread->wait);
+-
+ 	thread->process_todo = true;
+ }
+ 
+@@ -525,7 +515,9 @@ static bool binder_has_work(struct binder_thread *thread, bool do_proc_work)
+ static bool binder_available_for_proc_work_ilocked(struct binder_thread *thread)
+ {
+ 	return !thread->transaction_stack &&
+-		binder_worklist_empty_ilocked(&thread->todo);
++		binder_worklist_empty_ilocked(&thread->todo) &&
++		(thread->looper & (BINDER_LOOPER_STATE_ENTERED |
++				   BINDER_LOOPER_STATE_REGISTERED));
+ }
+ 
+ static void binder_wakeup_poll_threads_ilocked(struct binder_proc *proc,
+@@ -1437,7 +1429,6 @@ static void binder_free_ref(struct binder_ref *ref)
+ 	if (ref->node)
+ 		binder_free_node(ref->node);
+ 	kfree(ref->death);
+-	kfree(ref->freeze);
+ 	kfree(ref);
+ }
+ 
+@@ -2813,56 +2804,6 @@ static int binder_fixup_parent(struct list_head *pf_head,
+ 	return binder_add_fixup(pf_head, buffer_offset, bp->buffer, 0);
+ }
+ 
+-/**
+- * binder_can_update_transaction() - Can a txn be superseded by an updated one?
+- * @t1: the pending async txn in the frozen process
+- * @t2: the new async txn to supersede the outdated pending one
+- *
+- * Return:  true if t2 can supersede t1
+- *          false if t2 can not supersede t1
+- */
+-static bool binder_can_update_transaction(struct binder_transaction *t1,
+-					  struct binder_transaction *t2)
+-{
+-	if ((t1->flags & t2->flags & (TF_ONE_WAY | TF_UPDATE_TXN)) !=
+-	    (TF_ONE_WAY | TF_UPDATE_TXN) || !t1->to_proc || !t2->to_proc)
+-		return false;
+-	if (t1->to_proc->tsk == t2->to_proc->tsk && t1->code == t2->code &&
+-	    t1->flags == t2->flags && t1->buffer->pid == t2->buffer->pid &&
+-	    t1->buffer->target_node->ptr == t2->buffer->target_node->ptr &&
+-	    t1->buffer->target_node->cookie == t2->buffer->target_node->cookie)
+-		return true;
+-	return false;
+-}
+-
+-/**
+- * binder_find_outdated_transaction_ilocked() - Find the outdated transaction
+- * @t:		 new async transaction
+- * @target_list: list to find outdated transaction
+- *
+- * Return: the outdated transaction if found
+- *         NULL if no outdated transacton can be found
+- *
+- * Requires the proc->inner_lock to be held.
+- */
+-static struct binder_transaction *
+-binder_find_outdated_transaction_ilocked(struct binder_transaction *t,
+-					 struct list_head *target_list)
+-{
+-	struct binder_work *w;
+-
+-	list_for_each_entry(w, target_list, entry) {
+-		struct binder_transaction *t_queued;
+-
+-		if (w->type != BINDER_WORK_TRANSACTION)
+-			continue;
+-		t_queued = container_of(w, struct binder_transaction, work);
+-		if (binder_can_update_transaction(t_queued, t))
+-			return t_queued;
+-	}
+-	return NULL;
+-}
+-
+ /**
+  * binder_proc_transaction() - sends a transaction to a process and wakes it up
+  * @t:		transaction to send
+@@ -2888,7 +2829,6 @@ static int binder_proc_transaction(struct binder_transaction *t,
+ 	struct binder_node *node = t->buffer->target_node;
+ 	bool oneway = !!(t->flags & TF_ONE_WAY);
+ 	bool pending_async = false;
+-	struct binder_transaction *t_outdated = NULL;
+ 
+ 	BUG_ON(!node);
+ 	binder_node_lock(node);
+@@ -2924,17 +2864,6 @@ static int binder_proc_transaction(struct binder_transaction *t,
+ 	} else if (!pending_async) {
+ 		binder_enqueue_work_ilocked(&t->work, &proc->todo);
+ 	} else {
+-		if ((t->flags & TF_UPDATE_TXN) && proc->is_frozen) {
+-			t_outdated = binder_find_outdated_transaction_ilocked(t,
+-									      &node->async_todo);
+-			if (t_outdated) {
+-				binder_debug(BINDER_DEBUG_TRANSACTION,
+-					     "txn %d supersedes %d\n",
+-					     t->debug_id, t_outdated->debug_id);
+-				list_del_init(&t_outdated->work.entry);
+-				proc->outstanding_txns--;
+-			}
+-		}
+ 		binder_enqueue_work_ilocked(&t->work, &node->async_todo);
+ 	}
+ 
+@@ -2945,22 +2874,6 @@ static int binder_proc_transaction(struct binder_transaction *t,
+ 	binder_inner_proc_unlock(proc);
+ 	binder_node_unlock(node);
+ 
+-	/*
+-	 * To reduce potential contention, free the outdated transaction and
+-	 * buffer after releasing the locks.
+-	 */
+-	if (t_outdated) {
+-		struct binder_buffer *buffer = t_outdated->buffer;
+-
+-		t_outdated->buffer = NULL;
+-		buffer->transaction = NULL;
+-		trace_binder_transaction_update_buffer_release(buffer);
+-		binder_transaction_buffer_release(proc, NULL, buffer, 0, 0);
+-		binder_alloc_free_buf(&proc->alloc, buffer);
+-		kfree(t_outdated);
+-		binder_stats_deleted(BINDER_STAT_TRANSACTION);
+-	}
+-
+ 	return 0;
+ }
+ 
+@@ -3296,28 +3209,9 @@ static void binder_transaction(struct binder_proc *proc,
+ 	if (target_node && target_node->txn_security_ctx) {
+ 		u32 secid;
+ 		size_t added_size;
+-		int max_retries = 100;
+ 
+ 		security_cred_getsecid(binder_get_cred(proc), &secid);
+- retry_alloc:
+ 		ret = security_secid_to_secctx(secid, &secctx, &secctx_sz);
+-		if (ret == -ENOMEM && max_retries-- > 0) {
+-			struct page *dummy_page;
+-
+-			/*
+-			 * security_secid_to_secctx() can fail because of a
+-			 * GFP_ATOMIC allocation in which case -ENOMEM is
+-			 * returned. This needs to be retried, but there is
+-			 * currently no way to tell userspace to retry so we
+-			 * do it here. We make sure there is still available
+-			 * memory first and then retry.
+-			 */
+-			dummy_page = alloc_page(GFP_KERNEL);
+-			if (dummy_page) {
+-				__free_page(dummy_page);
+-				goto retry_alloc;
+-			}
+-		}
+ 		if (ret) {
+ 			return_error = BR_FAILED_REPLY;
+ 			return_error_param = ret;
+@@ -3438,7 +3332,6 @@ static void binder_transaction(struct binder_proc *proc,
+ 		 */
+ 		copy_size = object_offset - user_offset;
+ 		if (copy_size && (user_offset > object_offset ||
+-				object_offset > tr->data_size ||
+ 				binder_alloc_copy_user_to_buffer(
+ 					&target_proc->alloc,
+ 					t->buffer, user_offset,
+@@ -3682,10 +3575,7 @@ static void binder_transaction(struct binder_proc *proc,
+ 		return_error_line = __LINE__;
+ 		goto err_copy_data_failed;
+ 	}
+-	if (t->buffer->oneway_spam_suspect)
+-		tcomplete->type = BINDER_WORK_TRANSACTION_ONEWAY_SPAM_SUSPECT;
+-	else
+-		tcomplete->type = BINDER_WORK_TRANSACTION_COMPLETE;
++	tcomplete->type = BINDER_WORK_TRANSACTION_COMPLETE;
+ 	t->work.type = BINDER_WORK_TRANSACTION;
+ 
+ 	if (reply) {
+@@ -3834,154 +3724,6 @@ static void binder_transaction(struct binder_proc *proc,
+ 	}
+ }
+ 
+-static int
+-binder_request_freeze_notification(struct binder_proc *proc,
+-				   struct binder_thread *thread,
+-				   struct binder_handle_cookie *handle_cookie)
+-{
+-	struct binder_ref_freeze *freeze;
+-	struct binder_ref *ref;
+-	bool is_frozen;
+-
+-	freeze = kzalloc(sizeof(*freeze), GFP_KERNEL);
+-	if (!freeze)
+-		return -ENOMEM;
+-	binder_proc_lock(proc);
+-	ref = binder_get_ref_olocked(proc, handle_cookie->handle, false);
+-	if (!ref) {
+-		binder_user_error("%d:%d BC_REQUEST_FREEZE_NOTIFICATION invalid ref %d\n",
+-				  proc->pid, thread->pid, handle_cookie->handle);
+-		binder_proc_unlock(proc);
+-		kfree(freeze);
+-		return -EINVAL;
+-	}
+-
+-	binder_node_lock(ref->node);
+-
+-	if (ref->freeze || !ref->node->proc) {
+-		binder_user_error("%d:%d invalid BC_REQUEST_FREEZE_NOTIFICATION %s\n",
+-				  proc->pid, thread->pid,
+-				  ref->freeze ? "already set" : "dead node");
+-		binder_node_unlock(ref->node);
+-		binder_proc_unlock(proc);
+-		kfree(freeze);
+-		return -EINVAL;
+-	}
+-	binder_inner_proc_lock(ref->node->proc);
+-	is_frozen = ref->node->proc->is_frozen;
+-	binder_inner_proc_unlock(ref->node->proc);
+-
+-	INIT_LIST_HEAD(&freeze->work.entry);
+-	freeze->cookie = handle_cookie->cookie;
+-	freeze->work.type = BINDER_WORK_FROZEN_BINDER;
+-	freeze->is_frozen = is_frozen;
+-
+-	ref->freeze = freeze;
+-
+-	binder_inner_proc_lock(proc);
+-	binder_enqueue_work_ilocked(&ref->freeze->work, &proc->todo);
+-	binder_wakeup_proc_ilocked(proc);
+-	binder_inner_proc_unlock(proc);
+-
+-	binder_node_unlock(ref->node);
+-	binder_proc_unlock(proc);
+-	return 0;
+-}
+-
+-static int
+-binder_clear_freeze_notification(struct binder_proc *proc,
+-				 struct binder_thread *thread,
+-				 struct binder_handle_cookie *handle_cookie)
+-{
+-	struct binder_ref_freeze *freeze;
+-	struct binder_ref *ref;
+-
+-	binder_proc_lock(proc);
+-	ref = binder_get_ref_olocked(proc, handle_cookie->handle, false);
+-	if (!ref) {
+-		binder_user_error("%d:%d BC_CLEAR_FREEZE_NOTIFICATION invalid ref %d\n",
+-				  proc->pid, thread->pid, handle_cookie->handle);
+-		binder_proc_unlock(proc);
+-		return -EINVAL;
+-	}
+-
+-	binder_node_lock(ref->node);
+-
+-	if (!ref->freeze) {
+-		binder_user_error("%d:%d BC_CLEAR_FREEZE_NOTIFICATION freeze notification not active\n",
+-				  proc->pid, thread->pid);
+-		binder_node_unlock(ref->node);
+-		binder_proc_unlock(proc);
+-		return -EINVAL;
+-	}
+-	freeze = ref->freeze;
+-	binder_inner_proc_lock(proc);
+-	if (freeze->cookie != handle_cookie->cookie) {
+-		binder_user_error("%d:%d BC_CLEAR_FREEZE_NOTIFICATION freeze notification cookie mismatch %016llx != %016llx\n",
+-				  proc->pid, thread->pid, (u64)freeze->cookie,
+-				  (u64)handle_cookie->cookie);
+-		binder_inner_proc_unlock(proc);
+-		binder_node_unlock(ref->node);
+-		binder_proc_unlock(proc);
+-		return -EINVAL;
+-	}
+-	ref->freeze = NULL;
+-	/*
+-	 * Take the existing freeze object and overwrite its work type. There are three cases here:
+-	 * 1. No pending notification. In this case just add the work to the queue.
+-	 * 2. A notification was sent and is pending an ack from userspace. Once an ack arrives, we
+-	 *    should resend with the new work type.
+-	 * 3. A notification is pending to be sent. Since the work is already in the queue, nothing
+-	 *    needs to be done here.
+-	 */
+-	freeze->work.type = BINDER_WORK_CLEAR_FREEZE_NOTIFICATION;
+-	if (list_empty(&freeze->work.entry)) {
+-		binder_enqueue_work_ilocked(&freeze->work, &proc->todo);
+-		binder_wakeup_proc_ilocked(proc);
+-	} else if (freeze->sent) {
+-		freeze->resend = true;
+-	}
+-	binder_inner_proc_unlock(proc);
+-	binder_node_unlock(ref->node);
+-	binder_proc_unlock(proc);
+-	return 0;
+-}
+-
+-static int
+-binder_freeze_notification_done(struct binder_proc *proc,
+-				struct binder_thread *thread,
+-				binder_uintptr_t cookie)
+-{
+-	struct binder_ref_freeze *freeze = NULL;
+-	struct binder_work *w;
+-
+-	binder_inner_proc_lock(proc);
+-	list_for_each_entry(w, &proc_wrapper(proc)->delivered_freeze, entry) {
+-		struct binder_ref_freeze *tmp_freeze =
+-			container_of(w, struct binder_ref_freeze, work);
+-
+-		if (tmp_freeze->cookie == cookie) {
+-			freeze = tmp_freeze;
+-			break;
+-		}
+-	}
+-	if (!freeze) {
+-		binder_user_error("%d:%d BC_FREEZE_NOTIFICATION_DONE %016llx not found\n",
+-				  proc->pid, thread->pid, (u64)cookie);
+-		binder_inner_proc_unlock(proc);
+-		return -EINVAL;
+-	}
+-	binder_dequeue_work_ilocked(&freeze->work);
+-	freeze->sent = false;
+-	if (freeze->resend) {
+-		freeze->resend = false;
+-		binder_enqueue_work_ilocked(&freeze->work, &proc->todo);
+-		binder_wakeup_proc_ilocked(proc);
+-	}
+-	binder_inner_proc_unlock(proc);
+-	return 0;
+-}
+-
+ /**
+  * binder_free_buf() - free the specified buffer
+  * @proc:	binder proc that owns buffer
+@@ -4457,44 +4199,6 @@ static int binder_thread_write(struct binder_proc *proc,
+ 			binder_inner_proc_unlock(proc);
+ 		} break;
+ 
+-		case BC_REQUEST_FREEZE_NOTIFICATION: {
+-			struct binder_handle_cookie handle_cookie;
+-			int error;
+-
+-			if (copy_from_user(&handle_cookie, ptr, sizeof(handle_cookie)))
+-				return -EFAULT;
+-			ptr += sizeof(handle_cookie);
+-			error = binder_request_freeze_notification(proc, thread,
+-								   &handle_cookie);
+-			if (error)
+-				return error;
+-		} break;
+-
+-		case BC_CLEAR_FREEZE_NOTIFICATION: {
+-			struct binder_handle_cookie handle_cookie;
+-			int error;
+-
+-			if (copy_from_user(&handle_cookie, ptr, sizeof(handle_cookie)))
+-				return -EFAULT;
+-			ptr += sizeof(handle_cookie);
+-			error = binder_clear_freeze_notification(proc, thread, &handle_cookie);
+-			if (error)
+-				return error;
+-		} break;
+-
+-		case BC_FREEZE_NOTIFICATION_DONE: {
+-			binder_uintptr_t cookie;
+-			int error;
+-
+-			if (get_user(cookie, (binder_uintptr_t __user *)ptr))
+-				return -EFAULT;
+-
+-			ptr += sizeof(cookie);
+-			error = binder_freeze_notification_done(proc, thread, cookie);
+-			if (error)
+-				return error;
+-		} break;
+-
+ 		default:
+ 			pr_err("%d:%d unknown command %d\n",
+ 			       proc->pid, thread->pid, cmd);
+@@ -4748,14 +4452,9 @@ static int binder_thread_read(struct binder_proc *proc,
+ 
+ 			binder_stat_br(proc, thread, cmd);
+ 		} break;
+-		case BINDER_WORK_TRANSACTION_COMPLETE:
+-		case BINDER_WORK_TRANSACTION_ONEWAY_SPAM_SUSPECT: {
+-			if (proc->oneway_spam_detection_enabled &&
+-				   w->type == BINDER_WORK_TRANSACTION_ONEWAY_SPAM_SUSPECT)
+-				cmd = BR_ONEWAY_SPAM_SUSPECT;
+-			else
+-				cmd = BR_TRANSACTION_COMPLETE;
++		case BINDER_WORK_TRANSACTION_COMPLETE: {
+ 			binder_inner_proc_unlock(proc);
++			cmd = BR_TRANSACTION_COMPLETE;
+ 			kfree(w);
+ 			binder_stats_deleted(BINDER_STAT_TRANSACTION_COMPLETE);
+ 			if (put_user(cmd, (uint32_t __user *)ptr))
+@@ -4895,45 +4594,6 @@ static int binder_thread_read(struct binder_proc *proc,
+ 			if (cmd == BR_DEAD_BINDER)
+ 				goto done; /* DEAD_BINDER notifications can cause transactions */
+ 		} break;
+-
+-		case BINDER_WORK_FROZEN_BINDER: {
+-			struct binder_ref_freeze *freeze;
+-			struct binder_frozen_state_info info;
+-
+-			memset(&info, 0, sizeof(info));
+-			freeze = container_of(w, struct binder_ref_freeze, work);
+-			info.is_frozen = freeze->is_frozen;
+-			info.cookie = freeze->cookie;
+-			freeze->sent = true;
+-			binder_enqueue_work_ilocked(w, &proc_wrapper(proc)->delivered_freeze);
+-			binder_inner_proc_unlock(proc);
+-
+-			if (put_user(BR_FROZEN_BINDER, (uint32_t __user *)ptr))
+-				return -EFAULT;
+-			ptr += sizeof(uint32_t);
+-			if (copy_to_user(ptr, &info, sizeof(info)))
+-				return -EFAULT;
+-			ptr += sizeof(info);
+-			binder_stat_br(proc, thread, BR_FROZEN_BINDER);
+-			goto done; /* BR_FROZEN_BINDER notifications can cause transactions */
+-		} break;
+-
+-		case BINDER_WORK_CLEAR_FREEZE_NOTIFICATION: {
+-			struct binder_ref_freeze *freeze =
+-			    container_of(w, struct binder_ref_freeze, work);
+-			binder_uintptr_t cookie = freeze->cookie;
+-
+-			binder_inner_proc_unlock(proc);
+-			kfree(freeze);
+-			if (put_user(BR_CLEAR_FREEZE_NOTIFICATION_DONE, (uint32_t __user *)ptr))
+-				return -EFAULT;
+-			ptr += sizeof(uint32_t);
+-			if (put_user(cookie, (binder_uintptr_t __user *)ptr))
+-				return -EFAULT;
+-			ptr += sizeof(binder_uintptr_t);
+-			binder_stat_br(proc, thread, BR_CLEAR_FREEZE_NOTIFICATION_DONE);
+-		} break;
+-
+ 		default:
+ 			binder_inner_proc_unlock(proc);
+ 			pr_err("%d:%d: bad work type %d\n",
+@@ -5121,7 +4781,6 @@ static void binder_release_work(struct binder_proc *proc,
+ 				"undelivered TRANSACTION_ERROR: %u\n",
+ 				e->cmd);
+ 		} break;
+-		case BINDER_WORK_TRANSACTION_ONEWAY_SPAM_SUSPECT:
+ 		case BINDER_WORK_TRANSACTION_COMPLETE: {
+ 			binder_debug(BINDER_DEBUG_DEAD_TRANSACTION,
+ 				"undelivered TRANSACTION_COMPLETE\n");
+@@ -5344,7 +5003,7 @@ static __poll_t binder_poll(struct file *filp,
+ 
+ 	thread = binder_get_thread(proc);
+ 	if (!thread)
+-		return EPOLLERR;
++		return POLLERR;
+ 
+ 	binder_inner_proc_lock(thread->proc);
+ 	thread->looper |= BINDER_LOOPER_STATE_POLL;
+@@ -5551,48 +5210,6 @@ static bool binder_txns_pending_ilocked(struct binder_proc *proc)
+ 	return false;
+ }
+ 
+-static void binder_add_freeze_work(struct binder_proc *proc, bool is_frozen)
+-{
+-	struct rb_node *n;
+-	struct binder_ref *ref;
+-
+-	binder_inner_proc_lock(proc);
+-	for (n = rb_first(&proc->nodes); n; n = rb_next(n)) {
+-		struct binder_node *node;
+-
+-		node = rb_entry(n, struct binder_node, rb_node);
+-		binder_inner_proc_unlock(proc);
+-		binder_node_lock(node);
+-		hlist_for_each_entry(ref, &node->refs, node_entry) {
+-			/*
+-			 * Need the node lock to synchronize
+-			 * with new notification requests and the
+-			 * inner lock to synchronize with queued
+-			 * freeze notifications.
+-			 */
+-			binder_inner_proc_lock(ref->proc);
+-			if (!ref->freeze) {
+-				binder_inner_proc_unlock(ref->proc);
+-				continue;
+-			}
+-			ref->freeze->work.type = BINDER_WORK_FROZEN_BINDER;
+-			if (list_empty(&ref->freeze->work.entry)) {
+-				ref->freeze->is_frozen = is_frozen;
+-				binder_enqueue_work_ilocked(&ref->freeze->work, &ref->proc->todo);
+-				binder_wakeup_proc_ilocked(ref->proc);
+-			} else {
+-				if (ref->freeze->sent && ref->freeze->is_frozen != is_frozen)
+-					ref->freeze->resend = true;
+-				ref->freeze->is_frozen = is_frozen;
+-			}
+-			binder_inner_proc_unlock(ref->proc);
+-		}
+-		binder_node_unlock(node);
+-		binder_inner_proc_lock(proc);
+-	}
+-	binder_inner_proc_unlock(proc);
+-}
+-
+ static int binder_ioctl_freeze(struct binder_freeze_info *info,
+ 			       struct binder_proc *target_proc)
+ {
+@@ -5604,7 +5221,6 @@ static int binder_ioctl_freeze(struct binder_freeze_info *info,
+ 		target_proc->async_recv = false;
+ 		target_proc->is_frozen = false;
+ 		binder_inner_proc_unlock(target_proc);
+-		binder_add_freeze_work(target_proc, false);
+ 		return 0;
+ 	}
+ 
+@@ -5637,8 +5253,6 @@ static int binder_ioctl_freeze(struct binder_freeze_info *info,
+ 		binder_inner_proc_lock(target_proc);
+ 		target_proc->is_frozen = false;
+ 		binder_inner_proc_unlock(target_proc);
+-	} else {
+-		binder_add_freeze_work(target_proc, true);
+ 	}
+ 
+ 	return ret;
+@@ -5706,7 +5320,7 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+ 			goto err;
+ 		break;
+ 	case BINDER_SET_MAX_THREADS: {
+-		u32 max_threads;
++		int max_threads;
+ 
+ 		if (copy_from_user(&max_threads, ubuf,
+ 				   sizeof(max_threads))) {
+@@ -5870,18 +5484,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+ 		}
+ 		break;
+ 	}
+-	case BINDER_ENABLE_ONEWAY_SPAM_DETECTION: {
+-		uint32_t enable;
+-
+-		if (copy_from_user(&enable, ubuf, sizeof(enable))) {
+-			ret = -EFAULT;
+-			goto err;
+-		}
+-		binder_inner_proc_lock(proc);
+-		proc->oneway_spam_detection_enabled = (bool)enable;
+-		binder_inner_proc_unlock(proc);
+-		break;
+-	}
+ 	default:
+ 		ret = -EINVAL;
+ 		goto err;
+@@ -5982,9 +5584,9 @@ static int binder_open(struct inode *nodp, struct file *filp)
+ 		     current->group_leader->pid, current->pid);
+ 
+ 	eproc = kzalloc(sizeof(*eproc), GFP_KERNEL);
+-	if (eproc == NULL)
+-		return -ENOMEM;
+ 	proc = &eproc->proc;
++	if (proc == NULL)
++		return -ENOMEM;
+ 	spin_lock_init(&proc->inner_lock);
+ 	spin_lock_init(&proc->outer_lock);
+ 	get_task_struct(current->group_leader);
+@@ -6016,7 +5618,6 @@ static int binder_open(struct inode *nodp, struct file *filp)
+ 	binder_stats_created(BINDER_STAT_PROC);
+ 	proc->pid = current->group_leader->pid;
+ 	INIT_LIST_HEAD(&proc->delivered_death);
+-	INIT_LIST_HEAD(&proc_wrapper(proc)->delivered_freeze);
+ 	INIT_LIST_HEAD(&proc->waiting_threads);
+ 	filp->private_data = proc;
+ 
+@@ -6567,9 +6168,7 @@ static const char * const binder_return_strings[] = {
+ 	"BR_FINISHED",
+ 	"BR_DEAD_BINDER",
+ 	"BR_CLEAR_DEATH_NOTIFICATION_DONE",
+-	"BR_FAILED_REPLY",
+-	"BR_FROZEN_REPLY",
+-	"BR_ONEWAY_SPAM_SUSPECT",
++	"BR_FAILED_REPLY"
+ };
+ 
+ static const char * const binder_command_strings[] = {
+@@ -6601,7 +6200,7 @@ static const char * const binder_objstat_strings[] = {
+ 	"ref",
+ 	"death",
+ 	"transaction",
+-	"transaction_complete",
++	"transaction_complete"
+ };
+ 
+ static void print_binder_stats(struct seq_file *m, const char *prefix,
+diff --git a/drivers/android/binder_internal.h b/drivers/android/binder_internal.h
+index 7a6c74313727..9f4392458792 100644
+--- a/drivers/android/binder_internal.h
++++ b/drivers/android/binder_internal.h
+@@ -155,7 +155,7 @@ enum binder_stat_types {
+ };
+ 
+ struct binder_stats {
+-	atomic_t br[_IOC_NR(BR_ONEWAY_SPAM_SUSPECT) + 1];
++	atomic_t br[_IOC_NR(BR_FAILED_REPLY) + 1];
+ 	atomic_t bc[_IOC_NR(BC_REPLY_SG) + 1];
+ 	atomic_t obj_created[BINDER_STAT_COUNT];
+ 	atomic_t obj_deleted[BINDER_STAT_COUNT];
+@@ -174,16 +174,11 @@ struct binder_work {
+ 	enum binder_work_type {
+ 		BINDER_WORK_TRANSACTION = 1,
+ 		BINDER_WORK_TRANSACTION_COMPLETE,
+-		BINDER_WORK_TRANSACTION_ONEWAY_SPAM_SUSPECT,
+ 		BINDER_WORK_RETURN_ERROR,
+ 		BINDER_WORK_NODE,
+ 		BINDER_WORK_DEAD_BINDER,
+ 		BINDER_WORK_DEAD_BINDER_AND_CLEAR,
+ 		BINDER_WORK_CLEAR_DEATH_NOTIFICATION,
+-#ifndef __GENKSYMS__
+-		BINDER_WORK_FROZEN_BINDER,
+-		BINDER_WORK_CLEAR_FREEZE_NOTIFICATION,
+-#endif
+ 	} type;
+ };
+ 
+@@ -305,14 +300,6 @@ struct binder_ref_death {
+ 	binder_uintptr_t cookie;
+ };
+ 
+-struct binder_ref_freeze {
+-	struct binder_work work;
+-	binder_uintptr_t cookie;
+-	bool is_frozen:1;
+-	bool sent:1;
+-	bool resend:1;
+-};
+-
+ /**
+  * struct binder_ref_data - binder_ref counts and id
+  * @debug_id:        unique ID for the ref
+@@ -345,8 +332,6 @@ struct binder_ref_data {
+  *               @node indicates the node must be freed
+  * @death:       pointer to death notification (ref_death) if requested
+  *               (protected by @node->lock)
+- * @freeze:      pointer to freeze notification (ref_freeze) if requested
+- *               (protected by @node->lock)
+  *
+  * Structure to track references from procA to target node (on procB). This
+  * structure is unsafe to access without holding @proc->outer_lock.
+@@ -363,7 +348,6 @@ struct binder_ref {
+ 	struct binder_proc *proc;
+ 	struct binder_node *node;
+ 	struct binder_ref_death *death;
+-	struct binder_ref_freeze *freeze;
+ };
+ 
+ /**
+@@ -406,6 +390,9 @@ enum binder_prio_state {
+  *                        (invariant after initialized)
+  * @tsk                   task_struct for group_leader of process
+  *                        (invariant after initialized)
++ * @files                 files_struct for process
++ *                        (protected by @files_lock)
++ * @files_lock            mutex to protect @files
+  * @deferred_work_node:   element for binder_deferred_list
+  *                        (protected by binder_deferred_lock)
+  * @deferred_work:        bitmap of deferred work to perform
+@@ -454,8 +441,6 @@ enum binder_prio_state {
+  * @outer_lock:           no nesting under innor or node lock
+  *                        Lock order: 1) outer, 2) node, 3) inner
+  * @binderfs_entry:       process-specific binderfs log file
+- * @oneway_spam_detection_enabled: process enabled oneway spam detection
+- *                        or not
+  *
+  * Bookkeeping structure for binder processes
+  */
+@@ -468,6 +453,8 @@ struct binder_proc {
+ 	struct list_head waiting_threads;
+ 	int pid;
+ 	struct task_struct *tsk;
++	struct files_struct *files;
++	struct mutex files_lock;
+ 	struct hlist_node deferred_work_node;
+ 	int deferred_work;
+ 	int outstanding_txns;
+@@ -491,7 +478,6 @@ struct binder_proc {
+ 	spinlock_t inner_lock;
+ 	spinlock_t outer_lock;
+ 	struct dentry *binderfs_entry;
+-	bool oneway_spam_detection_enabled;
+ };
+ 
+ /**
+@@ -500,8 +486,6 @@ struct binder_proc {
+  * @cred                  struct cred associated with the `struct file`
+  *                        in binder_open()
+  *                        (invariant after initialized)
+- * @delivered_freeze:     list of delivered freeze notification
+- *                        (protected by @inner_lock)
+  *
+  * Extended binder_proc -- needed to add the "cred" field without
+  * changing the KMI for binder_proc.
+@@ -509,7 +493,6 @@ struct binder_proc {
+ struct binder_proc_ext {
+ 	struct binder_proc proc;
+ 	const struct cred *cred;
+-	struct list_head delivered_freeze;
+ };
+ 
+ static inline const struct cred *binder_get_cred(struct binder_proc *proc)
+@@ -520,12 +503,6 @@ static inline const struct cred *binder_get_cred(struct binder_proc *proc)
+ 	return eproc->cred;
+ }
+ 
+-static inline
+-struct binder_proc_ext *proc_wrapper(struct binder_proc *proc)
+-{
+-	return container_of(proc, struct binder_proc_ext, proc);
+-}
+-
+ /**
+  * struct binder_thread - binder thread bookkeeping
+  * @proc:                 binder process for this thread
+-- 
+2.39.5
+
