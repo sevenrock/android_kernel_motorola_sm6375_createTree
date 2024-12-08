@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Mon, 9 Dec 2024 23:33:15 +0100
+Subject: [PATCH] arm64: configs: rhodep: Disable unused touchscreen modules
+
+Change-Id: I5d4a230d07ed56b79624ff2a1c9612dfe2773e09
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index c093add1eaae..4e834de9b83c 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -74,3 +74,7 @@ CONFIG_USB_NET_AX8817X=m
+ CONFIG_USB_NET_AX88179_178A=m
+ CONFIG_USB_NET_CDCETHER=m
+ CONFIG_MOTO_F_USBNET=m
++# CONFIG_TOUCHSCREEN_USB_COMPOSITE is not set
++# CONFIG_TOUCHSCREEN_SYNAPTICS_TCM is not set
++# CONFIG_TOUCHSCREEN_SYNAPTICS_DSX is not set
++# CONFIG_TOUCHSCREEN_NT36XXX is not set
+-- 
+2.39.5
+

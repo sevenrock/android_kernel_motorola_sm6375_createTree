@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Tue, 10 Dec 2024 23:34:39 +0100
+Subject: [PATCH] mm: page_owner: Fix -Wstrlcpy-strlcat-size
+
+../../../../../../kernel/motorola/sm6375/mm/page_owner.c:944:39: error:
+ size argument in 'strlcpy' call appears to be size of the source;
+ expected the size of the destination [-Werror,-Wstrlcpy-strlcat-size]
+  944 |         strlcpy(call_site->name, buf, strlen(buf));
+      |                                       ~~~~~~~^~~~
+../../../../../../kernel/motorola/sm6375/mm/page_owner.c:944:32: note:
+ change size argument to be the size of the destination
+  944 |         strlcpy(call_site->name, buf, strlen(buf));
+      |                                       ^~~~~~~~~~~
+      |                                       sizeof(call_site->name)
+
+https://github.com/LineageOS/android_kernel_qcom_sm8450/blob/lineage-20/drivers/soc/qcom/minidump_memory.c#L692
+contains the same code.
+
+Change-Id: Id06f67fe18f2e00dd180afaf99c7577787198cc3
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ mm/page_owner.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mm/page_owner.c b/mm/page_owner.c
+index 762f45de8380..390be01c4d2c 100644
+--- a/mm/page_owner.c
++++ b/mm/page_owner.c
+@@ -941,7 +941,7 @@ static ssize_t page_owner_call_site_write(struct file *file,
+ 	if (!call_site)
+ 		return -ENOMEM;
+ 
+-	strlcpy(call_site->name, buf, strlen(buf));
++	strlcpy(call_site->name, buf, strlen(call_site->name));
+ 	mutex_lock(&accounted_call_site_lock);
+ 	list_add_tail(&call_site->list, &accounted_call_site_list);
+ 	mutex_unlock(&accounted_call_site_lock);
+-- 
+2.39.5
+

@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Weinstein <jake@aospa.co>
+Date: Thu, 24 Nov 2022 14:29:36 +0900
+Subject: [PATCH] arm64: configs: moto-holi: Lower NR_CPUS to 8
+
+We only have 8 cores.
+
+Change-Id: I4b0342e2b754efa1fedea0a6b0dd4d9876500482
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index b28f60e55876..e8b518034a1f 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -75,3 +75,4 @@ CONFIG_QCA_CLD_WLAN=m
+ # CONFIG_MEMORY_HOTREMOVE is not set
+ # CONFIG_QCOM_MEM_OFFLINE is not set
+ # CONFIG_OVERRIDE_MEMORY_LIMIT is not set
++CONFIG_NR_CPUS=8
+-- 
+2.39.5
+

@@ -29,12 +29,12 @@ echoyellow "download moto kernel"
 if [ -d $WORK_DIR/kernel-msm ]
 then
     cd $WORK_DIR/kernel-msm
-    git fetch origin android-13-release-t1sus33.1-124-6-8-1
+    git fetch origin android-14-release-u1ugs34.23-110-2-1
     check_rc $? "git fetch"
-    git reset origin/android-13-release-t1sus33.1-124-6-8-1 --hard
+    git reset origin/android-14-release-u1ugs34.23-110-2-1 --hard
     check_rc $? "git reset"
 else
-    git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-13-release-t1sus33.1-124-6-8-1 --single-branch
+    git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-14-release-u1ugs34.23-110-2-1 --single-branch
     check_rc $? "git clone"
     cd $WORK_DIR/kernel-msm
     curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
@@ -42,19 +42,19 @@ else
 fi
 
 # Revert "fs:EROFS:Porting 5.10 erofs to 5.4"
-git revert --no-edit f2496ea48764
+git revert --no-edit 45482ab6d38d 819904916893 fa3b0b74bbcf
 check_rc $? "git revert"
 
 # Revert "Penang: resolve kasan panic"
 # Revert "Penang: kasan panic"
 # Revert "penang: device suspend tests fail"
 # Revert "net: qrtr: get svc_id before queueing sk_buff"
-git revert --no-edit 011d4a88c74e 6ed5195034fe 608b5e5affae 625e3bd86868
+git revert --no-edit 836e3b0c9a1c 485bfce7488f 0ab43c2ab514 a65aa65ad1c1
 check_rc $? "git revert"
 
 # Revert "af_unix: Fix garbage collector racing against connect()"
 # Revert "af_unix: Do not use atomic ops for unix_sk(sk)->inflight."
-git revert --no-edit 61a21da82e11 ba912f951d19
+git revert --no-edit 6487f3d3468b 9ef7c24511b3
 check_rc $? "git revert"
 
 echoyellow "download LineageOS qcom sm8350 kernel"
@@ -86,6 +86,10 @@ check_rc $? "git revert"
 git revert --no-edit 58e401790ae9f1bbaab96eda7d2e21fb4b020247
 check_rc $? "git revert"
 
+# Revert "sched: Provide sched_set_fifo()
+git revert --no-edit 9044855f697b
+check_rc $? "git revert"
+
 for i in $WORK_DIR/_patches_prepare_sm8350/*; do echo "--- patching $i"; git am --keep-cr $i || break; done
 check_rc $? "git am"
 
@@ -94,23 +98,22 @@ cd $WORK_DIR
 echoyellow "init new sm6375 kernel repo"
 if [ ! -d $WORK_DIR/android_kernel_motorola_sm6375 ]
 then
-    git init -b lineage-21 $WORK_DIR/android_kernel_motorola_sm6375
+    git init -b lineage-22.0 $WORK_DIR/android_kernel_motorola_sm6375
     cd $WORK_DIR/android_kernel_motorola_sm6375
     curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
     chmod +x .git/hooks/commit-msg
-    git remote add los_qcom_common ../android_kernel_qcom_sm8350
+    git remote add LineageOS/android_kernel_qcom_sm8350 ../android_kernel_qcom_sm8350
     git remote add moto-kernel ../kernel-msm
 fi
 
 echoyellow "prepare new sm6375 kernel repo"
 cd $WORK_DIR/android_kernel_motorola_sm6375
-git fetch los_qcom_common
+git fetch LineageOS/android_kernel_qcom_sm8350
 check_rc $? "git fetch"
 git fetch moto-kernel
 check_rc $? "git fetch"
-git checkout -b lineage-21
-check_rc $? "git checkout"
-git reset los_qcom_common/lineage-20 --hard
+git checkout -b lineage-22.0
+git reset LineageOS/android_kernel_qcom_sm8350/lineage-20 --hard
 check_rc $? "git reset"
 
 git rm -r techpack/
@@ -123,9 +126,9 @@ git rm -r arch/arm64/boot/dts/vendor/
 git commit -m "prepare: remove arch/arm64/boot/dts/vendor/"
 check_rc $? "git commit"
 
-git merge moto-kernel/android-13-release-t1sus33.1-124-6-8-1 -m "Merge remote-tracking branch 'moto-kernel/android-13-release-t1sus33.1-124-6-8-1' into lineage-21
+git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.0
 
-MMI-T1SUS33.1-124-6-12"
+MMI-U1UGS34.23-110-2-1"
 check_rc $? "git merge"
 
 git mv Androidbp Android.bp
@@ -145,86 +148,66 @@ for i in \
     motorola-kernel-modules \
     vendor-qcom-opensource-datarmnet \
     vendor-qcom-opensource-datarmnet-ext \
-    vendor-qcom-opensource-wlan-fw-api \
     ; \
     do
     rm -rf $WORK_DIR/$i
-    unset codelinaro_repo filter_repo_subdir
-    codelinaro_tag=LA.UM.9.16.r1-17400-MANNAR.QSSI14.0
+
+    unset filter_repo_subdir
 
     case $i in
         kernel-camera-devicetree)
-            moto_branch=android-13-release-ttpn
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=arch/arm64/boot/dts/vendor/qcom/camera-legacy/rhodep/
             ;;
         kernel-devicetree)
-            moto_branch=android-13-release-t1ssm33.1-121-4
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=arch/arm64/boot/dts/vendor/
             ;;
         kernel-display-devicetree)
-            moto_branch=android-13-release-ttpn
+            moto_branch=android-13-release-t2sn33.73-22-3
             filter_repo_subdir=arch/arm64/boot/dts/vendor/qcom/
             ;;
         kernel-msm-5.4-techpack-audio)
-            moto_branch=android-13-release-t1ssis33.1-75-7-1
-            codelinaro_repo=platform/vendor/opensource/audio-kernel
-            codelinaro_branch=audio-drivers.lnx.5.0.r2-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=techpack/audio/
             ;;
         kernel-msm-5.4-techpack-camera)
-            moto_branch=android-13-release-t1rd33.116-33-3
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=techpack/camera/
             ;;
         kernel-msm-5.4-techpack-display)
-# cherry-pick only, rebase is broken
-            moto_branch=android-13-release-t1ssm33.1-121-4
-            codelinaro_repo=platform/vendor/opensource/display-drivers
-            codelinaro_branch=display-kernel.lnx.5.4.r3-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=techpack/display/
             ;;
         kernel-msm-5.4-techpack-video)
-            moto_branch=android-13-release-t1ssm33.1-121-4
-            codelinaro_repo=platform/vendor/opensource/video-driver
-            codelinaro_branch=video-kernel.lahaina.lnx.1.0.r2-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=techpack/video/
             ;;
         kernel-msm-techpack-dataipa)
-            moto_branch=android-13-release-t1sus33.1-124-6-7
-            codelinaro_repo=platform/vendor/opensource/dataipa
-            codelinaro_branch=data-kernel.lnx.1.1.r2-rel
+            moto_branch=android-13-release-t1tp33.75-96-1
             filter_repo_subdir=techpack/dataipa/
             ;;
         motorola-kernel-modules)
-            moto_branch=android-13-release-tra
+            moto_branch=android-13-release-t2sn33.73-22-3
             ;;
         vendor-qcom-opensource-wlan-fw-api)
-            moto_branch=android-13-release-t1sus33.1-124-6-7
-            codelinaro_repo=platform/vendor/qcom-opensource/wlan/fw-api
-            codelinaro_branch=wlan-api.lnx.1.0.r55-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=drivers/staging/fw-api/
             ;;
         vendor-qcom-opensource-wlan-qcacld-3.0)
-            moto_branch=android-13-release-t1tpn33.58-94r1
-            codelinaro_repo=platform/vendor/qcom-opensource/wlan/qcacld-3.0
-            codelinaro_branch=wlan-cld3.driver.lnx.2.0.r22-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=drivers/staging/qcacld-3.0/
             ;;
         vendor-qcom-opensource-wlan-qca-wifi-host-cmn)
-            moto_branch=android-13-release-ttpn
-            codelinaro_repo=platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn
-            codelinaro_branch=wlan-cmn.driver.lnx.2.0.r22-rel
+            moto_branch=android-14-release-u1ug34.23-23-3
             filter_repo_subdir=drivers/staging/qca-wifi-host-cmn/
             ;;
         vendor-qcom-opensource-datarmnet)
-            moto_branch=MMI-T3TC33.18-12-3
-            codelinaro_repo=platform/vendor/qcom/opensource/datarmnet
-            codelinaro_branch=data-kernel.lnx.1.1.r2-rel
+            moto_branch=MMI-U1RD34.80-40 # dubai a14, no fogos push, same code anyway
             filter_repo_subdir=techpack/datarmnet/
             ;;
         vendor-qcom-opensource-datarmnet-ext)
-            moto_branch=MMI-T3TC33.18-12-3
-            codelinaro_repo=platform/vendor/qcom/opensource/datarmnet-ext
-            codelinaro_branch=data-kernel.lnx.1.1.r2-rel
+            moto_branch=MMI-U1RD34.80-40 # dubai a14, no fogos push, same code anyway
             filter_repo_subdir=techpack/datarmnet-ext/
             ;;
     esac
@@ -232,58 +215,8 @@ for i in \
     echoyellow "download moto $i"
 
     cd $WORK_DIR
-    rm -rf $codelinaro_tag
     git clone --branch $moto_branch https://github.com/MotorolaMobilityLLC/$i.git
     check_rc $? "git clone"
-
-# CodeLinaro repo available for rebase/cherry-pick
-    if [ ! "x"$codelinaro_repo = "x" ]
-    then
-        echoyellow "download codelinaro $codelinaro_repo"
-        git clone https://git.codelinaro.org/clo/la/$codelinaro_repo.git --branch $codelinaro_branch --single-branch $codelinaro_tag
-        check_rc $? "git clone"
-
-        case $i in
-            vendor-qcom-opensource-wlan-qca-wifi-host-cmn)
-                cd $WORK_DIR/$codelinaro_tag/
-                git revert --no-edit 5336f4036a3acc2509ba6750b6422e65f613b8e8
-                check_rc $? "git revert"
-                git revert --no-edit d400de634f2666cf9ecab0aaef302edf4a3165a4
-                check_rc $? "git revert"
-                git revert --no-edit 05fbfac24f62e5c426c13022383397327c0510e2
-                check_rc $? "git revert"
-                ;;
-        esac
-
-        cd $WORK_DIR/$i
-        git remote add codelinaro ../$codelinaro_tag/
-        git fetch codelinaro
-        check_rc $? "git fetch"
-
-        echoyellow "rebase moto $i on codelinaro $codelinaro_repo"
-        case $i in
-            kernel-msm-5.4-techpack-display)
-                git cherry-pick a4fdef4c120bbdf44f54156013d25a6a3af795e4
-                check_rc $? "git cherry-pick"
-                git cherry-pick 9c77f40c14bc397a759337e1880e0edf08a858df
-                check_rc $? "git cherry-pick"
-                git cherry-pick 2653c8e8139284d752cd63ce0dd12f51611527e5
-                check_rc $? "git cherry-pick"
-                git cherry-pick 9d53b47d4ea10ab1cdcfec5237b413a6ae0539ee
-                check_rc $? "git cherry-pick"
-                ;;
-            vendor-qcom-opensource-wlan-qca-wifi-host-cmn)
-                git rebase codelinaro/$codelinaro_branch
-                check_rc $? "git rebase"
-                git cherry-pick 5336f4036a3acc2509ba6750b6422e65f613b8e8
-                check_rc $? "git cherry-pick"
-                ;;
-            *)
-                git rebase codelinaro/$codelinaro_branch
-                check_rc $? "git rebase"
-                ;;
-        esac
-    fi
 
 # move files to subdirectory to prepare for merge with unified kernel
     if [ ! "x"$filter_repo_subdir = "x" ]
@@ -297,7 +230,7 @@ for i in \
     cd $WORK_DIR/android_kernel_motorola_sm6375
     case $i in
         vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
-            git tag -d MMI-T3TC33.18-12-3
+            git tag -d MMI-U1RD34.80-40
             ;;
     esac
 
@@ -305,7 +238,7 @@ for i in \
 
     case $i in
         vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
-            git tag -d MMI-T3TC33.18-12-3
+            git tag -d MMI-U1RD34.80-40
             git fetch $i --tags
             ;;
         *)
@@ -326,7 +259,7 @@ for i in \
         vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
             git merge --no-edit --allow-unrelated-histories $moto_branch
             check_rc $? "git merge $moto_branch"
-            git tag -d MMI-T3TC33.18-12-3
+            git tag -d MMI-U1RD34.80-40
             ;;
         *)
             git merge --no-edit --allow-unrelated-histories $i/$moto_branch
@@ -335,7 +268,6 @@ for i in \
     esac
 
     git remote remove $i
-    rm -rf $WORK_DIR/$codelinaro_tag
     rm -rf $WORK_DIR/$i
 
 done
@@ -344,6 +276,7 @@ cd $WORK_DIR/android_kernel_motorola_sm6375
 echoyellow "applying local patches to sm6375 kernel"
 
 find . -name "Android.mk" -delete
+git restore Android.mk
 git commit -a -m "treewide: remove Android.mk"
 
 for i in $WORK_DIR/_patches/*; do echo "--- patching $i"; git am --keep-cr $i || break; done

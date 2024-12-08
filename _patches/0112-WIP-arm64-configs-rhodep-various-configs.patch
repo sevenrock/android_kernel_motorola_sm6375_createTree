@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Mon, 9 Dec 2024 23:45:10 +0100
+Subject: [PATCH] WIP arm64: configs: rhodep: various configs
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index acacfcba9916..e1a191dc55c0 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -84,3 +84,5 @@ CONFIG_RADIO_ELNA=y
+ CONFIG_LDO_VIBRATOR_MMI=m
+ CONFIG_WATCHDOGTEST=m
+ CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y
++# CONFIG_PSTORE_DEFLATE_COMPRESS is not set
++CONFIG_CRYPTO_XCBC=y
+-- 
+2.39.5
+

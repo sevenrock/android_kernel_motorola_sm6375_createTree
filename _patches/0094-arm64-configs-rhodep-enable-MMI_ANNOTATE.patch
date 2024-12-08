@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 09:07:14 +0200
+Subject: [PATCH] arm64: configs: rhodep: enable MMI_ANNOTATE
+
+Change-Id: I48b86eb3358e29a930c5bdff7b5ee7e204a010f4
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 5c450bea2a74..c7add81abec6 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -45,3 +45,4 @@ CONFIG_SGM4154X_CHARGER=m
+ CONFIG_TCPC_RT1711H=m
+ CONFIG_TCPC_SGM7220=m
+ CONFIG_TCPC_CLASS=m
++CONFIG_MMI_ANNOTATE=m
+-- 
+2.39.5
+

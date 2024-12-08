@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Weinstein <jake@aospa.co>
+Date: Wed, 15 Feb 2023 22:17:19 +0530
+Subject: [PATCH] arm64: configs: moto-holi: Disable some debug configs
+
+Change-Id: Ia7c67da01ad36730aba6a427d5efd34cf4bf2db6
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index cac6fc2c17f8..e176a3fff74b 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -82,3 +82,11 @@ CONFIG_NR_CPUS=8
+ # CONFIG_HARDEN_BRANCH_PREDICTOR is not set
+ # CONFIG_KALLSYMS_ALL is not set
+ CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
++# CONFIG_ARM_QCOM_CPUFREQ_HW_DEBUG is not set
++# CONFIG_QTI_TZ_LOG is not set
++# CONFIG_CMA_DEBUGFS is not set
++# CONFIG_REGMAP_QTI_DEBUG is not set
++# CONFIG_REGMAP_ALLOW_WRITE_DEBUGFS is not set
++# CONFIG_REGULATOR_QTI_DEBUG is not set
++# CONFIG_COMMON_CLK_QCOM_DEBUG is not set
++# CONFIG_INTERCONNECT_TEST is not set
+-- 
+2.39.5
+

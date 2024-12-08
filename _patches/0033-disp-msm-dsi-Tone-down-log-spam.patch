@@ -1,0 +1,89 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 1 Dec 2024 19:31:22 +0100
+Subject: [PATCH] disp: msm: dsi: Tone down log spam
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/dsi/dsi_display.c |  8 ++++----
+ techpack/display/msm/dsi/dsi_panel.c   | 10 +++++-----
+ 2 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
+index 0b00dfe5ae7f..8bfae81a80e1 100644
+--- a/techpack/display/msm/dsi/dsi_display.c
++++ b/techpack/display/msm/dsi/dsi_display.c
+@@ -8159,9 +8159,9 @@ int dsi_display_set_mode(struct dsi_display *display,
+ 		goto error;
+ 	}
+ 
+-	DSI_INFO("mdp_transfer_time=%d, hactive=%d, vactive=%d, fps=%d\n",
+-			adj_mode.priv_info->mdp_transfer_time_us,
+-			timing.h_active, timing.v_active, timing.refresh_rate);
++//	DSI_INFO("mdp_transfer_time=%d, hactive=%d, vactive=%d, fps=%d\n",
++//			adj_mode.priv_info->mdp_transfer_time_us,
++//			timing.h_active, timing.v_active, timing.refresh_rate);
+ 	SDE_EVT32(adj_mode.priv_info->mdp_transfer_time_us,
+ 			timing.h_active, timing.v_active, timing.refresh_rate);
+ 
+@@ -9401,7 +9401,7 @@ int dsi_display_disable(struct dsi_display *display)
+ 		return -EINVAL;
+ 	}
+ 
+-	DSI_INFO("%s(%s)+\n", __func__, display->drm_conn->name);
++//	DSI_INFO("%s(%s)+\n", __func__, display->drm_conn->name);
+ 	SDE_EVT32(SDE_EVTLOG_FUNC_ENTRY);
+ 	mutex_lock(&display->display_lock);
+ 
+diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
+index 6efa552cfdd6..02e346a18d8a 100644
+--- a/techpack/display/msm/dsi/dsi_panel.c
++++ b/techpack/display/msm/dsi/dsi_panel.c
+@@ -481,7 +481,7 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
+ {
+ 	int rc = 0;
+ 
+-	DSI_INFO("(%s)+\n", panel->name);
++//	DSI_INFO("(%s)+\n", panel->name);
+ 
+ 	if ((panel->tp_state_check_enable) && (panel->tp_state)) {
+ 		pr_info("%s: (%s)+power is alway on \n", __func__, panel->name);
+@@ -531,7 +531,7 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
+ 		DSI_DEBUG("TWM Enabled, skip panel power off\n");
+ 		return rc;
+ 	}
+-	DSI_INFO("%s(%s)+\n", __func__, panel->name);
++//	DSI_INFO("%s(%s)+\n", __func__, panel->name);
+ 
+ 	if (panel->tp_state_check_enable) {
+ 			if (panel_power_is_alway_on (panel)) {
+@@ -6126,7 +6126,7 @@ int dsi_panel_post_switch(struct dsi_panel *panel)
+ 		return -EINVAL;
+ 	}
+ 
+-	pr_info("(%s)+\n", panel->name);
++//	pr_info("(%s)+\n", panel->name);
+ 	mutex_lock(&panel->panel_lock);
+ 
+ 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_POST_TIMING_SWITCH);
+@@ -6149,7 +6149,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
+ 		return -EINVAL;
+ 	}
+ 
+-	DSI_INFO("(%s)+\n", panel->name);
++//	DSI_INFO("(%s)+\n", panel->name);
+ 	mutex_lock(&panel->panel_lock);
+ 
+ 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_ON);
+@@ -6271,7 +6271,7 @@ int dsi_panel_disable(struct dsi_panel *panel)
+ 		DSI_DEBUG("TWM Enabled, skip panel disable\n");
+ 		return rc;
+ 	}
+-	DSI_INFO("%s(%s)+\n", __func__, panel->name);
++//	DSI_INFO("%s(%s)+\n", __func__, panel->name);
+ 	mutex_lock(&panel->panel_lock);
+ 
+ 	/* Avoid sending panel off commands when ESD recovery is underway */
+-- 
+2.39.5
+

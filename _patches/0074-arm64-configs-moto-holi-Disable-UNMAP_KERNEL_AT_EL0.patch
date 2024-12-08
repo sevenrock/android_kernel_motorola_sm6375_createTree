@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Miguel de Dios <migueldedios@google.com>
+Date: Sun, 22 Nov 2020 19:09:32 +0300
+Subject: [PATCH] arm64: configs: moto-holi: Disable UNMAP_KERNEL_AT_EL0
+
+This causes a perf regression on the *_syscall bionic benchmarks.
+
+Bug: 120161344
+Change-Id: I313510c64471b8109456b30314a3d85a1d1d5cae
+Signed-off-by: Miguel de Dios <migueldedios@google.com>
+Signed-off-by: chandu078 <chandudyavanapelli03@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 673aa4fa318d..6701f5a7b51d 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -78,3 +78,4 @@ CONFIG_QCA_CLD_WLAN=m
+ CONFIG_NR_CPUS=8
+ # CONFIG_CPU_FREQ_GOV_POWERSAVE is not set
+ # CONFIG_CPU_FREQ_GOV_CONSERVATIVE is not set
++# CONFIG_UNMAP_KERNEL_AT_EL0 is not set
+-- 
+2.39.5
+

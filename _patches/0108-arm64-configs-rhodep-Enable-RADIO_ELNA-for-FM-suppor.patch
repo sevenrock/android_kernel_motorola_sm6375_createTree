@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Mon, 9 Dec 2024 23:37:54 +0100
+Subject: [PATCH] arm64: configs: rhodep: Enable RADIO_ELNA (for FM support)
+
+Change-Id: I0f8648a32d37312184910ec4d3475a84450502ce
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 9c4e06765d1d..670fdc5e6b7f 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -80,3 +80,4 @@ CONFIG_MOTO_F_USBNET=m
+ # CONFIG_TOUCHSCREEN_NT36XXX is not set
+ CONFIG_LEDS_AW99703=m
+ CONFIG_LEDS_LM3697_MMI=m
++CONFIG_RADIO_ELNA=y
+-- 
+2.39.5
+

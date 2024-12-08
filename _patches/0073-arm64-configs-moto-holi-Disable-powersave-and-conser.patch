@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Weinstein <jake@aospa.co>
+Date: Thu, 24 Nov 2022 14:30:00 +0900
+Subject: [PATCH] arm64: configs: moto-holi: Disable powersave and conservative
+ governors
+
+We don't use these.
+
+Change-Id: I5d15cf2700ebab7223363d13fe55172aa715e396
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index e8b518034a1f..673aa4fa318d 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -76,3 +76,5 @@ CONFIG_QCA_CLD_WLAN=m
+ # CONFIG_QCOM_MEM_OFFLINE is not set
+ # CONFIG_OVERRIDE_MEMORY_LIMIT is not set
+ CONFIG_NR_CPUS=8
++# CONFIG_CPU_FREQ_GOV_POWERSAVE is not set
++# CONFIG_CPU_FREQ_GOV_CONSERVATIVE is not set
+-- 
+2.39.5
+

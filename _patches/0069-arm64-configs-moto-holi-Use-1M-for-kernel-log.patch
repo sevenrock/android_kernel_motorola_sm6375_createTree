@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Mon, 21 Jun 2021 00:50:08 +0900
+Subject: [PATCH] arm64: configs: moto-holi: Use 1M for kernel log
+
+ * The default of 128K is not even enough to store the
+   boot log.
+
+Change-Id: Ic7f7c88fff92f77bf822fc353c3e39b021120a8b
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 429fb651015c..b7465fd646d6 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -54,6 +54,9 @@ CONFIG_TOUCHSCREEN_FTS=n
+ # Exfat
+ CONFIG_EXFAT_FS=m
+ 
++# Logging
++CONFIG_LOG_BUF_SHIFT=20
++
+ # Net
+ CONFIG_IP_NF_TARGET_TTL=y
+ 
+-- 
+2.39.5
+

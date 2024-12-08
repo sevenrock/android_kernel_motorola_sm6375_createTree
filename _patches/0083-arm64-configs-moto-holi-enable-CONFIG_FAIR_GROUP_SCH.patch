@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Wei Wang <wvw@google.com>
+Date: Mon, 26 Oct 2020 15:26:48 -0700
+Subject: [PATCH] arm64: configs: moto-holi: enable CONFIG_FAIR_GROUP_SCHED
+
+Enable CONFIG_FAIR_GROUP_SCHED with proper tuning can help prioritize
+important work in Android. The feature was taken off due to improper
+setting on the background tasks' share. Now Tasks in root group has
+already moved into a newly created system subgroup, so the shares can be
+properly set.
+
++----------------------------------------------------------------------------------------+
+| Cold App Launch Time (* w/ prio120 8 threads running in root cpuset)                   |
++----------------------------------------+--------+------+---------+-----------+---------+
+|                                        | chrome | maps | youtube | playstore | setting |
++----------------------------------------+--------+------+---------+-----------+---------+
+| No CONFIG_FAIR_GROUP_SCHED support(*)  |    591 | 1314 |     887 |      1952 |     551 |
++----------------------------------------+--------+------+---------+-----------+---------+
+| CONFIG_FAIR_GROUP_SCHED w/ 1% limit(*) |    567 |  637 |     668 |      1450 |     529 |
++----------------------------------------+--------+------+---------+-----------+---------+
+| No stress runnning (best case)         |    416 |  463 |     484 |      1075 |     363 |
++----------------------------------------+--------+------+---------+-----------+---------+
+
+Bug: 171740453
+Test: Build and boot
+Signed-off-by: Wei Wang <wvw@google.com>
+Change-Id: Ibb7e48c93136e3967da6381d7c0c94d0cdaee443
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 490f6595df11..2fb842f1e32a 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -94,3 +94,4 @@ CONFIG_SUSPEND_SKIP_SYNC=y
+ CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
+ CONFIG_QCOM_KGSL_IDLE_TIMEOUT=58
+ # CONFIG_PROCESS_RECLAIM is not set
++CONFIG_FAIR_GROUP_SCHED=y
+-- 
+2.39.5
+

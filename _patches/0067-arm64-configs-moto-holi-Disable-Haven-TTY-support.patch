@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Koskovich <akoskovich@pm.me>
+Date: Wed, 27 Apr 2022 01:40:15 -0700
+Subject: [PATCH] arm64: configs: moto-holi: Disable Haven TTY support
+
+ * We do not need to expose communication with virtual
+   machines in a Haven hypervisor, and it gets very
+   angry when we try to remove the 'console' cmdline.
+
+Change-Id: Idb03fa207686dce9f77719bd74411d119aa332dc
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index e36c4362f49e..1534646bb133 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -54,5 +54,8 @@ CONFIG_EXFAT_FS=m
+ # Net
+ CONFIG_IP_NF_TARGET_TTL=y
+ 
++# VM
++CONFIG_HVC_HAVEN=n
++
+ # Wifi
+ CONFIG_QCA_CLD_WLAN=m
+-- 
+2.39.5
+

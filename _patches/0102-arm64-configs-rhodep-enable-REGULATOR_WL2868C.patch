@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 10:21:11 +0200
+Subject: [PATCH] arm64: configs: rhodep: enable REGULATOR_WL2868C
+
+Change-Id: I61674d3f5193b6a1af36a599880717ddb3a7ec09
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 82aff984a1e6..123f16cf98f2 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -56,3 +56,4 @@ CONFIG_SX937X_POWER_SUPPLY_ONLINE=y
+ CONFIG_MOTO_UTAGS=m
+ CONFIG_MMI_SYS_TEMP=m
+ CONFIG_CAMERA_CCI_INTF=m
++CONFIG_REGULATOR_WL2868C=y
+-- 
+2.39.5
+

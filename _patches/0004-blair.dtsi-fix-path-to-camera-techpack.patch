@@ -10,10 +10,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/vendor/qcom/blair.dtsi b/arch/arm64/boot/dts/vendor/qcom/blair.dtsi
-index 468edb3fb554..1f483995fe0e 100644
+index c61cbd6d53c1..2cc7d6a7603d 100644
 --- a/arch/arm64/boot/dts/vendor/qcom/blair.dtsi
 +++ b/arch/arm64/boot/dts/vendor/qcom/blair.dtsi
-@@ -3341,7 +3341,7 @@
+@@ -3336,7 +3336,7 @@
  #include "holi-coresight.dtsi"
  #include "holi-pm.dtsi"
  #include "holi-vidc.dtsi"

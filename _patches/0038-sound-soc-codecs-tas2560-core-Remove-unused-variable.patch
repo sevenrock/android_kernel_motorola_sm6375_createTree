@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: marcost2 <marcostolcachir@gmail.com>
+Date: Wed, 9 Nov 2022 21:10:00 -0300
+Subject: [PATCH] sound: soc: codecs: tas2560-core: Remove unused variable
+
+* Unused, and redundant since pTAS2560->read maps to tas2560_dev_read which handles giving the appropiate message in case something fails
+
+Change-Id: I637f75cfc273fdb4fe180b95ae2f6a46b29434c5
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ sound/soc/codecs/tas2560-core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sound/soc/codecs/tas2560-core.c b/sound/soc/codecs/tas2560-core.c
+index f60c3a2d6cf2..42a404062e9f 100644
+--- a/sound/soc/codecs/tas2560-core.c
++++ b/sound/soc/codecs/tas2560-core.c
+@@ -460,9 +460,9 @@ int tas2560_set_bit_rate(struct tas2560_priv *pTAS2560, unsigned int nBitRate)
+ 
+ int tas2560_get_bit_rate(struct tas2560_priv *pTAS2560)
+ {
+-	int nBitRate = -1, value = -1, ret = 0;
++	int nBitRate = -1, value = -1;
+ 
+-	ret = pTAS2560->read(pTAS2560, TAS2560_DAI_FMT, &value);
++	pTAS2560->read(pTAS2560, TAS2560_DAI_FMT, &value);
+ 	value &= 0x03;
+ 
+ 	switch (value) {
+-- 
+2.39.5
+

@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Koskovich <akoskovich@pm.me>
+Date: Wed, 27 Apr 2022 13:32:42 -0700
+Subject: [PATCH] arm64: configs: moto-holi: Disable irrelevant architectures
+
+Change-Id: I090bdc72d3df93cdbc9e599ac8944bf5cf963d6e
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index e73aefd1837d..e36c4362f49e 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -42,6 +42,12 @@ CONFIG_USB_VIDEO_CLASS=y
+ CONFIG_NFC=y
+ CONFIG_THINLTO=y
+ 
++# Architectures
++# CONFIG_ARCH_SUNXI is not set
++# CONFIG_ARCH_HISI is not set
++# CONFIG_ARCH_SHIMA is not set
++# CONFIG_ARCH_YUPIK is not set
++
+ # Exfat
+ CONFIG_EXFAT_FS=m
+ 
+-- 
+2.39.5
+

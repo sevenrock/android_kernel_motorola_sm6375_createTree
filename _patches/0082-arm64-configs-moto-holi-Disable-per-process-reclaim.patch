@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pedro Bertoleti <pedrohfb@motorola.com>
+Date: Thu, 4 Nov 2021 17:31:23 -0300
+Subject: [PATCH] arm64: configs: moto-holi: Disable per-process reclaim
+
+Accordingly to FPS tests
+(http://perf.mot.com/apps/fps/rungraphs/?runids=44588,44602,44598),
+overall device performance has been improved when PPR is disabled (mainly
+considering Major Page Fault and Swap IO improvements).
+
+Change-Id: I89dade542cf47c754787fd17c11cc90e61d34473
+Reviewed-on: https://gerrit.mot.com/2112482
+SLTApproved: Slta Waiver
+SME-Granted: SME Approvals Granted
+Tested-by: Jira Key
+Reviewed-by: Fernanda Schmidt <fschmidt@motorola.com>
+Reviewed-by: Rafael Ortolan <rafones@motorola.com>
+Reviewed-by: Carlos Pinho <cpinho@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 2e2bc1a32ec4..490f6595df11 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -93,3 +93,4 @@ CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
+ CONFIG_SUSPEND_SKIP_SYNC=y
+ CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
+ CONFIG_QCOM_KGSL_IDLE_TIMEOUT=58
++# CONFIG_PROCESS_RECLAIM is not set
+-- 
+2.39.5
+

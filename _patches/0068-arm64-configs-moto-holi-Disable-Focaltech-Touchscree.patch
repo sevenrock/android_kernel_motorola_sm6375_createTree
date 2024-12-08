@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Koskovich <akoskovich@pm.me>
+Date: Wed, 27 Apr 2022 01:55:06 -0700
+Subject: [PATCH] arm64: configs: moto-holi: Disable Focaltech Touchscreen
+
+ * We use Synaptics, this is causing the driver to probe
+   forever and spam i2c_geni.
+
+Change-Id: I6b920edf864ab94592533992e92914c99cabea39
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 1534646bb133..429fb651015c 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -48,6 +48,9 @@ CONFIG_THINLTO=y
+ # CONFIG_ARCH_SHIMA is not set
+ # CONFIG_ARCH_YUPIK is not set
+ 
++# Display
++CONFIG_TOUCHSCREEN_FTS=n
++
+ # Exfat
+ CONFIG_EXFAT_FS=m
+ 
+-- 
+2.39.5
+

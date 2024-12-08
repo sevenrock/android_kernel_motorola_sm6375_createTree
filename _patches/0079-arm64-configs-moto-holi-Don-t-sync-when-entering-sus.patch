@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Wed, 18 Nov 2020 01:47:31 -0800
+Subject: [PATCH] arm64: configs: moto-holi: Don't sync when entering suspend
+
+Syncing can take a long time in some cases, and the risk of us losing
+power or crashing while in suspend on a battery-backed device is very
+low. Android also enters and exits suspend very frequently, which
+exacerbates the cost.
+
+Change-Id: I35b9cb3e79532e18b2240b377b20708eae86cec2
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index e176a3fff74b..f2a4d0fcb54f 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -90,3 +90,4 @@ CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
+ # CONFIG_REGULATOR_QTI_DEBUG is not set
+ # CONFIG_COMMON_CLK_QCOM_DEBUG is not set
+ # CONFIG_INTERCONNECT_TEST is not set
++CONFIG_SUSPEND_SKIP_SYNC=y
+-- 
+2.39.5
+

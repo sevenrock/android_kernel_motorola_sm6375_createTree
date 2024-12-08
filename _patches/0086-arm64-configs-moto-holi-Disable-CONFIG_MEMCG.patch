@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Adithya R <gh0strider.2k18.reborn@gmail.com>
+Date: Sat, 17 Dec 2022 02:47:26 +0530
+Subject: [PATCH] arm64: configs: moto-holi: Disable CONFIG_MEMCG
+
+Only required for low-ram devices in Android 11 and above lmkd.
+
+Change-Id: I13838cd60f790e21bfc2afbd751cc50610ad47c6
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 8e91d5f7c2a4..331d8bfd6465 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -98,3 +98,5 @@ CONFIG_FAIR_GROUP_SCHED=y
+ CONFIG_UCLAMP_BUCKETS_COUNT=20
+ # CONFIG_IPC_LOGGING is not set
+ # CONFIG_QTI_HW_MEMLAT_LOG is not set
++# CONFIG_MEMCG is not set
++# CONFIG_MEMCG_SWAP is not set
+-- 
+2.39.5
+

@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 10:43:49 +0200
+Subject: [PATCH] arm64: configs: rhodep: Enable QPNP_ADAPTIVE_CHARGE
+
+Change-Id: I3cb69dea381332d630ce110658827d69f4186b42
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 123f16cf98f2..ae12c3a1aba0 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -57,3 +57,4 @@ CONFIG_MOTO_UTAGS=m
+ CONFIG_MMI_SYS_TEMP=m
+ CONFIG_CAMERA_CCI_INTF=m
+ CONFIG_REGULATOR_WL2868C=y
++CONFIG_QPNP_ADAPTIVE_CHARGE=m
+-- 
+2.39.5
+

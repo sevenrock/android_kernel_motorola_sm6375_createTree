@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Fri, 29 Jul 2022 15:11:21 +0200
+Subject: [PATCH] arm64: configs: moto-holi: build qcacld wlan module
+
+Change-Id: I08cb6aa891ee055b90a1df5d311746ede4766c12
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index a3da70508ef1..97d672305b22 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -44,3 +44,6 @@ CONFIG_THINLTO=y
+ 
+ # Exfat
+ CONFIG_EXFAT_FS=m
++
++# Wifi
++CONFIG_QCA_CLD_WLAN=m
+-- 
+2.39.5
+

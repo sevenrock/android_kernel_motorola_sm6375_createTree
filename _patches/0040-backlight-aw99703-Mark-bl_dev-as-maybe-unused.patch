@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 8 Dec 2024 23:36:44 +0100
+Subject: [PATCH] backlight: aw99703: Mark bl_dev as maybe unused
+
+../../../../../../kernel/motorola/sm6375/drivers/backlight/aw99703/leds_aw99703.c:705:27:
+ error: variable 'bl_dev' set but not used [-Werror,-Wunused-but-set-variable]
+  705 |         struct backlight_device *bl_dev;
+
+Change-Id: Ic54933366a36805939160423188595c81e2711e6
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/backlight/aw99703/leds_aw99703.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/backlight/aw99703/leds_aw99703.c b/drivers/backlight/aw99703/leds_aw99703.c
+index 50fd54336b13..0cc4e63288bc 100644
+--- a/drivers/backlight/aw99703/leds_aw99703.c
++++ b/drivers/backlight/aw99703/leds_aw99703.c
+@@ -702,7 +702,7 @@ static int aw99703_probe(struct i2c_client *client,
+ {
+ 	struct aw99703_data *drvdata;
+ #ifdef KERNEL_ABOVE_4_14
+-	struct backlight_device *bl_dev;
++	struct backlight_device __maybe_unused *bl_dev;
+ 	struct backlight_properties props;
+ #endif
+ 	int err = 0;
+-- 
+2.39.5
+

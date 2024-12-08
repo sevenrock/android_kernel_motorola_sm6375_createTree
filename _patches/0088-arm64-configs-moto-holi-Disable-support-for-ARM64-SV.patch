@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kazuki Hashimoto <kazukih@tuta.io>
+Date: Sat, 27 Jan 2024 17:10:20 +0800
+Subject: [PATCH] arm64: configs: moto-holi: Disable support for ARM64 SVE
+
+Checking for SVE support takes a LOT of cpu time, and mobile processors
+don't support it. Turn off the config to gain back some cpu performance.
+
+Change-Id: I0f495c6b45968a8d7e7c5305e762e98eccd896f8
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index b4efda3b6435..ed447ff612e4 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -101,3 +101,4 @@ CONFIG_UCLAMP_BUCKETS_COUNT=20
+ # CONFIG_MEMCG is not set
+ # CONFIG_MEMCG_SWAP is not set
+ # CONFIG_SLUB_CPU_PARTIAL is not set
++# CONFIG_ARM64_SVE is not set
+-- 
+2.39.5
+

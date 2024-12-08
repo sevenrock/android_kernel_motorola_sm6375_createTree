@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Date: Thu, 3 Aug 2017 15:58:41 +0530
+Subject: [PATCH] arm64: configs: moto-holi: Enable power efficient workqueues
+
+commit cee22a15052f ("workqueues: Introduce new flag WQ_POWER_EFFICIENT
+for power oriented workqueues") introduced the concept of power
+efficient workqueues (4 years back), but it was never enabled in
+upstream kernel configs.
+
+Power efficient workqueues are simply marked as "unbound," so that jobs
+queued to them can run on any CPU in the system. It leaves the target
+CPU selection to the scheduler, which is the best place for such
+decision making. This improves power efficiency for workqueues which are
+otherwise pinned to a CPU.
+
+Enable it for ARM64 platforms as ARM platforms were the main target for
+the introduction of power efficient workqueues.
+
+Change-Id: I6eefe1e967701c62e557c0db7820c281b1349d08
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index f2a4d0fcb54f..6757774f6011 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -91,3 +91,4 @@ CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
+ # CONFIG_COMMON_CLK_QCOM_DEBUG is not set
+ # CONFIG_INTERCONNECT_TEST is not set
+ CONFIG_SUSPEND_SKIP_SYNC=y
++CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
+-- 
+2.39.5
+

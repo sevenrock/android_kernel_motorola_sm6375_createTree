@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Sun, 3 Apr 2022 21:47:36 +0200
+Subject: [PATCH] arch: arm64: configs: add initial config fragment for
+ moto-holi
+
+from moto-holi.config
+
+Change-Id: I02b9ae0d81875b65e860e669c65f99b4cb107497
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../configs/vendor/lineage_moto-holi.config   | 41 +++++++++++++++++++
+ 1 file changed, 41 insertions(+)
+ create mode 100644 arch/arm64/configs/vendor/lineage_moto-holi.config
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+new file mode 100644
+index 000000000000..8c7923319548
+--- /dev/null
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -0,0 +1,41 @@
++#
++# Please avoid changing the Qualcomm defconfig files and use this file to
++# add any Motorola-specific configuration changes that are applicable to
++# userdebug, eng, and user builds.
++#
++# After building, a list of all of the config files that are used can be found
++# at the top of:
++# out/target/product/$(PRODUCT)/obj/KERNEL_OBJ/mapphone_defconfig
++#
++# The actual output of the kernel configuration system can be found at:
++# out/target/product/$(PRODUCT)/obj/KERNEL_OBJ/.config
++#
++# You can check the .config file to verify that your configuration option is
++# being set as expected.
++#
++CONFIG_LOCALVERSION="-moto"
++CONFIG_MMI_DEVICE_DTBS=y
++CONFIG_PSTORE=y
++CONFIG_PSTORE_CONSOLE=y
++CONFIG_PSTORE_RAM=y
++CONFIG_PSTORE_PMSG=y
++CONFIG_SERIAL_MSM_GENI_CONSOLE=y
++# CONFIG_SMB1398_CHARGER is not set
++# CONFIG_SMB1355_SLAVE_CHARGER is not set
++CONFIG_SLUB_DEBUG=y
++# CONFIG_SLUB_DEBUG_ON is not set
++# CONFIG_SLUB_DEBUG_PANIC_ON is not set
++CONFIG_BUG_ON_DATA_CORRUPTION=y
++CONFIG_SCHED_STACK_END_CHECK=y
++
++CONFIG_MEDIA_USB_SUPPORT=y
++CONFIG_USB_VIDEO_CLASS=y
++# CONFIG_CORESIGHT_LINK_AND_SINK_TMC is not set
++# CONFIG_CORESIGHT_SOURCE_ETM4X is not set
++# CONFIG_CORESIGHT_CTI is not set
++# CONFIG_CORESIGHT_TPDA is not set
++# CONFIG_CORESIGHT_TPDM is not set
++# CONFIG_CORESIGHT_HWEVENT is not set
++# CONFIG_CORESIGHT_DUMMY is not set
++# CONFIG_CORESIGHT_REMOTE_ETM is not set
++# CONFIG_CORESIGHT_TGU is not set
+-- 
+2.39.5
+

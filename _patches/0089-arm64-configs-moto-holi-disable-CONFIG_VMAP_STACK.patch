@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Sat, 25 Sep 2021 22:09:54 +0900
+Subject: [PATCH] arm64: configs: moto-holi: disable CONFIG_VMAP_STACK
+
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+Signed-off-by: Chenyang Zhong <zhongcy95@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index ed447ff612e4..7f1ea0897a49 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -102,3 +102,4 @@ CONFIG_UCLAMP_BUCKETS_COUNT=20
+ # CONFIG_MEMCG_SWAP is not set
+ # CONFIG_SLUB_CPU_PARTIAL is not set
+ # CONFIG_ARM64_SVE is not set
++# CONFIG_VMAP_STACK is not set
+-- 
+2.39.5
+

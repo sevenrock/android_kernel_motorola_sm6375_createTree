@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SGCMarkus <markusornik@gmail.com>
+Date: Mon, 4 Apr 2022 21:16:31 +0200
+Subject: [PATCH] arm64: configs: moto-holi: enable CONFIG_NFC
+
+Change-Id: Iec42b95069f631bac5cbcd4c966bb00865e34c6a
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index a9f6409cee99..a18a54a9ec8d 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -39,4 +39,5 @@ CONFIG_USB_VIDEO_CLASS=y
+ # CONFIG_CORESIGHT_DUMMY is not set
+ # CONFIG_CORESIGHT_REMOTE_ETM is not set
+ # CONFIG_CORESIGHT_TGU is not set
++CONFIG_NFC=y
+ CONFIG_THINLTO=y
+-- 
+2.39.5
+

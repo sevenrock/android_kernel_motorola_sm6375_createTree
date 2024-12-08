@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 8 Dec 2024 23:01:50 +0100
+Subject: [PATCH] Revert "disp: msm: dsi: Add print info for DSI_CTRL"
+
+This reverts commit 3a743de84d19295179568ab2f75f6018fd003445.
+
+Fixes build error
+
+../../../../../../kernel/motorola/sm6375/techpack/display/msm/dsi/dsi_display.c:8542:27: error: unused variable 'ctrl' [
+-Werror,-Wunused-variable]
+ 8542 |         struct dsi_display_ctrl *ctrl = &display->ctrl[0];
+
+by reverting Motorola commit
+https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-display/commit/942f7d4bcfd2f8fcbb7446df482f4efdfb0b469c
+which also reduces log spam.
+
+Change-Id: I3a394ecf8c452eecd367236e0b01f48e5b2d1b0a
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/dsi/dsi_display.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
+index 8bfae81a80e1..5e8d747907a7 100644
+--- a/techpack/display/msm/dsi/dsi_display.c
++++ b/techpack/display/msm/dsi/dsi_display.c
+@@ -8539,7 +8539,6 @@ int dsi_display_prepare(struct dsi_display *display)
+ {
+ 	int rc = 0;
+ 	struct dsi_display_mode *mode;
+-	struct dsi_display_ctrl *ctrl = &display->ctrl[0];
+ 
+ 	if (!display) {
+ 		DSI_ERR("Invalid params\n");
+@@ -8551,9 +8550,7 @@ int dsi_display_prepare(struct dsi_display *display)
+ 		return -EINVAL;
+ 	}
+ 
+-	DSI_INFO("panel_name=%s ctrl-index=%d\n",
+-		display->panel->name, ctrl->ctrl->cell_index);
+-
++	DSI_INFO("%s(%s)+\n", __func__, display->drm_conn->name);
+ 	SDE_EVT32(SDE_EVTLOG_FUNC_ENTRY);
+ 	mutex_lock(&display->display_lock);
+ 
+-- 
+2.39.5
+

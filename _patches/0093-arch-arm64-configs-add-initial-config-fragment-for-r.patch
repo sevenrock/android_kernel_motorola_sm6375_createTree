@@ -1,0 +1,71 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Marc Bourgoin <themard85@gmail.com>
+Date: Mon, 8 Aug 2022 23:59:27 -0600
+Subject: [PATCH] arch: arm64: configs: add initial config fragment for rhodep
+
+from moto-holi-rhodep.config & factory-holi-rhodep.config
+
+also from: https://github.com/MotorolaMobilityLLC/readme/blob/master/MMI-S1SU32.73-41-2-4
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ .../configs/vendor/lineage_rhodep.config      | 47 +++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+ create mode 100644 arch/arm64/configs/vendor/lineage_rhodep.config
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+new file mode 100644
+index 000000000000..5c450bea2a74
+--- /dev/null
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -0,0 +1,47 @@
++#
++# Please avoid changing the Qualcomm defconfig files and use this file to
++# add any Motorola-specific configuration changes that are applicable to
++# userdebug, eng, and user builds.
++#
++# After building, a list of all of the config files that are used can be found
++# at the top of:
++# out/target/product/$(PRODUCT)/obj/KERNEL_OBJ/mapphone_defconfig
++#
++# The actual output of the kernel configuration system can be found at:
++# out/target/product/$(PRODUCT)/obj/KERNEL_OBJ/.config
++#
++# You can check the .config file to verify that your configuration option is
++# being set as expected.
++#
++CONFIG_RHODEP_DTB=y
++# CONFIG_NFC_QTI_I2C is not set
++CONFIG_FS_EPOLL_WAKEUP_DEBUG=y
++CONFIG_ZRAM_WRITEBACK=y
++# CONFIG_THERMAL_STATISTICS is not set
++# CONFIG_REGULATOR_QPNP_LCDB is not set
++CONFIG_AW882XX_STEREO_SMARTPA=y
++CONFIG_AW882XX_PARAMS_FROM_BIN=y
++CONFIG_AW882XX_MAPSIZE_16K=y
++# CONFIG_MICRON_UFSHID is not set
++CONFIG_QUP0_SE2_AP=y
++CONFIG_CAMERA_FLASH_PWM=y
++CONFIG_CAMERA_DISABLE_VSYNC_IRQ=y
++CONFIG_CRYPTO_CHACHA20POLY1305=y
++# CONFIG_UFSTW is not set
++CONFIG_CAM_SENSOR_PROBE_RETRY=y
++CONFIG_INPUT_EGIS_FPS_MMI=m
++CONFIG_INPUT_FOCAL_FPS_MMI=m
++CONFIG_MMI_RELAY=m
++CONFIG_INPUT_TOUCHSCREEN_MMI=m
++CONFIG_DRM_PANEL_NOTIFICATIONS=y
++CONFIG_TOUCHSCREEN_GOODIX_BRL=m
++CONFIG_TOUCHSCREEN_GOODIX_BRL_SPI=y
++CONFIG_SEC_NFC=m
++CONFIG_SEC_NFC_PRODUCT_N5=y
++CONFIG_SEC_NFC_IF_I2C=y
++CONFIG_MMI_QC3P_TURBO_CHARGER=y
++CONFIG_MMI_CHARGER=m
++CONFIG_SGM4154X_CHARGER=m
++CONFIG_TCPC_RT1711H=m
++CONFIG_TCPC_SGM7220=m
++CONFIG_TCPC_CLASS=m
+-- 
+2.39.5
+

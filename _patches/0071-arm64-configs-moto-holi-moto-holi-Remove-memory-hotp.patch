@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: zoujc <zoujc@motorola.com>
+Date: Fri, 7 May 2021 20:16:26 +0800
+Subject: [PATCH] arm64: configs: moto-holi: moto-holi: Remove memory hotplug
+
+Memory hotplug harm performance when offline a granule.
+It can't improve power(<1mA).
+Also for disable PASR feature.
+
+Change-Id: I314552a5683f114f63f5b8434a48bcb860aed4ca
+Signed-off-by: zoujc <zoujc@motorola.com>
+Reviewed-on: https://gerrit.mot.com/1942435
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Zhenxin Xi <xizx@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+[sevenrock: moved to lineage_moto-holi.config]
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 8c7bd34ced4e..b28f60e55876 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -66,3 +66,12 @@ CONFIG_HVC_HAVEN=n
+ 
+ # Wifi
+ CONFIG_QCA_CLD_WLAN=m
++
++# Various
++# CONFIG_MEMORY_HOTPLUG is not set
++# CONFIG_HOTPLUG_SIZE_BITS is not set
++# CONFIG_MEMORY_HOTPLUG_DEFAULT_ONLINE is not set
++# CONFIG_MEMORY_HOTPLUG_MOVABLE_NODE is not set
++# CONFIG_MEMORY_HOTREMOVE is not set
++# CONFIG_QCOM_MEM_OFFLINE is not set
++# CONFIG_OVERRIDE_MEMORY_LIMIT is not set
+-- 
+2.39.5
+

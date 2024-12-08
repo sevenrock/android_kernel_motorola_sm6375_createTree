@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 10:13:26 +0200
+Subject: [PATCH] arm64: configs: rhodep: Enable MMI_SYS_TEMP
+
+Change-Id: Ief25ed7008ac7a647d7ce6b4d9c9ecfed113f9cc
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index f758b593c92b..3cf6eb7f3d8d 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -54,3 +54,4 @@ CONFIG_SX937X_USB_CAL=y
+ CONFIG_SX937X_FLIP_CAL=y
+ CONFIG_SX937X_POWER_SUPPLY_ONLINE=y
+ CONFIG_MOTO_UTAGS=m
++CONFIG_MMI_SYS_TEMP=m
+-- 
+2.39.5
+

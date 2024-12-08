@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sultan Alsawaf <sultan@kerneltoast.com>
+Date: Sat, 27 Jan 2024 17:28:19 +0800
+Subject: [PATCH] arm64: configs: moto-holi: Disable SLUB per-CPU partial
+ caches
+
+This causes load spikes when the per-CPU partial caches are filled and
+need to be drained, which is bad for maintaining low latency.
+
+Change-Id: I5ac8e8352bfef4db22d15fae2964e98e6eac2301
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 331d8bfd6465..b4efda3b6435 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -100,3 +100,4 @@ CONFIG_UCLAMP_BUCKETS_COUNT=20
+ # CONFIG_QTI_HW_MEMLAT_LOG is not set
+ # CONFIG_MEMCG is not set
+ # CONFIG_MEMCG_SWAP is not set
++# CONFIG_SLUB_CPU_PARTIAL is not set
+-- 
+2.39.5
+

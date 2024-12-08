@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Sat, 21 Nov 2020 01:05:12 -0800
+Subject: [PATCH] arm64: configs: moto-holi: Disable Qualcomm EDAC support
+
+Qualcomm's LLCC controller does not have an error IRQ line on lito and
+instead polls to check memory banks for errors every 5 seconds, which is
+inefficient and will add to system jitter.
+
+The generic Kryo CPU cache controller does have error IRQ lines so it
+doesn't need to use polling, but EDAC in general is fairly useless in
+its current state anyway because Google disabled the option to panic on
+uncorrectable error. Let's follow their decision and just disable EDAC
+entirely, as well as its placeholder RAS dependency.
+
+Change-Id: I1226951eadba0dd048be02198cecb0fa6bc04264
+Signed-off-by: Danny Lin <danny@kdrag0n.dev>
+Signed-off-by: Adithya R <gh0strider.2k18.reborn@gmail.com>
+Signed-off-by: saikiran2001 <bjsaikiran@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 7f1ea0897a49..0e46fe53771c 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -103,3 +103,4 @@ CONFIG_UCLAMP_BUCKETS_COUNT=20
+ # CONFIG_SLUB_CPU_PARTIAL is not set
+ # CONFIG_ARM64_SVE is not set
+ # CONFIG_VMAP_STACK is not set
++# CONFIG_EDAC is not set
+-- 
+2.39.5
+

@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 10:12:38 +0200
+Subject: [PATCH] arm64: configs: rhodep: Enable MOTO_UTAGS
+
+Change-Id: Id3e19be0af480d244c28eda053f1373ee6d6bdb6
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 39659fdceafc..f758b593c92b 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -53,3 +53,4 @@ CONFIG_SARSENSOR_SX937X=m
+ CONFIG_SX937X_USB_CAL=y
+ CONFIG_SX937X_FLIP_CAL=y
+ CONFIG_SX937X_POWER_SUPPLY_ONLINE=y
++CONFIG_MOTO_UTAGS=m
+-- 
+2.39.5
+

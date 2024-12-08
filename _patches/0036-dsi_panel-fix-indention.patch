@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Sun, 8 Dec 2024 22:48:04 +0100
+Subject: [PATCH] dsi_panel: fix indention
+
+../../../../../../kernel/motorola/sm6375/techpack/display/msm/dsi/dsi_panel.c:1326:3: error: misleading indentation; sta
+tement is not part of the previous 'if' [-Werror,-Wmisleading-indentation]
+ 1326 |                 rc = dsi_panel_send_param_cmd(panel, param_info);
+      |                 ^
+../../../../../../kernel/motorola/sm6375/techpack/display/msm/dsi/dsi_panel.c:1323:2: note: previous statement is here
+ 1323 |         if (panel->lhbm_config.lhbm_wait_for_fps_valid && param_info->value == HBM_FOD_ON_STATE)
+      |         ^
+
+Broken code was added by Motorola:
+https://github.com/MotorolaMobilityLLC/kernel-msm-5.4-techpack-display/commit/d67e46e138eb9e61359cd90b92786417152d8dea
+
+Change-Id: If122cbae26b5e8a23f9766cf685d3a3599adc8f5
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/dsi/dsi_panel.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
+index 02e346a18d8a..142b32414101 100644
+--- a/techpack/display/msm/dsi/dsi_panel.c
++++ b/techpack/display/msm/dsi/dsi_panel.c
+@@ -1318,8 +1318,9 @@ static int dsi_panel_set_hbm(struct dsi_panel *panel,
+ 			dsi_panel_set_local_hbm_param(panel, param_info, lhbm_config);
+ 		}
+ 
+-	if (panel->lhbm_config.lhbm_wait_for_fps_valid && param_info->value == HBM_FOD_ON_STATE)
+-		dsi_panel_lhbm_waitfor_fps_valid(panel);
++		if (panel->lhbm_config.lhbm_wait_for_fps_valid && param_info->value == HBM_FOD_ON_STATE) {
++			dsi_panel_lhbm_waitfor_fps_valid(panel);
++		}
+ 
+ 		rc = dsi_panel_send_param_cmd(panel, param_info);
+ 		if (rc < 0) {
+-- 
+2.39.5
+

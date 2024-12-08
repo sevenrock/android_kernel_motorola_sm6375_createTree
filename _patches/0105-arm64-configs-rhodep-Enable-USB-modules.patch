@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Mon, 9 Dec 2024 23:32:01 +0100
+Subject: [PATCH] arm64: configs: rhodep: Enable USB modules
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index 53575e700a4f..c093add1eaae 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -67,3 +67,10 @@ CONFIG_MMI_DISCRETE_CHARGER_CLASS=m
+ CONFIG_MMI_DISCRETE_TURBO_CHARGER=m
+ # CONFIG_QPNP_QG is not set
+ # CONFIG_QPNP_SMB5 is not set
++CONFIG_RT_PD_MANAGER=m
++CONFIG_TYPEC_ADAPTER_CLASS=m
++CONFIG_USB_USBNET=m
++CONFIG_USB_NET_AX8817X=m
++CONFIG_USB_NET_AX88179_178A=m
++CONFIG_USB_NET_CDCETHER=m
++CONFIG_MOTO_F_USBNET=m
+-- 
+2.39.5
+

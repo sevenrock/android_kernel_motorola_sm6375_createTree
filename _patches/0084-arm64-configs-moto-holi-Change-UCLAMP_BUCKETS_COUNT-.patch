@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rick Yiu <rickyiu@google.com>
+Date: Sat, 27 Jan 2024 17:26:06 +0800
+Subject: [PATCH] arm64: configs: moto-holi: Change UCLAMP_BUCKETS_COUNT to 20
+
+Using the default setting 5 means the first bucket contains the
+uclamp values from 0 to 19 (in percentage), in this case, if the
+uclamp.min setting of a group is under 20, it will fall into this
+bucket with other groups that have uclamp.min set to 0, which
+increase the possibility of over boost. By setting the bucket
+count to 20 will ease this situation, while a uclamp.min greater
+than 4 will fall into a different bucket.
+
+Bug: 170487162
+Change-Id: Ife96b199bee36faedc8e129ade17e475cdbe44e0
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 2fb842f1e32a..ba9a0b45f83a 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -95,3 +95,4 @@ CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y
+ CONFIG_QCOM_KGSL_IDLE_TIMEOUT=58
+ # CONFIG_PROCESS_RECLAIM is not set
+ CONFIG_FAIR_GROUP_SCHED=y
++CONFIG_UCLAMP_BUCKETS_COUNT=20
+-- 
+2.39.5
+

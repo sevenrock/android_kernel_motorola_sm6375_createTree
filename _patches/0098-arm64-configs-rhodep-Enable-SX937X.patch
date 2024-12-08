@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: vantoman <Mustafa.vantom@gmail.com>
+Date: Thu, 11 Aug 2022 10:07:39 +0200
+Subject: [PATCH] arm64: configs: rhodep: Enable SX937X
+
+Change-Id: I5d7836c1e8c4de50597afcfc2916c7caff041d4f
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_rhodep.config | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
+index eabeaed01114..39659fdceafc 100644
+--- a/arch/arm64/configs/vendor/lineage_rhodep.config
++++ b/arch/arm64/configs/vendor/lineage_rhodep.config
+@@ -49,3 +49,7 @@ CONFIG_MMI_ANNOTATE=m
+ CONFIG_MMI_INFO=m
+ CONFIG_MMI_RELAY=m
+ CONFIG_SENSORS_CLASS=m
++CONFIG_SARSENSOR_SX937X=m
++CONFIG_SX937X_USB_CAL=y
++CONFIG_SX937X_FLIP_CAL=y
++CONFIG_SX937X_POWER_SUPPLY_ONLINE=y
+-- 
+2.39.5
+
