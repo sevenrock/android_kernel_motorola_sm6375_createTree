@@ -26,10 +26,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
-index bc9c9167dbd2..488421f95feb 100644
+index 1cfa05931380..8a7c91a55fdd 100644
 --- a/fs/f2fs/f2fs.h
 +++ b/fs/f2fs/f2fs.h
-@@ -612,8 +612,8 @@ enum {
+@@ -613,8 +613,8 @@ enum {
  
  #define DEFAULT_RETRY_IO_COUNT	8	/* maximum retry read IO count */
  

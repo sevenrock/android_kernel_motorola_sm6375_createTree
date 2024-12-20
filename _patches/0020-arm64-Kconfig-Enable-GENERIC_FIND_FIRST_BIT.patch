@@ -122,7 +122,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 1e4c18b72f15..2d5163fd00f1 100644
+index aa4271bd4cda..78b6914be214 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -101,6 +101,7 @@ config ARM64

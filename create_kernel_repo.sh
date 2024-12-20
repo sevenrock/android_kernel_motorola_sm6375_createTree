@@ -98,7 +98,7 @@ cd $WORK_DIR
 echoyellow "init new sm6375 kernel repo"
 if [ ! -d $WORK_DIR/android_kernel_motorola_sm6375 ]
 then
-    git init -b lineage-22.0 $WORK_DIR/android_kernel_motorola_sm6375
+    git init -b lineage-22.1 $WORK_DIR/android_kernel_motorola_sm6375
     cd $WORK_DIR/android_kernel_motorola_sm6375
     curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
     chmod +x .git/hooks/commit-msg
@@ -112,7 +112,7 @@ git fetch LineageOS/android_kernel_qcom_sm8350
 check_rc $? "git fetch"
 git fetch moto-kernel
 check_rc $? "git fetch"
-git checkout -b lineage-22.0
+git checkout -b lineage-22.1
 git reset LineageOS/android_kernel_qcom_sm8350/lineage-20 --hard
 check_rc $? "git reset"
 
@@ -126,7 +126,7 @@ git rm -r arch/arm64/boot/dts/vendor/
 git commit -m "prepare: remove arch/arm64/boot/dts/vendor/"
 check_rc $? "git commit"
 
-git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.0
+git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.1
 
 MMI-U1UGS34.23-110-2-1"
 check_rc $? "git merge"
