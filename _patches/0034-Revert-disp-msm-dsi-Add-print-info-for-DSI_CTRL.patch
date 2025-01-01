@@ -22,10 +22,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+), 4 deletions(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
-index 8bfae81a80e1..5e8d747907a7 100644
+index 05108b83f25b..0a236e80fd97 100644
 --- a/techpack/display/msm/dsi/dsi_display.c
 +++ b/techpack/display/msm/dsi/dsi_display.c
-@@ -8539,7 +8539,6 @@ int dsi_display_prepare(struct dsi_display *display)
+@@ -8546,7 +8546,6 @@ int dsi_display_prepare(struct dsi_display *display)
  {
  	int rc = 0;
  	struct dsi_display_mode *mode;
@@ -33,7 +33,7 @@ index 8bfae81a80e1..5e8d747907a7 100644
  
  	if (!display) {
  		DSI_ERR("Invalid params\n");
-@@ -8551,9 +8550,7 @@ int dsi_display_prepare(struct dsi_display *display)
+@@ -8558,9 +8557,7 @@ int dsi_display_prepare(struct dsi_display *display)
  		return -EINVAL;
  	}
  

@@ -1,13 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-<<<<<<< HEAD:_patches/0033-arm64-Add-rhodep-defconfig.patch
-From: Sevenrock <sevenrock@hotmail.de>
-Date: Sun, 7 Aug 2022 19:19:18 +0200
-Subject: [PATCH] arm64: Add rhodep defconfig
-=======
 From: Arian <arian.kulmer@web.de>
 Date: Mon, 19 Sep 2022 15:00:05 +0200
 Subject: [PATCH] arch: arm64: configs: Generate holi-qgki_defconfig
->>>>>>> f4e1513 (moto: MMI-U1UGS34.23-110-2-1):_patches/0059-arch-arm64-configs-Generate-holi-qgki_defconfig.patch
 
 ```
 PATH="../../../prebuilts/tools-lineage/linux-x86/bin:../../../prebuilts/clang/host/linux-x86/clang-r487747c/bin:$PATH"

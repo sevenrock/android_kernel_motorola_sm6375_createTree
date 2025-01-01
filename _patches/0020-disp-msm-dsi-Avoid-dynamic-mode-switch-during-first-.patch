@@ -36,10 +36,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_drm.c b/techpack/display/msm/dsi/dsi_drm.c
-index 8b6db3d58d65..68370f5f4018 100644
+index 84681e2e8726..4558a7e93f1d 100644
 --- a/techpack/display/msm/dsi/dsi_drm.c
 +++ b/techpack/display/msm/dsi/dsi_drm.c
-@@ -436,7 +436,13 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
+@@ -437,7 +437,13 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
  			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_DYN_CLK)) &&
  			(!crtc_state->active_changed ||
  			 display->is_cont_splash_enabled)) {

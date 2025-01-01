@@ -21,7 +21,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
-index 02e346a18d8a..142b32414101 100644
+index 4e3b25edfce2..7df63a0aaf82 100644
 --- a/techpack/display/msm/dsi/dsi_panel.c
 +++ b/techpack/display/msm/dsi/dsi_panel.c
 @@ -1318,8 +1318,9 @@ static int dsi_panel_set_hbm(struct dsi_panel *panel,

@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Thu, 2 Jan 2025 20:24:48 +0100
+Subject: [PATCH] techpack/display/msm/sde: revert 'prepare techpack merge'
+
+Change-Id: If0f1d42d257cb661155af566e5f9fe9a97963857
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/sde/sde_connector.c | 4 ++--
+ techpack/display/msm/sde/sde_kms.c       | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/techpack/display/msm/sde/sde_connector.c b/techpack/display/msm/sde/sde_connector.c
+index a2fc5acdb180..3d571ef05782 100644
+--- a/techpack/display/msm/sde/sde_connector.c
++++ b/techpack/display/msm/sde/sde_connector.c
+@@ -246,8 +246,8 @@ static int sde_backlight_setup(struct sde_connector *c_conn,
+ 	memset(&props, 0, sizeof(props));
+ 	props.type = BACKLIGHT_RAW;
+ 	props.power = FB_BLANK_UNBLANK;
+-	props.max_brightness = bl_config->brightness_max_level;
+-	props.brightness = bl_config->brightness_default_level;
++	props.max_brightness = brightness_max_level;
++	props.brightness = brightness_max_level;
+ 	snprintf(bl_node_name, BL_NODE_NAME_SIZE, "panel%u-backlight",
+ 							display_count);
+ 	c_conn->bl_device = backlight_device_register(bl_node_name, dev->dev,
+diff --git a/techpack/display/msm/sde/sde_kms.c b/techpack/display/msm/sde/sde_kms.c
+index dec8fe38f164..63e33a7481d5 100644
+--- a/techpack/display/msm/sde/sde_kms.c
++++ b/techpack/display/msm/sde/sde_kms.c
+@@ -1814,7 +1814,7 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
+ 		.cmd_transfer = NULL,
+ 		.force_esd_disable = NULL,
+ 		.set_param = NULL,
+-		.cont_splash_config = NULL,
++		.cont_splash_config = dp_display_cont_splash_config,
+ 		.cont_splash_res_disable = NULL,
+ 		.get_panel_vfp = NULL,
+ 		.update_pps = dp_connector_update_pps,
+@@ -3761,7 +3761,7 @@ static int sde_kms_set_panel_feature(const struct msm_kms *kms,
+ 	return rc;
+ }
+ 
+-static void _sde_kms_null_commit(struct drm_device *dev,
++static int _sde_kms_null_commit(struct drm_device *dev,
+ 		struct drm_encoder *enc)
+ {
+ 	struct drm_modeset_acquire_ctx ctx;
+-- 
+2.39.5
+

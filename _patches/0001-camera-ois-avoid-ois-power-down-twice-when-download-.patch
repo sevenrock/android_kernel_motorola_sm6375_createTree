@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: liuwang2 <liuwang2@lenovo.com>
+Date: Mon, 1 Aug 2022 10:23:39 +0800
+Subject: [PATCH] camera: ois: avoid ois power down twice when download
+ firmware failed
+
+[detail]
+ois will power down when received CAM_RELEASE_DEV command.
+
+Change-Id: I58a573356614670d898095772c28c873d43eb830
+Signed-off-by: liuwang2 <liuwang2@lenovo.com>
+Reviewed-on: https://gerrit.mot.com/2350085
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: <zhaoxy41@motorola.com>
+Reviewed-by: Yongqin Wan <wanyq1@motorola.com>
+Reviewed-by: <hedj3@motorola.com>
+Reviewed-by: Long Cheng <chengl1@motorola.com>
+Reviewed-by: Zhichao Chen <chenzc2@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+[re-apply after revert to prepare techpack merge]
+---
+ .../camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c b/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
+index 8bf8c9a0ce1c..ae40a0149fbc 100644
+--- a/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
++++ b/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
+@@ -186,6 +186,8 @@ static int cam_ois_power_up(struct cam_ois_ctrl_t *o_ctrl)
+ 		return rc;
+ 	}
+ 
++	CAM_INFO(CAM_OIS, "OIS Power up successfully");
++
+ 	rc = camera_io_init(&o_ctrl->io_master_info);
+ 	if (rc) {
+ 		CAM_ERR(CAM_OIS, "cci_init failed: rc: %d", rc);
+@@ -235,6 +237,8 @@ static int cam_ois_power_down(struct cam_ois_ctrl_t *o_ctrl)
+ 		return rc;
+ 	}
+ 
++	CAM_INFO(CAM_OIS, "OIS power down successed");
++
+ #ifdef CONFIG_MOT_DONGWOON_OIS_AF_DRIFT
+ 	if (strstr(o_ctrl->ois_name, "dw9784"))
+ 		cam_ois_set_init_info(0);
+@@ -1785,7 +1789,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
+ 	}
+ pwr_dwn:
+ 	cam_mem_put_cpu_buf(dev_config.packet_handle);
+-	cam_ois_power_down(o_ctrl);
++	//cam_ois_power_down(o_ctrl); /* ois will pown down in CAM_RELEASE_DEV when closed camera */
+ 	return rc;
+ }
+ 
+-- 
+2.39.5
+

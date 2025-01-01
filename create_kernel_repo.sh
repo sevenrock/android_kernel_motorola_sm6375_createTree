@@ -116,16 +116,6 @@ git checkout -b lineage-22.1
 git reset LineageOS/android_kernel_qcom_sm8350/lineage-20 --hard
 check_rc $? "git reset"
 
-git rm -r techpack/
-git restore --staged techpack/Kbuild techpack/.gitignore techpack/stub/*
-git restore techpack/Kbuild techpack/.gitignore techpack/stub/*
-git commit -m "prepare: remove techpack/"
-check_rc $? "git commit"
-
-git rm -r arch/arm64/boot/dts/vendor/
-git commit -m "prepare: remove arch/arm64/boot/dts/vendor/"
-check_rc $? "git commit"
-
 git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.1
 
 MMI-U1UGS34.23-110-2-1"
@@ -140,75 +130,43 @@ for i in \
     kernel-camera-devicetree \
     kernel-devicetree \
     kernel-display-devicetree \
-    kernel-msm-techpack-dataipa \
     kernel-msm-5.4-techpack-audio \
     kernel-msm-5.4-techpack-camera \
     kernel-msm-5.4-techpack-display \
     kernel-msm-5.4-techpack-video \
     motorola-kernel-modules \
-    vendor-qcom-opensource-datarmnet \
-    vendor-qcom-opensource-datarmnet-ext \
     ; \
     do
     rm -rf $WORK_DIR/$i
 
-    unset filter_repo_subdir
+    unset subtree_prefix_subdir
+    moto_branch=android-14-release-u1ug34.23-23-3
 
     case $i in
         kernel-camera-devicetree)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=arch/arm64/boot/dts/vendor/qcom/camera-legacy/rhodep/
+            subtree_prefix_subdir=arch/arm64/boot/dts/vendor/qcom/camera/
             ;;
         kernel-devicetree)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=arch/arm64/boot/dts/vendor/
+            subtree_prefix_subdir=arch/arm64/boot/dts/vendor/
             ;;
         kernel-display-devicetree)
             moto_branch=android-13-release-t2sn33.73-22-3
-            filter_repo_subdir=arch/arm64/boot/dts/vendor/qcom/
+            subtree_prefix_subdir=arch/arm64/boot/dts/vendor/qcom/
             ;;
         kernel-msm-5.4-techpack-audio)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=techpack/audio/
+            subtree_prefix_subdir=techpack/audio/
             ;;
         kernel-msm-5.4-techpack-camera)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=techpack/camera/
+            subtree_prefix_subdir=techpack/camera/
             ;;
         kernel-msm-5.4-techpack-display)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=techpack/display/
+            subtree_prefix_subdir=techpack/display/
             ;;
         kernel-msm-5.4-techpack-video)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=techpack/video/
-            ;;
-        kernel-msm-techpack-dataipa)
-            moto_branch=android-13-release-t1tp33.75-96-1
-            filter_repo_subdir=techpack/dataipa/
+            subtree_prefix_subdir=techpack/video/
             ;;
         motorola-kernel-modules)
             moto_branch=android-13-release-t2sn33.73-22-3
-            ;;
-        vendor-qcom-opensource-wlan-fw-api)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=drivers/staging/fw-api/
-            ;;
-        vendor-qcom-opensource-wlan-qcacld-3.0)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=drivers/staging/qcacld-3.0/
-            ;;
-        vendor-qcom-opensource-wlan-qca-wifi-host-cmn)
-            moto_branch=android-14-release-u1ug34.23-23-3
-            filter_repo_subdir=drivers/staging/qca-wifi-host-cmn/
-            ;;
-        vendor-qcom-opensource-datarmnet)
-            moto_branch=MMI-U1RD34.80-40 # dubai a14, no fogos push, same code anyway
-            filter_repo_subdir=techpack/datarmnet/
-            ;;
-        vendor-qcom-opensource-datarmnet-ext)
-            moto_branch=MMI-U1RD34.80-40 # dubai a14, no fogos push, same code anyway
-            filter_repo_subdir=techpack/datarmnet-ext/
             ;;
     esac
 
@@ -218,51 +176,31 @@ for i in \
     git clone --branch $moto_branch https://github.com/MotorolaMobilityLLC/$i.git
     check_rc $? "git clone"
 
-# move files to subdirectory to prepare for merge with unified kernel
-    if [ ! "x"$filter_repo_subdir = "x" ]
-    then
-        cd $WORK_DIR/$i
-        git filter-repo --force --to-subdirectory $filter_repo_subdir
-        check_rc $? "git filter-repo"
-    fi
+    case $i in
+        kernel-msm-5.4-techpack-camera)
+            cd $WORK_DIR/$i
+            git am $WORK_DIR/_patches_prepare_techpack_camera/*
+            check_rc $? "git am"
+            ;;
+    esac
 
     echoyellow "merge rebased moto $i to sm6375 kernel"
     cd $WORK_DIR/android_kernel_motorola_sm6375
-    case $i in
-        vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
-            git tag -d MMI-U1RD34.80-40
-            ;;
-    esac
 
     git remote add $i ../$i
-
-    case $i in
-        vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
-            git tag -d MMI-U1RD34.80-40
-            git fetch $i --tags
-            ;;
-        *)
-            git fetch $i --no-tags
-            check_rc $? "git fetch"
-            ;;
-    esac
+    git fetch $i --no-tags
+    check_rc $? "git fetch"
 
     case $i in
         motorola-kernel-modules)
             git rm sound/soc/codecs/Makefile include/linux/input/synaptics_tcm.h fs/exfat/Makefile fs/exfat/Kconfig fs/exfat/README.md drivers/misc/Makefile drivers/leds/trigger/Makefile Documentation/devicetree/bindings
             check_rc $? "git rm"
             git commit -m "remove files to prevent merge errors with motorola-kernel-modules"
-            ;;
-    esac
-
-    case $i in
-        vendor-qcom-opensource-datarmnet | vendor-qcom-opensource-datarmnet-ext)
-            git merge --no-edit --allow-unrelated-histories $moto_branch
-            check_rc $? "git merge $moto_branch"
-            git tag -d MMI-U1RD34.80-40
+            git merge --no-edit --allow-unrelated-histories $i/$moto_branch
+            check_rc $? "git merge $i/$moto_branch"
             ;;
         *)
-            git merge --no-edit --allow-unrelated-histories $i/$moto_branch
+            git subtree pull --prefix $subtree_prefix_subdir $i $moto_branch -m "Merge remote-tracking branch '$i/$moto_branch' into lineage-22.1"
             check_rc $? "git merge $i/$moto_branch"
             ;;
     esac
@@ -273,6 +211,10 @@ for i in \
 done
 
 cd $WORK_DIR/android_kernel_motorola_sm6375
+
+# Revert "rhodep/rhodec: update camera device tree path"
+git revert --no-edit 7b0a2deb4201932773e9d9e51fffd097c6370a38
+
 echoyellow "applying local patches to sm6375 kernel"
 
 find . -name "Android.mk" -delete

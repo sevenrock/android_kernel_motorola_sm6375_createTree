@@ -8,12 +8,12 @@ watchdog timeout.
 
 [electimon: Include dqbuf as well]
 Bug: 163772974
-Change-Id: Ia09c33ce3900561da2e18631beca953de1cc8458
 Signed-off-by: Raylin Hsu <raylinhsu@google.com>
 
+Original patch:
 https://github.com/moto-common/android_kernel_motorola_msm-5.4/commit/998902adff554c02767f649cf1cbe5322a81d7da
 
-Change-Id: I9b3084faf4ca8d5ccabf767e98486c8738335f02
+Change-Id: Ia09c33ce3900561da2e18631beca953de1cc8458
 Signed-off-by: Sevenrock <sevenrock@hotmail.de>
 ---
  techpack/video/msm/vidc/msm_vidc_common.c | 22 ++++++++++++++++++----

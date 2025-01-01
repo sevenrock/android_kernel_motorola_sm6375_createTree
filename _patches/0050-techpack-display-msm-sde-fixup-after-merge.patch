@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sevenrock <sevenrock@hotmail.de>
+Date: Thu, 2 Jan 2025 20:54:03 +0100
+Subject: [PATCH] techpack/display/msm/sde: fixup after merge
+
+Change-Id: I68ef32312c4bacd9bc1b312659dee4f1eeec57ab
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/display/msm/sde/sde_connector.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/techpack/display/msm/sde/sde_connector.c b/techpack/display/msm/sde/sde_connector.c
+index 905e1ece60c9..05ad023d65bf 100644
+--- a/techpack/display/msm/sde/sde_connector.c
++++ b/techpack/display/msm/sde/sde_connector.c
+@@ -97,7 +97,7 @@ static inline struct sde_kms *_sde_connector_get_kms(struct drm_connector *conn)
+ static int sde_backlight_device_update_status(struct backlight_device *bd)
+ {
+ 	int brightness;
+-	struct dsi_display *dsi_display;
++	struct dsi_display *dsi_display = NULL;
+ 	struct dp_panel *dp_panel;
+ 	struct sde_connector *c_conn = bl_get_data(bd);
+ 	int bl_lvl;
+@@ -140,8 +140,8 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
+ 	if (brightness > c_conn->thermal_max_brightness)
+ 		brightness = c_conn->thermal_max_brightness;
+ 
+-	if (brightness && brightness < display->panel->bl_config.bl_min_level)
+-		brightness = display->panel->bl_config.bl_min_level;
++	if (brightness && brightness < dsi_display->panel->bl_config.bl_min_level)
++		brightness = dsi_display->panel->bl_config.bl_min_level;
+ 
+ 	/* map UI brightness into driver backlight level with rounding */
+ 	bl_lvl = mult_frac(brightness, bl_max_level, brightness_max_level);
+@@ -149,7 +149,7 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
+ 	if (!bl_lvl && brightness)
+ 		bl_lvl = 1;
+ 
+-	if (display->panel->bl_config.bl_remap) {
++	if (dsi_display->panel->bl_config.bl_remap) {
+ 		pr_debug("%s: remap bl_lvl from %d to %d", __func__, bl_lvl, bl_lut[bl_lvl]);
+ 		bl_lvl = bl_lut[bl_lvl];
+ 	}
+-- 
+2.39.5
+

@@ -64,10 +64,10 @@ index 2353bc044c90..ee6def6ed74d 100644
  	qcom,mdss-dsi-bl-min-level = <9>;
  	qcom,mdss-dsi-bl-max-level = <3514>;
 diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
-index cafd1e55cd2a..59937d50ed69 100644
+index d4a654a8f65e..27e95fa6999d 100644
 --- a/techpack/display/msm/dsi/dsi_panel.c
 +++ b/techpack/display/msm/dsi/dsi_panel.c
-@@ -3317,6 +3317,9 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
+@@ -3318,6 +3318,9 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
  	panel->bl_config.bl_inverted_dbv = utils->read_bool(utils->data,
  		"qcom,mdss-dsi-bl-inverted-dbv");
  
@@ -372,10 +372,10 @@ index 000000000000..d5046547b36c
 +	4095
 +};
 diff --git a/techpack/display/msm/sde/sde_connector.c b/techpack/display/msm/sde/sde_connector.c
-index 42dbfcd648f6..a31bb9b2ae54 100644
+index 3d571ef05782..905e1ece60c9 100644
 --- a/techpack/display/msm/sde/sde_connector.c
 +++ b/techpack/display/msm/sde/sde_connector.c
-@@ -21,6 +21,8 @@
+@@ -22,6 +22,8 @@
  #include "sde_vm.h"
  #include <drm/drm_probe_helper.h>
  
@@ -383,8 +383,8 @@ index 42dbfcd648f6..a31bb9b2ae54 100644
 +
  #define BL_NODE_NAME_SIZE 32
  #define HDR10_PLUS_VSIF_TYPE_CODE      0x81
- 
-@@ -120,7 +122,7 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
+ #define MAX_BRIGHTNESS_LEVEL 255
+@@ -138,7 +140,7 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
  	if (brightness > c_conn->thermal_max_brightness)
  		brightness = c_conn->thermal_max_brightness;
  
@@ -393,7 +393,7 @@ index 42dbfcd648f6..a31bb9b2ae54 100644
  		brightness = display->panel->bl_config.bl_min_level;
  
  	/* map UI brightness into driver backlight level with rounding */
-@@ -130,6 +132,11 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
+@@ -147,6 +149,11 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
  	if (!bl_lvl && brightness)
  		bl_lvl = 1;
  
@@ -405,7 +405,7 @@ index 42dbfcd648f6..a31bb9b2ae54 100644
  	if (!c_conn->allow_bl_update) {
  		c_conn->unset_bl_level = bl_lvl;
  		return 0;
-@@ -164,7 +171,9 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
+@@ -181,7 +188,9 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
  
  static int sde_backlight_device_get_brightness(struct backlight_device *bd)
  {

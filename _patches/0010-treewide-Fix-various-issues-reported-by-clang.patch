@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: electimon <electimon@gmail.com>
+Date: Sun, 11 Jun 2023 16:35:00 -0400
+Subject: [PATCH] treewide: Fix various issues reported by clang
+
+Change-Id: I6e799d793aef88760f5579900e88aa86ae6a8b42
+Signed-off-by: electimon <electimon@gmail.com>
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+index 4a8f27af1789..4b8b7ed5e9be 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+@@ -1333,7 +1333,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ {
+ 	int ret = -EINVAL;
+ 	uint32_t ctrl_value = 0;
+-	struct aw_device *aw_dev;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1342,8 +1341,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ 	aw_dev_dbg(aw882xx->dev, "ucontrol->value.integer.value[0]=%ld",
+ 			ucontrol->value.integer.value[0]);
+ 
+-	aw_dev = aw882xx->aw_pa;
+-
+ 	ctrl_value = ucontrol->value.integer.value[0];
+ 	if (aw882xx->pstream) {
+ 		ret = aw_dev_set_spin(ctrl_value);
+@@ -1360,7 +1357,6 @@ static int aw882xx_set_spin(struct snd_kcontrol *kcontrol,
+ static int aw882xx_get_spin(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+-	struct aw_device *aw_dev;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1368,8 +1364,6 @@ static int aw882xx_get_spin(struct snd_kcontrol *kcontrol,
+ 	int ctrl_value;
+ 	int ret = -EINVAL;
+ 
+-	aw_dev = aw882xx->aw_pa;
+-
+ 	if (aw882xx->pstream) {
+ 		ret = aw_dev_get_spin(&ctrl_value);
+ 		if (ret) {
+-- 
+2.39.5
+

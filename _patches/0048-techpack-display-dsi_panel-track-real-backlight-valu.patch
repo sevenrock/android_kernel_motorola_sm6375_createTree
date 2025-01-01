@@ -16,7 +16,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  2 files changed, 4 insertions(+)
 
 diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
-index 142b32414101..cafd1e55cd2a 100644
+index 7df63a0aaf82..d4a654a8f65e 100644
 --- a/techpack/display/msm/dsi/dsi_panel.c
 +++ b/techpack/display/msm/dsi/dsi_panel.c
 @@ -1003,6 +1003,8 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
@@ -28,7 +28,7 @@ index 142b32414101..cafd1e55cd2a 100644
  	return rc;
  }
  
-@@ -3281,6 +3283,7 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
+@@ -3282,6 +3284,7 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel)
  
  	panel->bl_config.bl_scale = MAX_BL_SCALE_LEVEL;
  	panel->bl_config.bl_scale_sv = MAX_SV_BL_SCALE_LEVEL;
