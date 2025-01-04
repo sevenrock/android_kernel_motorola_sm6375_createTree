@@ -7,23 +7,9 @@ Change-Id: Ie11f06aded3d483cc5bcb73e79930317ab09e37f
 Signed-off-by: electimon <electimon@gmail.com>
 Signed-off-by: Sevenrock <sevenrock@hotmail.de>
 ---
- drivers/power/bq2589x_chg_mmi/bq2589x_charger.c | 2 +-
- drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c       | 8 ++++----
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
-index f57bc679382b..e56d017b9a56 100644
---- a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
-+++ b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
-@@ -1623,7 +1623,7 @@ int bq2589x_get_usb_present(struct bq2589x *bq)
- 	return ret;
- }
- 
--static bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
-+static int bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
- {
- 	int ret = 0;
- 
 diff --git a/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c b/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c
 index da3997ca67db..1207e39dd613 100644
 --- a/drivers/usb/typec/mmi_tcpc/tcpc_rt1711h.c

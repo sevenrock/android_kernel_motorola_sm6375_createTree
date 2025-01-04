@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: FPSensor <gkartyt@gmail.com>
+Date: Sat, 7 Oct 2023 07:18:26 +0000
+Subject: [PATCH] power: bq2589x_chg_mmi: Fix implicit-int error
+
+drivers/power/bq2589x_chg_mmi/bq2589x_charger.c:1518:8: error: type
+specifier missing, defaults to 'int' [-Werror,-Wimplicit-int]
+static bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
+~~~~~~ ^
+int
+1 error generated.
+
+Change-Id: I05d81da96a672ac64a5ba13718339d50ad3c9899
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/bq2589x_chg_mmi/bq2589x_charger.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
+index f57bc679382b..6edbd1a01c38 100644
+--- a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
++++ b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
+@@ -1623,7 +1623,7 @@ int bq2589x_get_usb_present(struct bq2589x *bq)
+ 	return ret;
+ }
+ 
+-static bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
++static int bq2589x_reuqest_dpdm(struct bq2589x *bq, bool enable)
+ {
+ 	int ret = 0;
+ 
+-- 
+2.39.5
+

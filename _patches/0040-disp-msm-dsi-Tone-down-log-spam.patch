@@ -10,7 +10,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  2 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
-index 17e6db765e55..05108b83f25b 100644
+index 14d44aa8a47e..0a236e80fd97 100644
 --- a/techpack/display/msm/dsi/dsi_display.c
 +++ b/techpack/display/msm/dsi/dsi_display.c
 @@ -8166,9 +8166,9 @@ int dsi_display_set_mode(struct dsi_display *display,
@@ -26,7 +26,7 @@ index 17e6db765e55..05108b83f25b 100644
  	SDE_EVT32(adj_mode.priv_info->mdp_transfer_time_us,
  			timing.h_active, timing.v_active, timing.refresh_rate);
  
-@@ -9408,7 +9408,7 @@ int dsi_display_disable(struct dsi_display *display)
+@@ -9405,7 +9405,7 @@ int dsi_display_disable(struct dsi_display *display)
  		return -EINVAL;
  	}
  
@@ -36,7 +36,7 @@ index 17e6db765e55..05108b83f25b 100644
  	mutex_lock(&display->display_lock);
  
 diff --git a/techpack/display/msm/dsi/dsi_panel.c b/techpack/display/msm/dsi/dsi_panel.c
-index a3a5b5a53f39..4e3b25edfce2 100644
+index 5568ae729d45..7df63a0aaf82 100644
 --- a/techpack/display/msm/dsi/dsi_panel.c
 +++ b/techpack/display/msm/dsi/dsi_panel.c
 @@ -481,7 +481,7 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
@@ -57,7 +57,7 @@ index a3a5b5a53f39..4e3b25edfce2 100644
  
  	if (panel->tp_state_check_enable) {
  			if (panel_power_is_alway_on (panel)) {
-@@ -6127,7 +6127,7 @@ int dsi_panel_post_switch(struct dsi_panel *panel)
+@@ -6128,7 +6128,7 @@ int dsi_panel_post_switch(struct dsi_panel *panel)
  		return -EINVAL;
  	}
  
@@ -66,7 +66,7 @@ index a3a5b5a53f39..4e3b25edfce2 100644
  	mutex_lock(&panel->panel_lock);
  
  	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_POST_TIMING_SWITCH);
-@@ -6150,7 +6150,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
+@@ -6151,7 +6151,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
  		return -EINVAL;
  	}
  
@@ -75,7 +75,7 @@ index a3a5b5a53f39..4e3b25edfce2 100644
  	mutex_lock(&panel->panel_lock);
  
  	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_ON);
-@@ -6272,7 +6272,7 @@ int dsi_panel_disable(struct dsi_panel *panel)
+@@ -6273,7 +6273,7 @@ int dsi_panel_disable(struct dsi_panel *panel)
  		DSI_DEBUG("TWM Enabled, skip panel disable\n");
  		return rc;
  	}

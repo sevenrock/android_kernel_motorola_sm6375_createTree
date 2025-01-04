@@ -1,0 +1,236 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Forenche <prahul2003@gmail.com>
+Date: Thu, 18 May 2023 12:55:06 +0530
+Subject: [PATCH] techpack/aw882xxacf: Disable logging
+
+Signed-off-by: Forenche <prahul2003@gmail.com>
+
+Original commit:
+https://github.com/Forenche/android_kernel_motorla_rhodei/commit/cba0d4ff27ff0b36112bb0a189fd64fe5383dcf4
+
+Change-Id: I1ca7aa81274588c0206fb1bd7a5c9f34ed065af3
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+[Sevenrock: Added __maybe_unused at various places to fix build errors]
+---
+ .../audio/asoc/codecs/aw882xxacf/aw882xx.c    | 32 +++++++++----------
+ .../audio/asoc/codecs/aw882xxacf/aw_device.c  |  2 +-
+ .../audio/asoc/codecs/aw882xxacf/aw_log.h     | 22 ++++---------
+ .../audio/asoc/codecs/aw882xxacf/aw_monitor.c |  2 +-
+ 4 files changed, 24 insertions(+), 34 deletions(-)
+
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+index 92146dcda115..3517882bc710 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw882xx.c
+@@ -406,7 +406,7 @@ static int aw882xx_hw_params(struct snd_pcm_substream *substream,
+ 			struct snd_soc_dai *dai)
+ {
+ 	aw_snd_soc_codec_t *codec = aw_get_codec(dai);
+-	struct aw882xx *aw882xx =
++	struct aw882xx __maybe_unused *aw882xx =
+ 		aw_componet_codec_ops.codec_get_drvdata(codec);
+ 
+ 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
+@@ -1142,7 +1142,7 @@ static int aw882xx_set_rx_en(struct snd_kcontrol *kcontrol,
+ {
+ 	int ret = -EINVAL;
+ 	uint32_t ctrl_value = 0;
+-	struct aw_device *aw_dev = NULL;
++	struct aw_device __maybe_unused *aw_dev = NULL;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1305,7 +1305,7 @@ static int aw882xx_get_copp_dis(struct snd_kcontrol *kcontrol,
+ {
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+-	struct aw882xx *aw882xx =
++	struct aw882xx __maybe_unused *aw882xx =
+ 		aw_componet_codec_ops.codec_get_drvdata(codec);
+ 
+ 	ucontrol->value.integer.value[0] = !g_algo_copp_en;
+@@ -1383,7 +1383,7 @@ static int aw882xx_get_spin(struct snd_kcontrol *kcontrol,
+ static int aw882xx_get_spin_status(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+-	struct aw_device *aw_dev;
++	struct aw_device __maybe_unused *aw_dev = NULL;
+ 	aw_snd_soc_codec_t *codec =
+ 		aw_componet_codec_ops.kcontrol_codec(kcontrol);
+ 	struct aw882xx *aw882xx =
+@@ -1773,7 +1773,7 @@ static int aw882xx_update_algo_profile(struct aw882xx *aw882xx)
+ {
+ 	int ret = -1;
+ 	int new_skt_prof_id = 0;
+-	int cur_skt_prof_id = aw882xx->cur_algo_prof_id;
++	int cur_skt_prof_id __maybe_unused = aw882xx->cur_algo_prof_id;
+ 	struct aw_device *aw_dev = NULL;
+ 
+ 	aw_dev_info(aw882xx->dev, "enter");
+@@ -1860,7 +1860,7 @@ static int aw882xx_get_algo_bypass_switch(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_BYPASS_ID];
+@@ -1895,7 +1895,7 @@ static int aw882xx_get_algo_handset_switch(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_HANDSET_ID];
+@@ -1934,7 +1934,7 @@ static int aw882xx_get_algo_hac_switch(struct snd_kcontrol *kcontrol,
+ {
+ 
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_HAC_ID];
+@@ -1953,7 +1953,7 @@ static int aw882xx_set_algo_hac_switch(struct snd_kcontrol *kcontrol,
+ {
+ 
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 	bool is_active = false;
+ 
+ 	aw_dev_info(aw882xx->dev, "ucontrol->value.integer.value[0]=%ld",
+@@ -1975,7 +1975,7 @@ static int aw882xx_get_algo_voice_switch(struct snd_kcontrol *kcontrol,
+ {
+ 
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_VOICE_ID];
+@@ -1994,7 +1994,7 @@ static int aw882xx_set_algo_voice_switch(struct snd_kcontrol *kcontrol,
+ {
+ 
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 	bool is_active = false;
+ 
+ 	aw_dev_info(aw882xx->dev, "ucontrol->value.integer.value[0]=%ld",
+@@ -2015,7 +2015,7 @@ static int aw882xx_get_algo_voip_switch(struct snd_kcontrol *kcontrol,
+ {
+ 
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_VOIP_ID];
+@@ -2033,7 +2033,7 @@ static int aw882xx_set_algo_voip_switch(struct snd_kcontrol *kcontrol,
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 	bool is_active = false;
+ 
+ 	aw_dev_info(aw882xx->dev, "ucontrol->value.integer.value[0]=%ld",
+@@ -2053,7 +2053,7 @@ static int aw882xx_get_algo_music_deepbuffer_switch(struct snd_kcontrol *kcontro
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_DEEPBUFFER_ID];
+@@ -2091,7 +2091,7 @@ static int aw882xx_get_algo_music_fasttrack_switch(struct snd_kcontrol *kcontrol
+ 	struct snd_ctl_elem_value *ucontrol)
+ {
+ 	struct snd_soc_component *codec = snd_soc_kcontrol_component(kcontrol);
+-	struct aw882xx *aw882xx = snd_soc_component_get_drvdata(codec);
++	struct aw882xx __maybe_unused *aw882xx = snd_soc_component_get_drvdata(codec);
+ 
+ 	struct aw882xx_scene_info *p_aw882xx_scene_st =
+ 			&aw882xx_scene_state[AW882XX_SCENE_FASTTRACK_ID];
+@@ -3116,7 +3116,7 @@ static ssize_t aw882xx_print_dbg_store(struct device *dev,
+ 				struct device_attribute *attr,
+ 				const char *buf, size_t count)
+ {
+-	struct aw882xx *aw882xx = dev_get_drvdata(dev);
++	struct aw882xx __maybe_unused *aw882xx = dev_get_drvdata(dev);
+ 	int ret;
+ 
+ 	ret = kstrtouint(buf, 0, &g_print_dbg);
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw_device.c b/techpack/audio/asoc/codecs/aw882xxacf/aw_device.c
+index 705a66659a5e..5e418789ee4f 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw_device.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw_device.c
+@@ -465,7 +465,7 @@ static void aw_dev_parse_skt_type(struct aw_device *aw_dev,
+ 		struct aw_cfg_hdr *prof_hdr, struct aw_all_prof_info *all_prof_info)
+ {
+ 	int i = 0;
+-	int sec_num = 0;
++	int sec_num __maybe_unused = 0;
+ 	struct aw_cfg_dde *cfg_dde =
+ 		(struct aw_cfg_dde *)((char *)prof_hdr + prof_hdr->a_hdr_offset);
+ 
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw_log.h b/techpack/audio/asoc/codecs/aw882xxacf/aw_log.h
+index 31e0f8e1e510..088ce5166e9e 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw_log.h
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw_log.h
+@@ -8,27 +8,17 @@
+ 	do { \
+ 		pr_err("[Awinic][%s]%s: " format "\n", dev_name(dev), __func__, ##__VA_ARGS__); \
+ 	} while (0)
+-#define aw_dev_info(dev, format, ...) \
+-	do { \
+-		pr_info("[Awinic][%s]%s: " format "\n", dev_name(dev), __func__, ##__VA_ARGS__); \
+-	} while (0)
+-#define aw_dev_dbg(dev, format, ...) \
+-	do { \
+-		pr_debug("[Awinic][%s]%s: " format "\n", dev_name(dev), __func__, ##__VA_ARGS__); \
+-	} while (0)
++#define aw_dev_info(dev, format, ...)	((void)0)
++
++#define aw_dev_dbg(dev, format, ...)	((void)0)
+ 
+ #define aw_pr_err(format, ...) \
+ 		do { \
+ 			pr_err("[Awinic]%s: " format "\n", __func__, ##__VA_ARGS__); \
+ 		} while (0)
+-#define aw_pr_info(format, ...) \
+-		do { \
+-			pr_info("[Awinic]%s: " format "\n", __func__, ##__VA_ARGS__); \
+-		} while (0)
+-#define aw_pr_dbg(format, ...) \
+-		do { \
+-			pr_debug("[Awinic]%s: " format "\n", __func__, ##__VA_ARGS__); \
+-		} while (0)
++#define aw_pr_info(format, ...)	((void)0)
++
++#define aw_pr_dbg(format, ...)	((void)0)
+ 
+ #endif
+ 
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw_monitor.c b/techpack/audio/asoc/codecs/aw882xxacf/aw_monitor.c
+index 2783fba1a9c6..0a436745f9a2 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw_monitor.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw_monitor.c
+@@ -540,7 +540,7 @@ void aw_monitor_start(struct aw_monitor_desc *monitor_desc)
+ 
+ int aw_monitor_stop(struct aw_monitor_desc *monitor_desc)
+ {
+-	struct aw_device *aw_dev = container_of(monitor_desc,
++	struct aw_device __maybe_unused *aw_dev = container_of(monitor_desc,
+ 			struct aw_device, monitor_desc);
+ 
+ 	aw_dev_info(aw_dev->dev, "enter");
+-- 
+2.39.5
+

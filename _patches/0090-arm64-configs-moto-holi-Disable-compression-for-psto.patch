@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Juhyung Park <qkrwngud825@gmail.com>
+Date: Mon, 28 Mar 2022 20:57:00 +0900
+Subject: [PATCH] arm64: configs: moto-holi: Disable compression for pstore-ram
+
+Compression doesn't allow any more additional log saves anyways.
+
+Signed-off-by: Juhyung Park <qkrwngud825@gmail.com>
+Change-Id: I8dc8be15de7c566be1f71938d48355336f5c25aa
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ arch/arm64/configs/vendor/lineage_moto-holi.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/vendor/lineage_moto-holi.config b/arch/arm64/configs/vendor/lineage_moto-holi.config
+index 84058c74344b..378303cd023e 100644
+--- a/arch/arm64/configs/vendor/lineage_moto-holi.config
++++ b/arch/arm64/configs/vendor/lineage_moto-holi.config
+@@ -115,3 +115,4 @@ CONFIG_HZ_300=y
+ # CONFIG_CORESIGHT is not set
+ # CONFIG_CORESIGHT_QGKI is not set
+ # CONFIG_CORESIGHT_STM is not set
++# CONFIG_PSTORE_DEFLATE_COMPRESS is not set
+-- 
+2.39.5
+

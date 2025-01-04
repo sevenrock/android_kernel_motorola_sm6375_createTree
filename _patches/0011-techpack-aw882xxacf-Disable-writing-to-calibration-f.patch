@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Forenche <prahul2003@gmail.com>
+Date: Thu, 18 May 2023 12:54:27 +0530
+Subject: [PATCH] techpack/aw882xxacf: Disable writing to calibration file
+
+*I am pretty sure prod builds don't need this to be enabled and was meant originally to be used in the development phase.
+*Further, dmesg shows that it fails to open the file:
+
+aw_cali_get_read_cali_re:channel:1 open /mnt/vendor/persist/factory/audio/aw_cali.bin failed!
+
+Signed-off-by: Forenche <prahul2003@gmail.com>
+
+Original commit:
+https://github.com/Forenche/android_kernel_motorla_rhodei/commit/ff8e2fbf8a8a84d0f185f08ff6e601c9d3088b9c
+
+Change-Id: I570853858cfb63d22bad4962506644d210ff3035
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/audio/asoc/codecs/aw882xxacf/aw_calib.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw_calib.h b/techpack/audio/asoc/codecs/aw882xxacf/aw_calib.h
+index fbcc2999282d..ae328d6c5b87 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw_calib.h
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw_calib.h
+@@ -1,7 +1,7 @@
+ #ifndef __AWINIC_CALIBRATION_H__
+ #define __AWINIC_CALIBRATION_H__
+ 
+-#define AW_CALI_STORE_EXAMPLE
++//#define AW_CALI_STORE_EXAMPLE
+ 
+ #define AW_CALI_READ_TIMES (3)
+ #define AW_ERRO_CALI_VALUE (0)
+-- 
+2.39.5
+

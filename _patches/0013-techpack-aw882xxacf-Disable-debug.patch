@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Forenche <prahul2003@gmail.com>
+Date: Sat, 20 May 2023 19:45:43 +0530
+Subject: [PATCH] techpack/aw882xxacf: Disable debug
+
+Signed-off-by: Forenche <prahul2003@gmail.com>
+
+Original commit:
+https://github.com/Forenche/android_kernel_motorla_rhodei/commit/4de0f04d77ade2cbeea2a0cfe0d79e480ab7418b
+
+Change-Id: I16ceafa0db952875f97fe0e109836504f93fccf8
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ techpack/audio/asoc/codecs/aw882xxacf/aw_bin_parse.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/techpack/audio/asoc/codecs/aw882xxacf/aw_bin_parse.c b/techpack/audio/asoc/codecs/aw882xxacf/aw_bin_parse.c
+index d7cfcb555df3..c112a1bb9eda 100644
+--- a/techpack/audio/asoc/codecs/aw882xxacf/aw_bin_parse.c
++++ b/techpack/audio/asoc/codecs/aw882xxacf/aw_bin_parse.c
+@@ -35,7 +35,7 @@
+ 
+ #define AWINIC_CODE_VERSION "V0.0.7-V1.0.4"	/* "code version"-"excel version" */
+ 
+-#define DEBUG_LOG_LEVEL
++/*#define DEBUG_LOG_LEVEL */
+ #ifdef DEBUG_LOG_LEVEL
+ #define DBG(fmt, arg...)   do {\
+ printk("AWINIC_BIN %s,line= %d,"fmt, __func__, __LINE__, ##arg);\
+@@ -44,8 +44,8 @@ printk("AWINIC_BIN %s,line= %d,"fmt, __func__, __LINE__, ##arg);\
+ printk("AWINIC_BIN_ERR %s,line= %d,"fmt, __func__, __LINE__, ##arg);\
+ } while (0)
+ #else
+-#define DBG(fmt, arg...) do {} while (0)
+-#define DBG_ERR(fmt, arg...) do {} while (0)
++#define DBG(fmt, arg...)	((void)0)
++#define DBG_ERR(fmt, arg...)	((void)0)
+ #endif
+ 
+ #define printing_data_code
+-- 
+2.39.5
+

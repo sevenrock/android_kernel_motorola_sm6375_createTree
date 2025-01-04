@@ -22,7 +22,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+), 4 deletions(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
-index 05108b83f25b..0a236e80fd97 100644
+index 17e6db765e55..14d44aa8a47e 100644
 --- a/techpack/display/msm/dsi/dsi_display.c
 +++ b/techpack/display/msm/dsi/dsi_display.c
 @@ -8546,7 +8546,6 @@ int dsi_display_prepare(struct dsi_display *display)

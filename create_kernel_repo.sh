@@ -121,11 +121,6 @@ git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tra
 MMI-U1UGS34.23-110-2-1"
 check_rc $? "git merge"
 
-git mv Androidbp Android.bp
-check_rc $? "git mv"
-git commit -m "prepare: Androidbp -> Android.bp"
-check_rc $? "git commit"
-
 for i in \
     kernel-camera-devicetree \
     kernel-devicetree \
