@@ -161,7 +161,7 @@ for i in \
             subtree_prefix_subdir=techpack/video/
             ;;
         motorola-kernel-modules)
-            moto_branch=android-13-release-t2sn33.73-22-3
+            moto_branch=android-13-release-tsc
             ;;
     esac
 
