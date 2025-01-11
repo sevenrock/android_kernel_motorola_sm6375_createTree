@@ -1,23 +1,24 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Sevenrock <sevenrock@hotmail.de>
-Date: Mon, 9 Dec 2024 23:38:36 +0100
-Subject: [PATCH] arm64: configs: rhodep: Enable WATCHDOGTEST
+From: Andrew Hexen <SyberHexen@gmail.com>
+Date: Thu, 20 Jul 2023 04:48:58 -0700
+Subject: [PATCH] arm64: configs: rhodep: Enable BOARD_USES_DOUBLE_TAP_CTRL
 
-Change-Id: I692238d30b290755127b51293c4a7f6951feaa5f
+Signed-off-by: Andrew Hexen <SyberHexen@gmail.com>
+Change-Id: I39937dce31e8dbcd76a393c94205efe4ff1bc2ad
 Signed-off-by: Sevenrock <sevenrock@hotmail.de>
 ---
  arch/arm64/configs/vendor/lineage_rhodep.config | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm64/configs/vendor/lineage_rhodep.config b/arch/arm64/configs/vendor/lineage_rhodep.config
-index 7145363fac76..04e90b639ca8 100644
+index edd31d1248d5..4b9c73a17611 100644
 --- a/arch/arm64/configs/vendor/lineage_rhodep.config
 +++ b/arch/arm64/configs/vendor/lineage_rhodep.config
-@@ -82,3 +82,4 @@ CONFIG_LEDS_AW99703=m
- CONFIG_LEDS_LM3697_MMI=m
+@@ -84,3 +84,4 @@ CONFIG_LEDS_LM3697_MMI=m
  CONFIG_RADIO_ELNA=y
  CONFIG_LDO_VIBRATOR_MMI=m
-+CONFIG_WATCHDOGTEST=m
+ CONFIG_WATCHDOGTEST=m
++CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y
 -- 
 2.39.5
 

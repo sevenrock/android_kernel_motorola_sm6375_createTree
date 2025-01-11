@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Wed, 14 Aug 2024 01:05:18 +0300
+Subject: [PATCH] power: mmi_charger: implement show for force_charging_disable
+
+Original patch, paths adapted to sm6375 tree:
+https://github.com/LineageOS/android_kernel_motorola_sm8475-modules/commit/cb46e481e0f5f108e49a7ba96b8ad425501f43e3
+
+Change-Id: I770c1bfa3af827c54d0d19f8c9791f7ebf18f244
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/mmi_charger/mmi_charger.c | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/power/mmi_charger/mmi_charger.c b/drivers/power/mmi_charger/mmi_charger.c
+index 7da063ed331f..e3fc22469f88 100644
+--- a/drivers/power/mmi_charger/mmi_charger.c
++++ b/drivers/power/mmi_charger/mmi_charger.c
+@@ -844,6 +844,22 @@ static DEVICE_ATTR(force_charging_enable, 0644,
+ 		force_charging_enable_show,
+ 		force_charging_enable_store);
+ 
++static ssize_t force_charging_disable_show(struct device *dev,
++			struct device_attribute *attr,
++			char *buf)
++{
++	int state;
++
++	if (!this_chip) {
++		pr_err("mmi_charger: chip not valid\n");
++		return -ENODEV;
++	}
++
++	state = mmi_get_effective_voter(&this_chip->disable_charging_vote) >= 0;
++
++	return scnprintf(buf, CHG_SHOW_MAX_SIZE, "%d\n", state);
++}
++
+ static ssize_t force_charging_disable_store(struct device *dev,
+ 			struct device_attribute *attr,
+ 			const char *buf, size_t count)
+@@ -870,8 +886,8 @@ static ssize_t force_charging_disable_store(struct device *dev,
+ 	return count;
+ }
+ 
+-static DEVICE_ATTR(force_charging_disable, 0200,
+-		NULL,
++static DEVICE_ATTR(force_charging_disable, 0644,
++		force_charging_disable_show,
+ 		force_charging_disable_store);
+ 
+ static struct attribute * mmi_g[] = {
+-- 
+2.39.5
+

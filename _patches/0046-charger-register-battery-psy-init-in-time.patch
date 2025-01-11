@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xunjie Xu <xuxj12@motorola.com>
+Date: Mon, 11 Mar 2024 13:01:03 +0800
+Subject: [PATCH] charger: register battery psy init in time
+
+Need handle battery psy init done notifier in time to register other
+battery psy l(CR) battery/age for upperlayer wait for.
+
+Change-Id: I88fdd6318d8a5c7b0013bb4087f726aacf50cb25
+Signed-off-by: Xunjie Xu <xuxj12@motorola.com>
+Reviewed-on: https://gerrit.mot.com/2902421
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Wentao Xu <xuwt2@motorola.com>
+Reviewed-by: Tao Sun <suntao2@motorola.com>
+Submit-Approved: Jira Key
+
+Original patch taken from dubai:
+https://github.com/MotorolaMobilityLLC/motorola-kernel-modules/commit/c26d480c8e1a0c12753a052e45ff7a86d077d4aa
+
+Signed-off-by: Sevenrock <sevenrock@hotmail.de>
+---
+ drivers/power/mmi_charger/mmi_charger.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/power/mmi_charger/mmi_charger.c b/drivers/power/mmi_charger/mmi_charger.c
+index e3fc22469f88..cda2babbf97d 100644
+--- a/drivers/power/mmi_charger/mmi_charger.c
++++ b/drivers/power/mmi_charger/mmi_charger.c
+@@ -2641,6 +2641,11 @@ static int mmi_psy_notifier_call(struct notifier_block *nb, unsigned long val,
+ 	if (val != PSY_EVENT_PROP_CHANGED)
+ 		return NOTIFY_OK;
+ 
++	if (psy && !chip->batt_psy &&
++	    (strcmp(psy->desc->name, "battery") == 0)) {
++		mmi_battery_supply_init(chip);
++	}
++
+ 	if (psy &&
+ 	    ((strcmp(psy->desc->name, "battery") == 0) ||
+ 	    (strcmp(psy->desc->name, "usb") == 0) ||
+-- 
+2.39.5
+

@@ -68,10 +68,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  .../power/mmi_discrete_turbo_charger/Kconfig  | 12 +++
  .../power/mmi_parallel_charger_iio/Kconfig    |  9 +++
  drivers/power/mmi_sc8549/Kconfig              |  9 +++
- drivers/power/qpnp_adaptive_charge/Kbuild     |  2 +-
+ drivers/power/qpnp_adaptive_charge/Kbuild     |  6 +-
  drivers/power/rt9426a_fg_mmi/Kconfig          |  9 +++
  drivers/power/sd77426_fg_mmi/Kconfig          |  9 +++
- drivers/power/sgm4154x_chg_mmi/Kbuild         | 28 +------
+ drivers/power/sgm4154x_chg_mmi/Kbuild         | 26 +-----
  drivers/power/sgm4154x_chg_mmi/Kconfig        | 23 ++++++
  drivers/power/sm5602_fg_mmi/Kconfig           |  3 +
  drivers/regulator/Kconfig                     |  4 +
@@ -83,8 +83,8 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  drivers/usb/typec/adapter_class/Kbuild        |  6 +-
  drivers/usb/typec/adapter_class/Kconfig       | 11 +++
  drivers/usb/typec/mmi_tcpc/Kbuild             | 20 ++---
- drivers/usb/typec/mmi_tcpc/Kconfig            | 41 ++++++++++
- 73 files changed, 592 insertions(+), 300 deletions(-)
+ drivers/usb/typec/mmi_tcpc/Kconfig            | 50 ++++++++++++
+ 73 files changed, 604 insertions(+), 299 deletions(-)
  create mode 100644 drivers/backlight/Kconfig
  create mode 100644 drivers/backlight/Makefile
  create mode 100644 drivers/backlight/aw99703/Kconfig
@@ -1320,15 +1320,19 @@ index 000000000000..8933e161024f
 +         This driver can also be built as a module.  If so, the module
 +         will be called mmi_sc8549.
 diff --git a/drivers/power/qpnp_adaptive_charge/Kbuild b/drivers/power/qpnp_adaptive_charge/Kbuild
-index 41d52ec8b3d5..3cb4199eaaee 100755
+index 41d52ec8b3d5..ed4c6c7a9d5a 100755
 --- a/drivers/power/qpnp_adaptive_charge/Kbuild
 +++ b/drivers/power/qpnp_adaptive_charge/Kbuild
-@@ -1,4 +1,4 @@
+@@ -1,6 +1,6 @@
 -ifneq ($(filter m y,$(CONFIG_USE_MMI_CHARGER)),)
+-	EXTRA_CFLAGS += -DUSE_MMI_CHARGER
+-	EXTRA_CFLAGS += -I$(srctree)/$(src)/../mmi_charger
 +ifneq ($(filter m y,$(CONFIG_MMI_CHARGER)),)
- 	EXTRA_CFLAGS += -DUSE_MMI_CHARGER
- 	EXTRA_CFLAGS += -I$(srctree)/$(src)/../mmi_charger
++	ccflags-y += -DUSE_MMI_CHARGER
++	ccflags-y += -I$(srctree)/$(src)/../mmi_charger
  endif
+ 
+ ifneq ($(filter m y, $(ADAPTIVE_TOLERANCE_OPTIMIZATION)),)
 diff --git a/drivers/power/rt9426a_fg_mmi/Kconfig b/drivers/power/rt9426a_fg_mmi/Kconfig
 new file mode 100644
 index 000000000000..64809be4bde9
@@ -1360,16 +1364,16 @@ index 000000000000..dbaf0ad0d216
 +         This driver can also be built as a module.  If so, the module
 +         will be called sd77426_fg_mmi.
 diff --git a/drivers/power/sgm4154x_chg_mmi/Kbuild b/drivers/power/sgm4154x_chg_mmi/Kbuild
-index b9fd084d799a..8ffa9791728b 100644
+index b9fd084d799a..e1f8c8b580f0 100644
 --- a/drivers/power/sgm4154x_chg_mmi/Kbuild
 +++ b/drivers/power/sgm4154x_chg_mmi/Kbuild
-@@ -1,27 +1 @@
+@@ -1,27 +1,5 @@
 -# add -Wall to try to catch everything we can.
 -EXTRA_CFLAGS += -Wall
 -EXTRA_CFLAGS += -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
 -		-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/drivers/power/sgm4154x_chg_mmi
 -
--ifneq ($(filter m y,$(CONFIG_MMI_QC3P_TURBO_CHARGER)),)
+ ifneq ($(filter m y,$(CONFIG_MMI_QC3P_TURBO_CHARGER)),)
 -        EXTRA_CFLAGS += -DCONFIG_MMI_QC3P_TURBO_CHARGER
 -endif
 -
@@ -1387,8 +1391,9 @@ index b9fd084d799a..8ffa9791728b 100644
 -
 -ifneq ($(filter m y,$(CONFIG_MMI_EXT_CHG_LED)),)
 -        EXTRA_CFLAGS += -DCONFIG_MMI_EXT_CHG_LED
--endif
--
++    ccflags-y += -DCONFIG_MMI_QC3P_TURBO_CHARGER
+ endif
+ 
 -obj-m += sgm4154x_charger.o
 -KBUILD_EXTRA_SYMBOLS += $(CURDIR)/$(KBUILD_EXTMOD)/../mmi_discrete_charger/$(GKI_OBJ_MODULE_DIR)/Module.symvers
 +obj-$(CONFIG_SGM4154X_CHARGER) += sgm4154x_charger.o
@@ -1592,10 +1597,10 @@ index 72f7413ba5bc..a9165010cf72 100644
 +obj-$(CONFIG_RT_PD_MANAGER) += rt_pd_manager.o
 diff --git a/drivers/usb/typec/mmi_tcpc/Kconfig b/drivers/usb/typec/mmi_tcpc/Kconfig
 new file mode 100644
-index 000000000000..1ccb40abe0e7
+index 000000000000..e6f01faf331f
 --- /dev/null
 +++ b/drivers/usb/typec/mmi_tcpc/Kconfig
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,50 @@
 +config TCPC_RT1711H
 +        tristate "TCPC RT1711H driver"
 +        default n
@@ -1637,6 +1642,15 @@ index 000000000000..1ccb40abe0e7
 +
 +         This driver can also be built as a module.  If so, the module
 +         will be called rt_pd_manager.
++
++config USB_POWER_DELIVERY
++        bool "Enable USB Power Delivery"
++        depends on TCPC_CLASS && TYPEC_ADAPTER_CLASS
++        default n
++        help
++         Say Y here if you have a usb power delivery compatible device connected.
++
++         If unsure, say N.
 -- 
 2.39.5
 
