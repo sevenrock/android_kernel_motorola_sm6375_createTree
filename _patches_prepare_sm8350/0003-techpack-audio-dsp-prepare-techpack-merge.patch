@@ -3,11 +3,11 @@ From: Sevenrock <sevenrock@hotmail.de>
 Date: Wed, 1 Jan 2025 19:58:18 +0100
 Subject: [PATCH] techpack/audio/dsp: prepare techpack merge
 
-Change-Id: I6338ea0c8941224c1c0640e9417d1582e39db44f
 Signed-off-by: Sevenrock <sevenrock@hotmail.de>
 ---
- techpack/audio/dsp/q6lsm.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ techpack/audio/dsp/q6lsm.c   | 4 ++--
+ techpack/audio/dsp/q6voice.c | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/techpack/audio/dsp/q6lsm.c b/techpack/audio/dsp/q6lsm.c
 index aa4127c1ae82..d5baac66a85d 100644
@@ -23,6 +23,19 @@ index aa4127c1ae82..d5baac66a85d 100644
   */
  #include <linux/fs.h>
  #include <linux/mutex.h>
+diff --git a/techpack/audio/dsp/q6voice.c b/techpack/audio/dsp/q6voice.c
+index 03e27b3978a2..ec3182cc0197 100644
+--- a/techpack/audio/dsp/q6voice.c
++++ b/techpack/audio/dsp/q6voice.c
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: GPL-2.0-only
+ /*
+  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
+- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
++ * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+  */
+ #include <linux/slab.h>
+ #include <linux/kthread.h>
 -- 
 2.39.5
 
