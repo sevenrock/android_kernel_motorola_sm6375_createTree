@@ -47,15 +47,15 @@ index 8bf8c9a0ce1c..ae40a0149fbc 100644
  #ifdef CONFIG_MOT_DONGWOON_OIS_AF_DRIFT
  	if (strstr(o_ctrl->ois_name, "dw9784"))
  		cam_ois_set_init_info(0);
-@@ -1785,7 +1789,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
- 	}
+@@ -1778,7 +1778,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
+ 		goto end;
+ 
  pwr_dwn:
- 	cam_mem_put_cpu_buf(dev_config.packet_handle);
 -	cam_ois_power_down(o_ctrl);
 +	//cam_ois_power_down(o_ctrl); /* ois will pown down in CAM_RELEASE_DEV when closed camera */
- 	return rc;
- }
- 
+ end:
+ 	cam_common_mem_free(csl_packet);
+ put_ref:
 -- 
 2.39.5
 

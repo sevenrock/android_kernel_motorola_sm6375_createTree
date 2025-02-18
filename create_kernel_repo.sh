@@ -57,6 +57,14 @@ check_rc $? "git revert"
 git revert --no-edit 6487f3d3468b 9ef7c24511b3
 check_rc $? "git revert"
 
+# Revert "msm: npu: Fix use after free issue"
+git revert --no-edit f6795b4ad6bb
+check_rc $? "git revert"
+
+# Add "net/ipv6: release expired exception dst cached in socket" to prevent merge error
+wget https://github.com/LineageOS/android_kernel_qcom_sm8350/commit/a95808252e8acc0123bacd2dff8b9af10bc145b7.patch -O - | git am
+check_rc $? "git am"
+
 echoyellow "download LineageOS qcom sm8350 kernel"
 if [ -d $WORK_DIR/android_kernel_qcom_sm8350 ]
 then
@@ -116,9 +124,10 @@ git checkout -b lineage-22.1
 git reset LineageOS/android_kernel_qcom_sm8350/lineage-20 --hard
 check_rc $? "git reset"
 
+echoyellow "merge moto kernel"
 git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.1
 
-MMI-U1UGS34.23-110-2-1"
+MMI-U1UGS34.23-110-23-2"
 check_rc $? "git merge"
 
 for i in \
@@ -209,12 +218,12 @@ cd $WORK_DIR/android_kernel_motorola_sm6375
 
 # Revert "rhodep/rhodec: update camera device tree path"
 git revert --no-edit 7b0a2deb4201932773e9d9e51fffd097c6370a38
-
-echoyellow "applying local patches to sm6375 kernel"
+check_rc $? "git revert"
 
 find . -name "Android.mk" -delete
 git restore Android.mk
 git commit -a -m "treewide: remove Android.mk"
 
+echoyellow "applying local patches to sm6375 kernel"
 for i in $WORK_DIR/_patches/*; do echo "--- patching $i"; git am --keep-cr $i || break; done
 check_rc $? "git am"
