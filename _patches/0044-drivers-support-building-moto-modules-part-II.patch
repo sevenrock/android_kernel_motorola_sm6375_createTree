@@ -117,10 +117,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  create mode 100644 drivers/usb/typec/mmi_tcpc/Kconfig
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 78b6914be214..38b89a81882a 100644
+index 65a718e18a56..d88d39148a61 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -2021,3 +2021,9 @@ config MOT_SECURE_CAMERA
+@@ -2023,3 +2023,9 @@ config MOT_SECURE_CAMERA
  config MOT_USB_DEBUG_LOG
  	bool "For usb debug log in factiry SW"
  	default n

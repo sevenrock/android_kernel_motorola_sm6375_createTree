@@ -12,7 +12,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 5 deletions(-)
 
 diff --git a/drivers/usb/dwc3/dwc3-msm.c b/drivers/usb/dwc3/dwc3-msm.c
-index ad3f58b527ea..860f398205ad 100644
+index c8c6e501d789..7b7ea9537734 100644
 --- a/drivers/usb/dwc3/dwc3-msm.c
 +++ b/drivers/usb/dwc3/dwc3-msm.c
 @@ -65,11 +65,6 @@

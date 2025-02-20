@@ -14,10 +14,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 4b9d7de3c9c2..aa4271bd4cda 100644
+index d2ae4d1345bc..127c7af62232 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1747,7 +1747,11 @@ config CC_HAVE_STACKPROTECTOR_SYSREG
+@@ -1749,7 +1749,11 @@ config CC_HAVE_STACKPROTECTOR_SYSREG
  
  config STACKPROTECTOR_PER_TASK
  	def_bool y

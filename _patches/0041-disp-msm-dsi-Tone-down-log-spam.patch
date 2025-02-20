@@ -10,10 +10,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  2 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/techpack/display/msm/dsi/dsi_display.c b/techpack/display/msm/dsi/dsi_display.c
-index 14d44aa8a47e..0a236e80fd97 100644
+index 0e1fb023c4b6..dd5b377691b2 100644
 --- a/techpack/display/msm/dsi/dsi_display.c
 +++ b/techpack/display/msm/dsi/dsi_display.c
-@@ -8166,9 +8166,9 @@ int dsi_display_set_mode(struct dsi_display *display,
+@@ -8170,9 +8170,9 @@ int dsi_display_set_mode(struct dsi_display *display,
  		goto error;
  	}
  
@@ -26,7 +26,7 @@ index 14d44aa8a47e..0a236e80fd97 100644
  	SDE_EVT32(adj_mode.priv_info->mdp_transfer_time_us,
  			timing.h_active, timing.v_active, timing.refresh_rate);
  
-@@ -9405,7 +9405,7 @@ int dsi_display_disable(struct dsi_display *display)
+@@ -9409,7 +9409,7 @@ int dsi_display_disable(struct dsi_display *display)
  		return -EINVAL;
  	}
  

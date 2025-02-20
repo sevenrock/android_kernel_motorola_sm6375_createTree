@@ -26,7 +26,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c b/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
-index 8bf8c9a0ce1c..ae40a0149fbc 100644
+index f2cfd1feee19..59e70c454811 100644
 --- a/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
 +++ b/techpack/camera/drivers/cam_sensor_module/cam_ois/cam_ois_core.c
 @@ -186,6 +186,8 @@ static int cam_ois_power_up(struct cam_ois_ctrl_t *o_ctrl)
@@ -47,7 +47,7 @@ index 8bf8c9a0ce1c..ae40a0149fbc 100644
  #ifdef CONFIG_MOT_DONGWOON_OIS_AF_DRIFT
  	if (strstr(o_ctrl->ois_name, "dw9784"))
  		cam_ois_set_init_info(0);
-@@ -1778,7 +1778,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
+@@ -1778,7 +1782,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
  		goto end;
  
  pwr_dwn:

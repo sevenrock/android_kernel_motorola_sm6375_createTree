@@ -88,10 +88,10 @@ index 1a10449e7604..b880fe914036 100644
  #endif
  }
 diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-index 51f4133f89e2..b1150fa8ed75 100644
+index abe652fc6eba..d37aa3196fb2 100644
 --- a/security/selinux/hooks.c
 +++ b/security/selinux/hooks.c
-@@ -5190,17 +5190,15 @@ static int selinux_socket_getpeersec_dgram(struct socket *sock, struct sk_buff *
+@@ -5246,17 +5246,15 @@ static int selinux_socket_getpeersec_dgram(struct socket *sock, struct sk_buff *
  
  static int selinux_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
  {
@@ -113,7 +113,7 @@ index 51f4133f89e2..b1150fa8ed75 100644
  
  	return 0;
  }
-@@ -5209,14 +5207,12 @@ static void selinux_sk_free_security(struct sock *sk)
+@@ -5265,14 +5263,12 @@ static void selinux_sk_free_security(struct sock *sk)
  {
  	struct sk_security_struct *sksec = sk->sk_security;
  
