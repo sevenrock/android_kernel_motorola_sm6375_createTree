@@ -186,7 +186,7 @@ index 9802c6c1b9ea..83357a3158e8 100644
  			TRY_TO_CALL(charger_mode, (int)touch_cdev->ps_is_present);
  				break;
 diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
-index bae784c6b371..779d51b414a1 100644
+index 416cd4b9d725..649c68eb1de5 100644
 --- a/include/linux/touchscreen_mmi.h
 +++ b/include/linux/touchscreen_mmi.h
 @@ -313,7 +313,10 @@ enum ts_mmi_panel_event {

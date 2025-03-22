@@ -24,10 +24,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  3 files changed, 25 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-index 1372b6b90511..44bb307dcb46 100644
+index 816661e1532e..f220b809690b 100644
 --- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 +++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-@@ -427,7 +427,7 @@ bool ts_mmi_is_sensor_enable(void)
+@@ -436,7 +436,7 @@ bool ts_mmi_is_sensor_enable(void)
  static int ts_mmi_sensor_set_enable(struct sensors_classdev *sensors_cdev,
  		unsigned int enable)
  {
@@ -66,7 +66,7 @@ index f6f6892ddc1d..9802c6c1b9ea 100644
  		}
  #else
 diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
-index ccee2f10105e..bae784c6b371 100644
+index 4327bd9cc067..416cd4b9d725 100644
 --- a/include/linux/touchscreen_mmi.h
 +++ b/include/linux/touchscreen_mmi.h
 @@ -296,8 +296,12 @@ struct ts_mmi_class_methods {

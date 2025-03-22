@@ -10,10 +10,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/power/mmi_charger/mmi_charger.c b/drivers/power/mmi_charger/mmi_charger.c
-index 361f9cee3a98..7da063ed331f 100644
+index d402099ad5ef..2a28355a157e 100644
 --- a/drivers/power/mmi_charger/mmi_charger.c
 +++ b/drivers/power/mmi_charger/mmi_charger.c
-@@ -1457,7 +1457,7 @@ static void mmi_get_charger_info(struct mmi_charger_chip *chip,
+@@ -1459,7 +1459,7 @@ static void mmi_get_charger_info(struct mmi_charger_chip *chip,
  	mmi_get_cur_thermal_level(chip, &thermal_level);
  	charger->driver->get_batt_info(charger->driver->data, batt_info);
  	charger->driver->get_chg_info(charger->driver->data, chg_info);
@@ -22,7 +22,7 @@ index 361f9cee3a98..7da063ed331f 100644
  		" batt_temp %d, batt_status %d, batt_sn %s, batt_fv_mv %d,"
  		" batt_fcc_ma %d\n",
  		charger->driver->name,
-@@ -1469,7 +1469,7 @@ static void mmi_get_charger_info(struct mmi_charger_chip *chip,
+@@ -1471,7 +1471,7 @@ static void mmi_get_charger_info(struct mmi_charger_chip *chip,
  		batt_info->batt_sn,
  		batt_info->batt_fv_mv,
  		batt_info->batt_fcc_ma);
@@ -31,7 +31,7 @@ index 361f9cee3a98..7da063ed331f 100644
  		" chrg_mv %d, chrg_ma %d, chrg_otg_enabled %d, thermal_level %d\n",
  		charger->driver->name,
  		chg_info->chrg_present,
-@@ -1621,7 +1621,7 @@ static void mmi_update_charger_status(struct mmi_charger_chip *chip,
+@@ -1624,7 +1624,7 @@ static void mmi_update_charger_status(struct mmi_charger_chip *chip,
  
  	charger->battery->pending++;
  
@@ -40,7 +40,7 @@ index 361f9cee3a98..7da063ed331f 100644
  		charger->driver->name,
  		stepchg_str[(int)status->pres_chrg_step],
  		status->pres_temp_zone,
-@@ -1736,7 +1736,7 @@ static void mmi_configure_charger(struct mmi_charger_chip *chip,
+@@ -1739,7 +1739,7 @@ static void mmi_configure_charger(struct mmi_charger_chip *chip,
  	charger->driver->set_constraint(charger->driver->data, &charger->constraint);
  	charger->driver->config_charge(charger->driver->data, cfg);
  

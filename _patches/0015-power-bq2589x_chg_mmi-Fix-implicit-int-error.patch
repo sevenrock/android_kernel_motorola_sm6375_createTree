@@ -17,10 +17,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
-index f57bc679382b..6edbd1a01c38 100644
+index 5ab8b118eb65..2b01168d3073 100644
 --- a/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
 +++ b/drivers/power/bq2589x_chg_mmi/bq2589x_charger.c
-@@ -1623,7 +1623,7 @@ int bq2589x_get_usb_present(struct bq2589x *bq)
+@@ -1624,7 +1624,7 @@ int bq2589x_get_usb_present(struct bq2589x *bq)
  	return ret;
  }
  

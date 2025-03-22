@@ -25,10 +25,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/power/mmi_charger/mmi_charger.c b/drivers/power/mmi_charger/mmi_charger.c
-index e3fc22469f88..cda2babbf97d 100644
+index e245248df664..858eac82b5c7 100644
 --- a/drivers/power/mmi_charger/mmi_charger.c
 +++ b/drivers/power/mmi_charger/mmi_charger.c
-@@ -2641,6 +2641,11 @@ static int mmi_psy_notifier_call(struct notifier_block *nb, unsigned long val,
+@@ -2644,6 +2644,11 @@ static int mmi_psy_notifier_call(struct notifier_block *nb, unsigned long val,
  	if (val != PSY_EVENT_PROP_CHANGED)
  		return NOTIFY_OK;
  

@@ -29,12 +29,12 @@ echoyellow "download moto kernel"
 if [ -d $WORK_DIR/kernel-msm ]
 then
     cd $WORK_DIR/kernel-msm
-    git fetch origin android-14-release-u1ugs34.23-110-2-1
+    git fetch origin android-15-release-v1ug35h.75-14
     check_rc $? "git fetch"
-    git reset origin/android-14-release-u1ugs34.23-110-2-1 --hard
+    git reset origin/android-15-release-v1ug35h.75-14 --hard
     check_rc $? "git reset"
 else
-    git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-14-release-u1ugs34.23-110-2-1 --single-branch
+    git clone https://github.com/MotorolaMobilityLLC/kernel-msm.git --branch android-15-release-v1ug35h.75-14 --single-branch
     check_rc $? "git clone"
     cd $WORK_DIR/kernel-msm
     curl -Lo .git/hooks/commit-msg https://review.lineageos.org/tools/hooks/commit-msg
@@ -42,27 +42,22 @@ else
 fi
 
 # Revert "fs:EROFS:Porting 5.10 erofs to 5.4"
-git revert --no-edit 45482ab6d38d 819904916893 fa3b0b74bbcf
+git revert --no-edit 1d17772933a5 a082cf145000 26e7dd42cc89
 check_rc $? "git revert"
 
 # Revert "Penang: resolve kasan panic"
 # Revert "Penang: kasan panic"
 # Revert "penang: device suspend tests fail"
 # Revert "net: qrtr: get svc_id before queueing sk_buff"
-git revert --no-edit 836e3b0c9a1c 485bfce7488f 0ab43c2ab514 a65aa65ad1c1
-check_rc $? "git revert"
-
-# Revert "af_unix: Fix garbage collector racing against connect()"
-# Revert "af_unix: Do not use atomic ops for unix_sk(sk)->inflight."
-git revert --no-edit 6487f3d3468b 9ef7c24511b3
+git revert --no-edit 7780525c37c0 3c4d7ce2de16 bb5ee7b24795 1f014f0efac4
 check_rc $? "git revert"
 
 # Revert "msm: npu: Fix use after free issue"
-git revert --no-edit f6795b4ad6bb
+git revert --no-edit d62454a4452e
 check_rc $? "git revert"
 
-# Add "net/ipv6: release expired exception dst cached in socket" to prevent merge error
-wget https://github.com/LineageOS/android_kernel_qcom_sm8350/commit/a95808252e8acc0123bacd2dff8b9af10bc145b7.patch -O - | git am
+# Add "af_unix: Suppress false-positive lockdep splat for spin_lock() in __unix_gc()." to prevent merge error
+wget https://github.com/LineageOS/android_kernel_qcom_sm8350/commit/eb27704f0da8c0c9d0997cf5871709d8cff1961a.patch -O - | git am
 check_rc $? "git am"
 
 echoyellow "download LineageOS qcom sm8350 kernel"
@@ -84,10 +79,6 @@ fi
 
 # Revert "qseecom: Add flush_work based on flag"
 git revert --no-edit 23d03fa257af1da4041b4d6bbf63e63dd5ebc8a1
-check_rc $? "git revert"
-
-# Revert "mmc: sdhci-msm: Disable partial_init and clk-scaling to avoid RED error"
-git revert --no-edit e46fa2494859f4774f64d067816eedcf10d767d6
 check_rc $? "git revert"
 
 # Revert "soc: qcom: smem: Add boundary checks for partitions"
@@ -120,14 +111,15 @@ git fetch LineageOS/android_kernel_qcom_sm8350
 check_rc $? "git fetch"
 git fetch moto-kernel
 check_rc $? "git fetch"
-git checkout -b lineage-22.1
+git checkout -b lineage-22.2
+
 git reset LineageOS/android_kernel_qcom_sm8350/lineage-20 --hard
 check_rc $? "git reset"
 
 echoyellow "merge moto kernel"
-git merge moto-kernel/android-14-release-u1ugs34.23-110-2-1 -m "Merge remote-tracking branch 'moto-kernel/android-14-release-u1ugs34.23-110-2-1' into lineage-22.1
+git merge moto-kernel/android-15-release-v1ug35h.75-14 -m "Merge remote-tracking branch 'moto-kernel/android-15-release-v1ug35h.75-14' into lineage-22.2
 
-MMI-U1UGS34.23-110-23-2"
+MMI-V1UG35H.75-14"
 check_rc $? "git merge"
 
 for i in \
@@ -151,6 +143,7 @@ for i in \
             subtree_prefix_subdir=arch/arm64/boot/dts/vendor/qcom/camera/
             ;;
         kernel-devicetree)
+            moto_branch=android-14-release-u1ufn34.41-70r3
             subtree_prefix_subdir=arch/arm64/boot/dts/vendor/
             ;;
         kernel-display-devicetree)
@@ -170,7 +163,7 @@ for i in \
             subtree_prefix_subdir=techpack/video/
             ;;
         motorola-kernel-modules)
-            moto_branch=android-13-release-tsc
+            moto_branch=android-14-release-u1ufn34.41-70r3
             ;;
     esac
 

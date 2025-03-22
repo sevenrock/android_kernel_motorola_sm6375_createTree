@@ -117,24 +117,31 @@ index 603c8c51702a..056020e5c916 100644
  	return size;
  }
 diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-index 44bb307dcb46..32f19e1a6377 100644
+index f220b809690b..59fd3f832012 100644
 --- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 +++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-@@ -212,15 +212,21 @@ static inline void update_poison_center(struct touch_event_data *tev)
+@@ -212,9 +212,9 @@ static inline void update_poison_center(struct touch_event_data *tev)
  static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
  {
  	int key_code;
 -	bool need2report = true;
  	struct ts_mmi_dev *touch_cdev = sensor_pdata->touch_cdev;
+ 	struct ts_mmi_dev_pdata *ppdata = &touch_cdev->pdata;
 +	unsigned char mode_type = touch_cdev->gesture_mode_type;
  
+ 	if (ppdata->resolution_boost) {
+ 		gev->evdata.x /= ppdata->resolution_boost;
+@@ -222,12 +222,18 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ 	}
  	switch (gev->evcode) {
  	case 1:
 +		if (!(mode_type & TS_MMI_GESTURE_SINGLE))
 +			return 1;
 +
  		key_code = BTN_TRIGGER_HAPPY3;
- 		pr_info("%s: single tap\n", __func__);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_X, gev->evdata.x);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_Y, gev->evdata.y);
+ 		pr_info("%s: single tap; x=%d, y=%d\n", __func__, gev->evdata.x, gev->evdata.y);
  			break;
  	case 2:
 +		if (!(mode_type & TS_MMI_GESTURE_ZERO))
@@ -143,7 +150,7 @@ index 44bb307dcb46..32f19e1a6377 100644
  		key_code = BTN_TRIGGER_HAPPY4;
  		if(gev->evdata.x == 0)
  			gev->evdata.x = touch_cdev->pdata.fod_x ;
-@@ -231,20 +237,23 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+@@ -238,22 +244,25 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
  		pr_info("%s: zero tap; x=%x, y=%x\n", __func__, gev->evdata.x, gev->evdata.y);
  		break;
  	case 3:
@@ -158,7 +165,9 @@ index 44bb307dcb46..32f19e1a6377 100644
 +			return 1;
 +
  		key_code = BTN_TRIGGER_HAPPY6;
- 		pr_info("%s: double tap\n", __func__);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_X, gev->evdata.x);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_Y, gev->evdata.y);
+ 		pr_info("%s: double tap; x=%d, y=%d\n", __func__, gev->evdata.x, gev->evdata.y);
  		break;
  	default:
 -		need2report = false;
@@ -194,7 +203,7 @@ index 83357a3158e8..0fc16380cae5 100644
  			dev_dbg(DEV_MMI, "%s: unknown command %d\n", __func__, cmd);
  		}
 diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
-index 779d51b414a1..dbd193add12c 100644
+index 649c68eb1de5..9757e1928bce 100644
 --- a/include/linux/touchscreen_mmi.h
 +++ b/include/linux/touchscreen_mmi.h
 @@ -303,6 +303,12 @@ enum ts_mmi_pm_mode {

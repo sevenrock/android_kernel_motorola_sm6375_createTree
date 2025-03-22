@@ -65,7 +65,7 @@ index ca08cb6c9550..1a4a45c26b7c 100644
  	&dev_attr_liquid_detection_ctl.attr,
  	NULL,
 diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-index 32f19e1a6377..061dd86eff72 100644
+index 59fd3f832012..c876def261b6 100644
 --- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 +++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 @@ -209,6 +209,32 @@ static inline void update_poison_center(struct touch_event_data *tev)
@@ -101,18 +101,18 @@ index 32f19e1a6377..061dd86eff72 100644
  static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
  {
  	int key_code;
-@@ -220,6 +246,7 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+@@ -225,6 +251,7 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
  		if (!(mode_type & TS_MMI_GESTURE_SINGLE))
  			return 1;
  
 +		ts_mmi_single_tap_handler(touch_cdev);
  		key_code = BTN_TRIGGER_HAPPY3;
- 		pr_info("%s: single tap\n", __func__);
- 			break;
-@@ -249,6 +276,8 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
- 
- 		key_code = BTN_TRIGGER_HAPPY6;
- 		pr_info("%s: double tap\n", __func__);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_X, gev->evdata.x);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_Y, gev->evdata.y);
+@@ -258,6 +285,8 @@ static int ts_mmi_gesture_handler(struct gesture_event_data *gev)
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_X, gev->evdata.x);
+ 		input_report_abs(sensor_pdata->input_sensor_dev, ABS_Y, gev->evdata.y);
+ 		pr_info("%s: double tap; x=%d, y=%d\n", __func__, gev->evdata.x, gev->evdata.y);
 +		touch_cdev->double_tap_pressed = true;
 +		sysfs_notify(&DEV_MMI->kobj, NULL, "double_tap_pressed");
  		break;
@@ -132,10 +132,10 @@ index 0fc16380cae5..f59f62ed1c75 100644
  	mutex_unlock(&touch_cdev->extif_mutex);
  	dev_info(DEV_MMI, "%s: done\n", __func__);
 diff --git a/include/linux/touchscreen_mmi.h b/include/linux/touchscreen_mmi.h
-index dbd193add12c..556b1aa43cca 100644
+index 9757e1928bce..201da924d5d3 100644
 --- a/include/linux/touchscreen_mmi.h
 +++ b/include/linux/touchscreen_mmi.h
-@@ -563,6 +563,11 @@ struct ts_mmi_dev {
+@@ -564,6 +564,11 @@ struct ts_mmi_dev {
  	struct attribute_group	*extern_group;
  	struct list_head	node;
  	struct touch_clip_area clip;

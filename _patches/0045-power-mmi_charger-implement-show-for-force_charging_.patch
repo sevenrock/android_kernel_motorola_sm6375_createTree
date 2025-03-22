@@ -13,10 +13,10 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 18 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/power/mmi_charger/mmi_charger.c b/drivers/power/mmi_charger/mmi_charger.c
-index 7da063ed331f..e3fc22469f88 100644
+index 2a28355a157e..e245248df664 100644
 --- a/drivers/power/mmi_charger/mmi_charger.c
 +++ b/drivers/power/mmi_charger/mmi_charger.c
-@@ -844,6 +844,22 @@ static DEVICE_ATTR(force_charging_enable, 0644,
+@@ -846,6 +846,22 @@ static DEVICE_ATTR(force_charging_enable, 0644,
  		force_charging_enable_show,
  		force_charging_enable_store);
  
@@ -39,7 +39,7 @@ index 7da063ed331f..e3fc22469f88 100644
  static ssize_t force_charging_disable_store(struct device *dev,
  			struct device_attribute *attr,
  			const char *buf, size_t count)
-@@ -870,8 +886,8 @@ static ssize_t force_charging_disable_store(struct device *dev,
+@@ -872,8 +888,8 @@ static ssize_t force_charging_disable_store(struct device *dev,
  	return count;
  }
  

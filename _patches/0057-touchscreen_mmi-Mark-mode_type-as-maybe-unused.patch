@@ -15,7 +15,7 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
-index 061dd86eff72..1d208b31d02b 100644
+index c876def261b6..b90e678fe03e 100644
 --- a/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 +++ b/drivers/input/touchscreen/touchscreen_mmi/touchscreen_mmi_gesture.c
 @@ -213,7 +213,7 @@ static inline void update_poison_center(struct touch_event_data *tev)

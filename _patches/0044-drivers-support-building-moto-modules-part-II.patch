@@ -17,16 +17,16 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  drivers/backlight/Kconfig                     |  3 +
  drivers/backlight/Makefile                    |  3 +
  drivers/backlight/aw99703/Kbuild              |  2 +-
- drivers/backlight/aw99703/Kconfig             |  9 +++
+ drivers/backlight/aw99703/Kconfig             |  9 ++
  drivers/backlight/lm3697/Kbuild               |  2 +-
- drivers/backlight/lm3697/Kconfig              |  9 +++
+ drivers/backlight/lm3697/Kconfig              |  9 ++
  drivers/backlight/sm5350/Kbuild               |  2 +-
  drivers/backlight/sm5350/Kconfig              |  6 ++
  drivers/fm/Kbuild                             |  5 +-
  drivers/fm/Kconfig                            |  4 +
  drivers/input/misc/Kconfig                    |  4 +
  drivers/input/misc/Makefile                   | 11 ++-
- drivers/input/misc/focal_fps_mmi/Kbuild       | 50 +-----------
+ drivers/input/misc/focal_fps_mmi/Kbuild       | 50 +----------
  drivers/input/misc/focal_fps_mmi/Kconfig      |  6 ++
  drivers/input/misc/qpnp_power_on_mmi/Kbuild   |  2 +-
  drivers/input/misc/qpnp_power_on_mmi/Kconfig  |  8 ++
@@ -34,14 +34,14 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  drivers/input/misc/rbs_fps_mmi/Kconfig        | 25 ++++++
  drivers/input/touchscreen/Kconfig             |  2 +
  drivers/input/touchscreen/Makefile            |  1 +
- .../touchscreen/goodix_berlin_mmi/Kbuild      | 76 +++++-------------
+ .../touchscreen/goodix_berlin_mmi/Kbuild      | 82 ++++---------------
  .../touchscreen/goodix_berlin_mmi/Kconfig     | 19 +++++
  drivers/leds/Kbuild                           |  6 --
  drivers/leds/trigger/Kbuild                   |  5 --
  drivers/leds/trigger/Kconfig                  |  7 ++
  drivers/leds/trigger/Makefile                 | 28 ++++---
  drivers/misc/Kconfig                          |  1 +
- drivers/misc/Makefile                         | 80 ++++++++++++++++---
+ drivers/misc/Makefile                         | 80 ++++++++++++++++--
  drivers/misc/awinic/Kconfig                   |  2 +-
  drivers/misc/ldo_vibrator_mmi/Kconfig         |  3 +
  drivers/mmi_annotate/Kbuild                   |  6 +-
@@ -56,35 +56,35 @@ Signed-off-by: Sevenrock <sevenrock@hotmail.de>
  drivers/power/bq2597x_mmi/Kbuild              |  7 +-
  drivers/power/bq2597x_mmi/Kconfig             | 16 ++++
  drivers/power/bq2597x_mmi_iio/Kbuild          |  8 +-
- drivers/power/bq2597x_mmi_iio/Kconfig         |  9 +++
- drivers/power/cw2217b_fg_mmi/Kbuild           |  9 +--
+ drivers/power/bq2597x_mmi_iio/Kconfig         |  9 ++
+ drivers/power/cw2217b_fg_mmi/Kbuild           |  9 +-
  drivers/power/cw2217b_fg_mmi/Kconfig          | 20 +++++
- drivers/power/mmi-smbcharger-iio/Kconfig      |  9 +++
+ drivers/power/mmi-smbcharger-iio/Kconfig      |  9 ++
  drivers/power/mmi_charger/Kbuild              |  2 +-
- drivers/power/mmi_charger/Kconfig             | 30 ++++---
+ drivers/power/mmi_charger/Kconfig             | 30 +++++--
  drivers/power/mmi_discrete_charger/Kbuild     | 14 +---
  drivers/power/mmi_discrete_charger/Kconfig    | 24 ++++++
  .../power/mmi_discrete_turbo_charger/Kbuild   | 16 +---
  .../power/mmi_discrete_turbo_charger/Kconfig  | 12 +++
- .../power/mmi_parallel_charger_iio/Kconfig    |  9 +++
- drivers/power/mmi_sc8549/Kconfig              |  9 +++
+ .../power/mmi_parallel_charger_iio/Kconfig    |  9 ++
+ drivers/power/mmi_sc8549/Kconfig              |  9 ++
  drivers/power/qpnp_adaptive_charge/Kbuild     |  6 +-
- drivers/power/rt9426a_fg_mmi/Kconfig          |  9 +++
- drivers/power/sd77426_fg_mmi/Kconfig          |  9 +++
+ drivers/power/rt9426a_fg_mmi/Kconfig          |  9 ++
+ drivers/power/sd77426_fg_mmi/Kconfig          |  9 ++
  drivers/power/sgm4154x_chg_mmi/Kbuild         | 26 +-----
  drivers/power/sgm4154x_chg_mmi/Kconfig        | 23 ++++++
  drivers/power/sm5602_fg_mmi/Kconfig           |  3 +
  drivers/regulator/Kconfig                     |  4 +
  drivers/regulator/Makefile                    |  2 +
- drivers/regulator/wl2866d/Kconfig             |  9 +++
- drivers/regulator/wl2868c/Kconfig             |  9 +++
+ drivers/regulator/wl2866d/Kconfig             |  9 ++
+ drivers/regulator/wl2868c/Kconfig             |  9 ++
  drivers/usb/typec/Kconfig                     |  4 +
  drivers/usb/typec/Makefile                    |  2 +
  drivers/usb/typec/adapter_class/Kbuild        |  6 +-
  drivers/usb/typec/adapter_class/Kconfig       | 11 +++
  drivers/usb/typec/mmi_tcpc/Kbuild             | 20 ++---
- drivers/usb/typec/mmi_tcpc/Kconfig            | 50 ++++++++++++
- 73 files changed, 604 insertions(+), 299 deletions(-)
+ drivers/usb/typec/mmi_tcpc/Kconfig            | 50 +++++++++++
+ 73 files changed, 604 insertions(+), 305 deletions(-)
  create mode 100644 drivers/backlight/Kconfig
  create mode 100644 drivers/backlight/Makefile
  create mode 100644 drivers/backlight/aw99703/Kconfig
@@ -485,7 +485,7 @@ index dfe8da830025..9c90e416d043 100644
  obj-$(CONFIG_TOUCHSCREEN_FTS_TS)	+= stmicro_mmi/
 +obj-$(CONFIG_TOUCHSCREEN_GOODIX_BRL)	+= goodix_berlin_mmi/
 diff --git a/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild b/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
-index 65bf4824597e..cf2c219897c3 100644
+index 86ce5a4367af..cf2c219897c3 100644
 --- a/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
 +++ b/drivers/input/touchscreen/goodix_berlin_mmi/Kbuild
 @@ -3,7 +3,7 @@ EXTRA_CFLAGS += -Wall
@@ -497,7 +497,7 @@ index 65bf4824597e..cf2c219897c3 100644
  goodix_brl_mmi-objs := \
  					goodix_brl_i2c.o \
  					goodix_brl_spi.o \
-@@ -17,117 +17,77 @@ goodix_brl_mmi-objs := \
+@@ -17,123 +17,77 @@ goodix_brl_mmi-objs := \
  					goodix_ts_config.o
  
  ifneq ($(filter m y, $(CONFIG_DRM_PANEL_EVENT_NOTIFICATIONS)),)
@@ -627,6 +627,12 @@ index 65bf4824597e..cf2c219897c3 100644
 -        EXTRA_CFLAGS += -DPRODUCT_LYNKCO
 -else ifneq ($(filter bangkk%, $(USE_TARGET_PRODUCT)), )
 -        EXTRA_CFLAGS += -DPRODUCT_BANGKK
+-else ifneq ($(filter eqe, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_EQE
+-else ifneq ($(filter boston%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_BOSTON
+-else ifneq ($(filter avatrn%, $(USE_TARGET_PRODUCT)), )
+-        EXTRA_CFLAGS += -DPRODUCT_AVATRN
 -endif
 -$(warning "william EXTRA_CFLAGS = $(EXTRA_CFLAGS)")
 -
